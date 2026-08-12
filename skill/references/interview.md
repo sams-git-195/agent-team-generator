@@ -56,9 +56,32 @@ user can't answer yet goes in AGENTS.md as an explicit `⚠️ undecided` marker
    behavioural, into the protocol).
 2. Anything agents must NEVER do in this project — every deploy/DB-push/dangerous command named
    here goes verbatim into the protocol §6 and the OpenCode `deny` lists.
+3. **Agent bash-permission policy (AskUserQuestion — always ask).** Present the recommended
+   default and let the user adopt or adjust it. The shape is fixed (allow-by-default with
+   ask/deny exceptions); the exception lists are theirs to tune. Recommended default:
+   - `"*": allow` — agents run builds, tests, gates, grep, and `git commit` freely.
+   - **deny** (can never run): this stack's deploy/DB-push commands · `git push --force`/`-f` ·
+     `git reset --hard` · `git clean -fd` · `sudo` · `chmod` · piping downloads into a shell.
+   - **ask** (prompts in-flow): `git push` · `gh pr create` (PR creation) · `rm` ·
+     package installs (`npm install`, `npx`, `pnpm add`, `yarn add`) · `curl`.
+   Rationale to present: irreversible-destructive or environment-changing → deny;
+   recoverable-destructive or outward-facing → ask; everything else → allow.
+   Offer: **recommended default** / **stricter** (installs + `curl` → deny; add asks for
+   `docker *`, `gh *` wholesale) / **looser** (ask list shrinks to `git push` + `gh pr create`
+   only) / **custom** (walk the deny and ask lists category by category).
+   Then RECOMMEND stack-specific additions the user may not have thought of — only ones that
+   exist in this stack: migration deploys (`prisma migrate deploy`, `drizzle-kit push`) ·
+   infra (`terraform apply`, `pulumi up`) · publishing (`npm publish`) · container destruction
+   (`docker system prune`, `docker volume rm`) · CLIs with live/production modes (Stripe,
+   Shopify… — prefer a wholesale `"tool *": ask` per agent-skeleton.md's property-based-danger
+   note) · Windows-native deletes (`Remove-Item`, `del`) when the team runs PowerShell.
+   The answer becomes `{POLICY_ADJUSTMENT_LINES}` and applies to EVERY OC agent identically —
+   one policy for the whole team; per-role bash variation is not offered.
 
 Do NOT ask about git policy — it is fixed (protocol template §6): commit freely; push/PR only
-when the user says so or after asking; deploys and DB pushes never without being told.
+when the user says so or after asking; deploys and DB pushes never without being told. The
+Phase 5.3 policy implements this mechanically (`git push`/`gh pr create` = ask, deploys =
+deny); the policy question tunes the exception lists, never the git policy itself.
 
 ## Phase 6 — OpenCode models
 

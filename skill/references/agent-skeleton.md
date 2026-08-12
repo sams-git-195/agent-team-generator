@@ -45,9 +45,13 @@ permission:
     # Allow-by-default with an ask/deny exception list — agents work freely, risky commands
     # prompt, destructive/deploy commands are impossible.
     "*": allow
-    "git push*": ask          # pushes prompt the user in-flow
+    "git push*": ask          # pushes and PR creation prompt the user in-flow
+    "gh pr create*": ask
     "rm *": ask
     "npm install*": ask
+    "npx *": ask
+    "pnpm add*": ask
+    "yarn add*": ask
     "curl *": ask
     "git push --force*": deny # destructive git can never run
     "git push -f*": deny
@@ -60,6 +64,8 @@ permission:
     {DEPLOY_DENY_LINES — one deny per command in the deploy-deny set: the UNION of the
      stack's deploy channels (interview Phase 2.6) and the Phase 5 never-do list, e.g.
      "supabase db push*": deny · "firebase deploy*": deny · "netlify deploy*": deny.}
+    {POLICY_ADJUSTMENT_LINES — extra ask/deny lines from the Phase 5.3 permission-policy answer,
+     e.g. "npm publish*": deny · "terraform apply*": ask; delete if none.}
   todowrite: allow
 ---
 ```

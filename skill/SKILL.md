@@ -30,7 +30,9 @@ commands, and business rules from this project.
 **Baked defaults (never interview questions):** git/deploy policy (commit freely; push/PR only
 on the user's word or after asking; deploy/db-push never unprompted — protocol §6 verbatim);
 the senior + security bar for product-specialist and architect; the Fable QA process for
-qa-tester; the OpenCode allow-by-default bash policy with ask/deny exception lists.
+qa-tester; the SHAPE of the OpenCode bash policy (allow-by-default with ask/deny exception
+lists) — the exception lists themselves are tuned with the user in interview Phase 5.3, one
+policy applied identically to every agent.
 
 ## Workflow
 
@@ -85,9 +87,12 @@ example page doc if concrete pages are known) from `documentation-convention.md`
   are qa-tester's test globs (overlap builders' co-located tests by design) and files
   explicitly declared shared + PM-sequenced. Anything else overlapping is a failure.
 - Model matrix names only roles that exist; OC edit allow-lists match the prose scope.
-- Every OC bash block is allow-by-default with the standard ask lines AND a `deny` line for
-  every command in the deploy-deny set — the **union** of the stack's deploy channels
-  (interview Phase 2.6) and the Phase 5 never-do list; if the two disagree, the union wins.
+- Every OC bash block is allow-by-default with the ask/deny lists agreed in interview
+  Phase 5.3 (identical across all agents — including `git push*`/`gh pr create*` at least at
+  ask) AND a `deny` line for every command in the deploy-deny set — the **union** of the
+  stack's deploy channels (interview Phase 2.6) and the Phase 5 never-do list; if the two
+  disagree, the union wins. `{POLICY_ADJUSTMENT_LINES}` resolved in every file (extra lines
+  inserted, or the placeholder deleted).
   The OC project-manager has `mode: primary`, no `model:` line, and docs-only edit rights.
 - Quality-gate commands quoted in protocol/agents exist in package.json (or equivalent). In a
   greenfield repo with no manifest yet, instead mark the gates in AGENTS.md with

@@ -31,8 +31,12 @@ permission:
   bash:
     "*": allow
     "git push*": ask
+    "gh pr create*": ask
     "rm *": ask
     "npm install*": ask
+    "npx *": ask
+    "pnpm add*": ask
+    "yarn add*": ask
     "curl *": ask
     "git push --force*": deny
     "git push -f*": deny
@@ -43,6 +47,7 @@ permission:
     "* | sh": deny
     "* | bash": deny
     {DEPLOY_DENY_LINES}
+    {POLICY_ADJUSTMENT_LINES — extra ask/deny lines from interview Phase 5.3; delete this line if none}
   todowrite: allow
 ---
 ```
