@@ -1,0 +1,33 @@
+{
+  "name": "agent-team-generator",
+  "version": "0.1.0",
+  "description": "Claude Code skill that scaffolds a disciplined AI agent team for a project: interview, AGENTS.md, CLAUDE.md, specialist subagents for Claude Code and OpenCode, an agent protocol, and a plain-English documentation system.",
+  "bin": {
+    "agent-team-generator": "bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "skill",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16.7.0"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "skill",
+    "agents",
+    "subagents",
+    "opencode",
+    "scaffold",
+    "agent-team"
+  ],
+  "author": "Sam Heard <samheard95@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sams-git-195/sams-agents.git"
+  }
+}

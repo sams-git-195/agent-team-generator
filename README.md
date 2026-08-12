@@ -1,2 +1,59 @@
-# sams-agents
+# agent-team-generator
 
+A [Claude Code](https://claude.com/claude-code) skill that scaffolds a complete, disciplined
+AI agent team for your project:
+
+- an **interview** that extracts your stack, risk surfaces, and business rules — including
+  whether you want separate **backend + UI/UX developers** (parallel dispatch) or a single
+  **full-stack developer** (simpler roster)
+- `AGENTS.md` + `CLAUDE.md` foundation files
+- specialist subagents for **both Claude Code** (`.claude/agents/`) **and OpenCode**
+  (`.opencode/agent/`), with file-ownership contracts, closed permission lists, and
+  per-project non-negotiables
+- a **Fable-level process protocol** (`.agents/rules/claude-agent-protocol.md`) so mid-level
+  models follow frontier-model steps — the quality bar lives in the process files, not the model
+- a plain-English `documentation/` system maintained as part of Definition of Done
+
+The project-manager runs as the **main session**, not a subagent; specialists
+(product-specialist, architect, developers, qa-tester) are dispatched with tight contracts
+and mandatory evidence.
+
+## Install
+
+```bash
+npx agent-team-generator
+```
+
+That copies the skill to `~/.claude/skills/agent-team-generator`, making it available in every
+project. To install for a single repo instead:
+
+```bash
+npx agent-team-generator --project
+```
+
+Other flags: `--force` (overwrite an existing install), `--uninstall`, `--help`.
+
+## Use
+
+Open Claude Code in the project you want an agent team for and run:
+
+```
+/agent-team-generator
+```
+
+…or just say "set up my agent team". The skill will survey the repo, interview you phase by
+phase, propose a roster for approval, and only then generate files. Unknowns become explicit
+`⚠️ undecided` markers — never guesses.
+
+## Repo layout
+
+| Path | What |
+|---|---|
+| `skill/SKILL.md` | The skill entrypoint (workflow, steps, verification) |
+| `skill/references/` | Interview bank, protocol + AGENTS.md templates, role library, Fable playbook |
+| `skill/references/templates/` | Pre-filled agent files for the core roles + fullstack-developer |
+| `bin/cli.js` | The `npx` installer |
+
+## License
+
+MIT
