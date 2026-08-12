@@ -101,8 +101,12 @@ example page doc if concrete pages are known) from `documentation-convention.md`
   qa-tester checklist both reference it.
 
 **Step 7 — Initialisation & add-ons.** On greenfield repos, run interview Phase 8: offer
-quality-gates setup, CI workflow, and env hygiene as a menu; scaffold only what the user
-approves (skip on repos that already have code). Then, on ALL repos, run interview Phase 9:
+production-ready standards as a menu — strict quality gates (strict TS, type-aware lint with
+no-explicit-any as an error, `--max-warnings 0`, format check, a test runner with one real
+test), CI on **both PR and merge** with every gate a separate step, env hygiene, and the
+optional hardening items (version pinning, dependency updates, targeted coverage floors,
+pre-push hook). Strict is the default; loosening needs a stated reason. Scaffold only what
+the user approves (skip on repos that already have code). Then, on ALL repos, run interview Phase 9:
 offer the optional third-party skill add-ons (UI/UX Pro Max, Animation Principles, web-app
 testing, Superpowers, …), asking per add-on whether to install at project or user level; run
 installs only after the user chooses, verify the installed path, and never block on a failed

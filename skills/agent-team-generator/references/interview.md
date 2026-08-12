@@ -125,17 +125,45 @@ proposal contents — and get explicit approval before writing files.
 
 ## Phase 8 — Initialisation recommendations (greenfield only)
 
-When the target repo has no code yet, recommend — and scaffold only after approval:
+When the target repo has no code yet, recommend — and scaffold only after approval. The bar is
+**production-ready from the first commit**: strict configs are near-free on day one and
+near-impossible to retrofit, so present strict as the default and loosening as the deviation
+that needs a reason.
 
-1. **Quality-gates setup**: linter config, a real typecheck script, test-runner wiring — so the
-   gate commands quoted throughout the generated files exist from day one.
-2. **CI workflow**: a PR-only pipeline running every gate as a separate step (so one run
-   reports every failure), shaped so the jobs can be marked required status checks.
+1. **Quality-gates setup (strict by default)**:
+   - TypeScript `strict: true`, plus `noUncheckedIndexedAccess`, `noFallthroughCasesInSwitch`,
+     `noUnusedLocals`/`noUnusedParameters`; a real typecheck script (`tsc --noEmit`).
+   - Type-aware ESLint with `@typescript-eslint/no-explicit-any: "error"` (matching the agents'
+     zero-`any` rule mechanically), no-floating-promises, and a **zero-tolerance policy**: lint
+     runs with `--max-warnings 0` — there is no "warnings are fine" tier, a gate either passes
+     clean or fails.
+   - A formatter (Prettier or equivalent) with a `format:check` script so style never reaches
+     review.
+   - Test-runner wiring **with one real passing test committed** — an empty test setup lets
+     every later "tests pass" claim be vacuously true; the agents' evidence discipline needs a
+     gate that can actually fail.
+2. **CI workflow — on PR AND on merge**: trigger on `pull_request` and on `push` to the main
+   branch (the merge run catches semantic conflicts between PRs that were each green alone).
+   Every gate is a separate step — typecheck, lint, format check, tests, build — so one run
+   reports every failure. Shape the jobs so they can be marked required status checks, and
+   recommend enabling branch protection (required checks + no force-push) once the repo is on
+   GitHub — that's a repo setting the user must click, not a file; put it in the hand-over
+   summary as a reminder.
 3. **Env hygiene**: `.env.example` documenting every env location, `.env` git-ignored, and the
    no-secrets-in-client-shipped-vars rule wired into AGENTS.md gotchas.
+4. **Further production hardening (optional menu items, recommend but don't push)**:
+   - Node version pinning: `.nvmrc` + `engines` in package.json, and the same version in CI.
+   - Automated dependency updates: Dependabot config (or Renovate) with grouped minor updates.
+   - Coverage floor on risk surfaces only: a coverage threshold scoped to the risk-surface
+     modules from Phase 3 (e.g. the money module), not a blanket repo-wide percentage —
+     blanket floors breed junk tests; targeted floors protect what's expensive to break.
+   - A pre-push git hook running the gates locally (husky or a plain `.git/hooks` script) —
+     optional because CI is the real gate; the hook just shortens the feedback loop.
 
-Present these as a short menu with what each creates; the user picks. Skip the phase entirely
-on repos that already have code.
+Whatever is scaffolded here must match the gate commands quoted in the generated agent files
+verbatim — the agents' quality gates and the CI steps are the same commands, so nothing passes
+locally that fails in CI. Present these as a short menu with what each creates; the user picks.
+Skip the phase entirely on repos that already have code.
 
 ## Phase 9 — Optional skill add-ons (all repos)
 
