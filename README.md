@@ -13,6 +13,9 @@ AI agent team for your project:
 - a **Fable-level process protocol** (`.agents/rules/claude-agent-protocol.md`) so mid-level
   models follow frontier-model steps — the quality bar lives in the process files, not the model
 - a plain-English `documentation/` system maintained as part of Definition of Done
+- optional third-party **skill add-ons** ([UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill),
+  [Animation Principles](https://github.com/dylantarre/animation-principles)) — offered during
+  the interview, installed at project or user level, your choice
 
 The project-manager runs as the **main session**, not a subagent; specialists
 (product-specialist, architect, developers, qa-tester) are dispatched with tight contracts

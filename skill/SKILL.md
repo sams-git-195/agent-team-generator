@@ -95,9 +95,12 @@ example page doc if concrete pages are known) from `documentation-convention.md`
 - Docs folder seeded (add `.gitkeep` to empty dirs so git tracks them); protocol §4 and the
   qa-tester checklist both reference it.
 
-**Step 7 — Initialisation recommendations (greenfield only).** Run interview Phase 8: offer
+**Step 7 — Initialisation & add-ons.** On greenfield repos, run interview Phase 8: offer
 quality-gates setup, CI workflow, and env hygiene as a menu; scaffold only what the user
-approves. Skip on repos that already have code.
+approves (skip on repos that already have code). Then, on ALL repos, run interview Phase 9:
+offer the optional third-party skill add-ons (UI/UX Pro Max, Animation Principles, …), asking
+per add-on whether to install at project or user level; run installs only after the user
+chooses, verify the installed path, and never block on a failed add-on.
 
 **Step 8 — Hand over.** Summarise what was generated, list the `⚠️ undecided` markers to
 resolve, and remind the user: gotchas in AGENTS.md grow over the project's life — append when

@@ -113,3 +113,22 @@ When the target repo has no code yet, recommend — and scaffold only after appr
 
 Present these as a short menu with what each creates; the user picks. Skip the phase entirely
 on repos that already have code.
+
+## Phase 9 — Optional skill add-ons (all repos)
+
+Offer the recommended third-party skills below (AskUserQuestion, multi-select). For each one
+the user wants, ask a follow-up: **project level** (this repo only) or **user level** (all
+their projects)? Run the matching install command only after they choose; verify the skill
+directory exists afterwards and report the path. If an install command fails, report the
+error verbatim and move on — never block generation on an add-on.
+
+| Add-on | What it does | Project-level install | User-level install |
+|---|---|---|---|
+| **UI/UX Pro Max** ([repo](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)) | Design intelligence: generates design systems, UI styles, palettes, stack-specific code | `npm install -g ui-ux-pro-max-cli` then `uipro init --ai claude` (run in the project root) | `npm install -g ui-ux-pro-max-cli` then `uipro init --ai claude --global` |
+| **Animation Principles** ([repo](https://github.com/dylantarre/animation-principles)) | Motion/animation guidance organised by skill level | `npx skillfish add dylantarre/animation-principles 04-by-skill-level --project` | `npx skillfish add dylantarre/animation-principles 04-by-skill-level --global` |
+
+Notes: `npm install -g` is machine-wide either way (it's the CLI, not the skill) — say so when
+asking. Both add-ons are most useful on projects with a UI; if the project has no frontend,
+still offer them but say they likely won't trigger. Record what was installed (and at which
+level) in the hand-over summary. This table is meant to grow — add rows as new add-ons prove
+useful.
