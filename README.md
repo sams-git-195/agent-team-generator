@@ -76,6 +76,26 @@ phase, propose a roster for approval, and only then generate files. Unknowns bec
 | `bin/cli.js` | The `npx` installer |
 | `.claude-plugin/` | Plugin + marketplace manifests for Claude Code's `/plugin` install path |
 | `scripts/test.js` | Smoke test (`npm test`): installer round-trip + template integrity |
+| `.github/workflows/` | `ci.yml` (tests on PR + merge) and `release.yml` (publish on tag) |
+
+## Releasing
+
+Publishing runs from CI via npm [trusted publishing](https://docs.npmjs.com/trusted-publishers/)
+— no npm token is stored in the repo or in GitHub secrets. To cut a release, bump the version
+in both `package.json` and `.claude-plugin/plugin.json` (the smoke test fails if they disagree),
+then:
+
+```bash
+npm version patch && git push --follow-tags
+```
+
+The tag triggers `release.yml`, which checks the tag matches `package.json`, runs the tests, and
+publishes with provenance.
+
+**One-time setup on npmjs.com** (after the first manual publish): package → Settings → Trusted
+Publisher → GitHub Actions, with organization/user `sams-git-195`, repository
+`agent-team-generator`, workflow filename `release.yml`, no environment. Fields are
+case-sensitive.
 
 ## License
 
