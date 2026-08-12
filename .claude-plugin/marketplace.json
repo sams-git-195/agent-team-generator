@@ -1,0 +1,14 @@
+{
+  "name": "agent-team-generator",
+  "owner": {
+    "name": "Sam Heard",
+    "email": "samheard95@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "agent-team-generator",
+      "source": "./",
+      "description": "Scaffolds a disciplined AI agent team for a project: interview, AGENTS.md, CLAUDE.md, specialist subagents for Claude Code and OpenCode, an agent protocol, and a plain-English documentation system."
+    }
+  ]
+}

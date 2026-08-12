@@ -149,9 +149,28 @@ error verbatim and move on — never block generation on an add-on.
 |---|---|---|---|
 | **UI/UX Pro Max** ([repo](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)) | Design intelligence: generates design systems, UI styles, palettes, stack-specific code | `npm install -g ui-ux-pro-max-cli` then `uipro init --ai claude` (run in the project root) | `npm install -g ui-ux-pro-max-cli` then `uipro init --ai claude --global` |
 | **Animation Principles** ([repo](https://github.com/dylantarre/animation-principles)) | Motion/animation guidance organised by skill level | `npx skillfish add dylantarre/animation-principles 04-by-skill-level --project` | `npx skillfish add dylantarre/animation-principles 04-by-skill-level --global` |
+| **Web-app testing** (Anthropic official, [repo](https://github.com/anthropics/skills)) | Playwright-driven browser testing — feeds qa-tester's "verify by running" and ui-ux-developer's responsive checks | `npx skillfish add anthropics/skills webapp-testing --project` | `npx skillfish add anthropics/skills webapp-testing --global` — or natively: `/plugin marketplace add anthropics/skills` in Claude Code |
+| **Superpowers** ([repo](https://github.com/obra/superpowers)) | Full development methodology: TDD, systematic debugging, planning, brainstorming skills | — (plugin manager installs are per user) | Claude Code: `/plugin install superpowers@claude-plugins-official`. OpenCode is also supported — see the repo's per-agent install instructions |
+
+**Superpowers caveat (present it honestly):** it is a complete process methodology and overlaps
+with this team's Fable protocol. Offer it as optional and say the agent protocol wins where the
+two conflict; a note to that effect goes in AGENTS.md gotchas if installed.
+
+**Security review** (offer alongside the add-ons, but it is generated, not installed):
+- Claude Code ships `/security-review` built in — no install; recommend it as a pre-merge step
+  and reference it in the qa-tester checklist and protocol.
+- OpenCode has no built-in equivalent. If the user wants parity, generate
+  `.opencode/command/security-review.md`: an OpenCode command whose body is a security-review
+  prompt tuned to THIS project — the interview's risk surfaces, per-role access model, secret
+  locations, and money/PII rules — instructing a review of the current diff for injection,
+  authn/authz gaps, secret exposure, unsafe rendering, and risk-surface-specific issues, with
+  findings reported file:line by severity and NO code edits. Frontmatter: `description` plus
+  `agent: qa-tester` so it runs with qa-tester's read-only-plus-tests permissions.
 
 Notes: `npm install -g` is machine-wide either way (it's the CLI, not the skill) — say so when
-asking. Both add-ons are most useful on projects with a UI; if the project has no frontend,
-still offer them but say they likely won't trigger. Record what was installed (and at which
-level) in the hand-over summary. This table is meant to grow — add rows as new add-ons prove
-useful.
+asking. The two design add-ons are most useful on projects with a UI; if the project has no
+frontend, still offer them but say they likely won't trigger. After the menu, ask one free-text
+follow-up: "any other skills/plugins you already use that I should install?" — install at the
+user's chosen level using the same tools (skillfish / plugin marketplace), never guessing at a
+source. Record what was installed (and at which level) in the hand-over summary. This table is
+meant to grow — add rows as new add-ons prove useful.

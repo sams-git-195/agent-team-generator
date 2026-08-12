@@ -1,0 +1,9 @@
+{
+  "name": "agent-team-generator",
+  "description": "Scaffolds a disciplined AI agent team for a project: interview, AGENTS.md, CLAUDE.md, specialist subagents for Claude Code and OpenCode, an agent protocol, and a plain-English documentation system.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Sam Heard",
+    "email": "samheard95@gmail.com"
+  }
+}

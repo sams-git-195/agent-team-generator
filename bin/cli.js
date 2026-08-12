@@ -42,7 +42,7 @@ const baseDir = args.includes('--project')
   ? path.join(process.cwd(), '.claude', 'skills')
   : path.join(os.homedir(), '.claude', 'skills');
 const target = path.join(baseDir, SKILL_NAME);
-const source = path.join(__dirname, '..', 'skill');
+const source = path.join(__dirname, '..', 'skills', SKILL_NAME);
 
 if (args.includes('--uninstall')) {
   if (!fs.existsSync(target)) {

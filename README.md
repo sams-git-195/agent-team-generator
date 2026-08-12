@@ -14,8 +14,13 @@ AI agent team for your project:
   models follow frontier-model steps — the quality bar lives in the process files, not the model
 - a plain-English `documentation/` system maintained as part of Definition of Done
 - optional third-party **skill add-ons** ([UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill),
-  [Animation Principles](https://github.com/dylantarre/animation-principles)) — offered during
-  the interview, installed at project or user level, your choice
+  [Animation Principles](https://github.com/dylantarre/animation-principles),
+  [Anthropic's web-app testing](https://github.com/anthropics/skills),
+  [Superpowers](https://github.com/obra/superpowers)) — offered during the interview,
+  installed at project or user level, your choice — plus a security-review command for
+  OpenCode parity with Claude Code's built-in `/security-review`
+- an **agent bash-permission policy** you tune in the interview (allow-by-default; deploys
+  denied; pushes, PR creation, deletes, and installs prompt first)
 
 The project-manager runs as the **main session**, not a subagent; specialists
 (product-specialist, architect, developers, qa-tester) are dispatched with tight contracts
@@ -36,6 +41,19 @@ npx agent-team-generator --project
 
 Other flags: `--force` (overwrite an existing install), `--uninstall`, `--help`.
 
+To upgrade to the latest version:
+
+```bash
+npx agent-team-generator@latest --force
+```
+
+Or install as a **Claude Code plugin** (no Node required) — inside Claude Code run:
+
+```
+/plugin marketplace add sams-git-195/agent-team-generator
+/plugin install agent-team-generator@agent-team-generator
+```
+
 ## Use
 
 Open Claude Code in the project you want an agent team for and run:
@@ -52,10 +70,12 @@ phase, propose a roster for approval, and only then generate files. Unknowns bec
 
 | Path | What |
 |---|---|
-| `skill/SKILL.md` | The skill entrypoint (workflow, steps, verification) |
-| `skill/references/` | Interview bank, protocol + AGENTS.md templates, role library, Fable playbook |
-| `skill/references/templates/` | Pre-filled agent files for the core roles + fullstack-developer |
+| `skills/agent-team-generator/SKILL.md` | The skill entrypoint (workflow, steps, verification) |
+| `skills/agent-team-generator/references/` | Interview bank, protocol + AGENTS.md templates, role library, Fable playbook |
+| `skills/agent-team-generator/references/templates/` | Pre-filled agent files for the core roles + fullstack-developer |
 | `bin/cli.js` | The `npx` installer |
+| `.claude-plugin/` | Plugin + marketplace manifests for Claude Code's `/plugin` install path |
+| `scripts/test.js` | Smoke test (`npm test`): installer round-trip + template integrity |
 
 ## License
 

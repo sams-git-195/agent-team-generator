@@ -103,9 +103,13 @@ example page doc if concrete pages are known) from `documentation-convention.md`
 **Step 7 — Initialisation & add-ons.** On greenfield repos, run interview Phase 8: offer
 quality-gates setup, CI workflow, and env hygiene as a menu; scaffold only what the user
 approves (skip on repos that already have code). Then, on ALL repos, run interview Phase 9:
-offer the optional third-party skill add-ons (UI/UX Pro Max, Animation Principles, …), asking
-per add-on whether to install at project or user level; run installs only after the user
-chooses, verify the installed path, and never block on a failed add-on.
+offer the optional third-party skill add-ons (UI/UX Pro Max, Animation Principles, web-app
+testing, Superpowers, …), asking per add-on whether to install at project or user level; run
+installs only after the user chooses, verify the installed path, and never block on a failed
+add-on. Also offer the security-review option: built-in `/security-review` on Claude Code
+(reference it in protocol + qa-tester), and for OpenCode parity a generated
+`.opencode/command/security-review.md` tuned to the project's risk surfaces (see interview
+Phase 9 for its required shape).
 
 **Step 8 — Hand over.** Summarise what was generated, list the `⚠️ undecided` markers to
 resolve, and remind the user: gotchas in AGENTS.md grow over the project's life — append when

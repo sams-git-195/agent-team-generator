@@ -7,10 +7,13 @@
   },
   "files": [
     "bin",
-    "skill",
+    "skills",
     "README.md",
     "LICENSE"
   ],
+  "scripts": {
+    "test": "node scripts/test.js"
+  },
   "engines": {
     "node": ">=16.7.0"
   },
@@ -28,6 +31,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sams-git-195/sams-agents.git"
+    "url": "git+https://github.com/sams-git-195/agent-team-generator.git"
+  },
+  "homepage": "https://github.com/sams-git-195/agent-team-generator#readme",
+  "bugs": {
+    "url": "https://github.com/sams-git-195/agent-team-generator/issues"
   }
 }
