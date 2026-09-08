@@ -14,8 +14,8 @@ on the user's word or after asking, deploy/db-push never unprompted.
 ## project-manager — MAIN agent (protocol §1 in Claude Code; `mode: primary` in OpenCode)
 
 - **CC**: no subagent file. The persona lives in the protocol. **OC**: primary agent file; body
-  = protocol §1 content + this block. No `model:` pin and no `steps:` cap — the primary agent
-  uses OpenCode's standard model selector and runs uncapped.
+  = protocol §1 content + this block. No `model:` pin — the primary agent uses OpenCode's
+  standard model selector.
 - Owns (edit allow-list): `AGENTS.md`, `.claude/agents/*.md`, `.opencode/agent/*.md`,
   `.agents/**`, `documentation/**`, `*.roadmap.*`. Bash: git status/log/diff/add/commit, grep,
   the project's gate commands. Never edits `src/**` or the data layer — even one character.

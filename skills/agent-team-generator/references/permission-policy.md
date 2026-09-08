@@ -213,8 +213,8 @@ the destructive set when emitting: the block must be bare `"pattern": action` li
 verifier's ordering and parity checks see every line.
 
 **Caveats to state in the hand-over:**
-- `steps:` and `color:` in OC agent frontmatter are not in the documented markdown-agent field
-  list — verify against the installed OpenCode version; harmless if ignored.
+- `color:` in OC agent frontmatter is not in the documented markdown-agent field list — verify
+  against the installed OpenCode version; harmless if ignored.
 - OpenCode matches "parsed commands"; if it splits pipelines, the `"* | sh"` lines never match.
   The `sh -c`/`bash -c` asks (Standard) and denies (Strict) are the fallback. Verify once with
   a harmless `echo hi | sh`.

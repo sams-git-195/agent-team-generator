@@ -22,7 +22,6 @@ name: backend-developer
 description: (same as above)
 mode: subagent
 color: "#2ECC71"
-steps: 50
 temperature: 0.1
 model: {OC_MODEL_BACKEND_DEVELOPER}
 permission:

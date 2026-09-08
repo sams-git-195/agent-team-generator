@@ -29,8 +29,6 @@ name: {same-name}
 description: {same description}
 mode: {primary for project-manager, subagent for everyone else}
 color: "{distinct hex per role}"
-steps: {20 for product, 35 for architect/qa, 50 for developers; the PM (primary) has NO steps
-  cap — omit the line}
 temperature: 0.1
 model: {OC_MODEL from interview, asked PER AGENT. The project-manager (primary) gets NO model
   line — it uses OpenCode's standard model selector.}
@@ -48,8 +46,8 @@ permission:
 ---
 ```
 
-`steps:` and `color:` are not in OpenCode's documented markdown-agent field list — keep them
-(harmless if ignored) but mark "verify against installed OpenCode version" in the hand-over.
+No `steps:` cap on any agent. `color:` is not in OpenCode's documented markdown-agent field list —
+keep it (harmless if ignored) but mark "verify against installed OpenCode version" in the hand-over.
 
 **Property-based dangers**: some risks are a property of the invocation, not a command prefix —
 e.g. a payments CLI in live mode (`--live` anywhere, a live API key argument, or a session

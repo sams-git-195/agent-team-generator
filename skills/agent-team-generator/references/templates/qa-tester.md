@@ -21,7 +21,6 @@ name: qa-tester
 description: (same as above)
 mode: subagent
 color: "#F39C12"
-steps: 35
 temperature: 0.1
 model: {OC_MODEL_QA_TESTER}
 permission:

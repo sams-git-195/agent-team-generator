@@ -65,5 +65,5 @@ The project is fictional. Nothing here may be copied into a real project by the 
 - Money rule names one module under `api/app/services/` and integer minor units.
 - `documentation/pages/` has four page docs; `.opencode/command/security-review.md` exists
   with `agent: qa-tester` and names the four risk surfaces.
-- The hand-over lists: the refund-window marker, the palette marker, "verify `steps`/`color`
+- The hand-over lists: the refund-window marker, the palette marker, "verify `color`
   against the installed OpenCode version", and where the tier is enforced.

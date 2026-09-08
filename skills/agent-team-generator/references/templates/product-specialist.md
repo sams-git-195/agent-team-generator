@@ -21,7 +21,6 @@ name: product-specialist
 description: (same as above)
 mode: subagent
 color: "#4C9AFF"
-steps: 20
 temperature: 0.1
 model: {OC_MODEL_PRODUCT_SPECIALIST}
 permission:

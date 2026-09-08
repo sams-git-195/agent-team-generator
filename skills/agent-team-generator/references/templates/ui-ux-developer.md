@@ -21,7 +21,6 @@ name: ui-ux-developer
 description: (same as above)
 mode: subagent
 color: "#E74C3C"
-steps: 50
 temperature: 0.1
 model: {OC_MODEL_UI_UX_DEVELOPER}
 permission:

@@ -110,7 +110,7 @@ non-overlapping; the model matrix names only existing agents; docs folder seeded
    `.agents/` and run in Step 6 — placeholders, roster == files, OC policy identity and
    ordering, ownership overlaps, CC/OC deny parity, gate scripts, docs seeding. The smoke
    test exercises it against a synthetic tree with seven deliberate breakages.
-7. `steps:`/`color:` in OC frontmatter and the `"* | sh"` deny lines are flagged "verify
+7. `color:` in OC frontmatter and the `"* | sh"` deny lines are flagged "verify
    against the installed OpenCode version" rather than asserted.
 
 ## Testing plan for the skill itself

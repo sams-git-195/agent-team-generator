@@ -25,7 +25,6 @@ name: fullstack-developer
 description: (same as above)
 mode: subagent
 color: "#9B59B6"
-steps: 50
 temperature: 0.1
 model: {OC_MODEL_FULLSTACK_DEVELOPER}
 permission:

@@ -21,7 +21,6 @@ name: architect
 description: (same as above)
 mode: subagent
 color: "#9B59B6"
-steps: 35
 temperature: 0.1
 model: {OC_MODEL_ARCHITECT}
 permission:
