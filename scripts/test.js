@@ -179,6 +179,25 @@ try {
   const good = runVerify(vt);
   check(good.code === 0, `verify-team passes on a consistent generated tree${good.code ? `\n${good.out.split('\n').filter((l) => l.startsWith('FAIL')).join('\n')}` : ''}`);
 
+  // Still passes when a policy line carries a trailing comment and CC denies differ only in
+  // spacing (OC "git push* --force*" vs CC "Bash(git push * --force *)").
+  {
+    const commented = OC_POLICY.replace('"git push --force*": deny', '"git push --force*": deny   # never\n    "git push* --force*": deny');
+    const tolerant = {
+      ...goodTree,
+      '.claude/settings.json': JSON.stringify({ permissions: { allow: ['Bash'], deny: ['Bash(git push --force *)', 'Bash(git push * --force *)', 'Bash(sudo *)', 'Bash(fly deploy *)'] } }),
+    };
+    for (const f of Object.keys(tolerant).filter((k) => k.startsWith('.opencode/'))) tolerant[f] = tolerant[f].replace(OC_POLICY, commented);
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'atg-verify-tol-'));
+    try {
+      writeTree(dir, tolerant);
+      const r = runVerify(dir);
+      check(r.code === 0, `verify-team tolerates trailing comments and spacing differences in CC parity${r.code ? `\n${r.out.split('\n').filter((l) => l.startsWith('FAIL')).join('\n')}` : ''}`);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
   const cases = [
     ['unfilled placeholder', { 'AGENTS.md': goodTree['AGENTS.md'] + '\nColors: {PALETTE}\n' }, /no unfilled placeholders/],
     ['overlapping builder globs', { '.opencode/agent/ui-ux-developer.md': ocAgent('ui-ux-developer', 'subagent', ['web/**', 'server/lib/**'], 'model: m\n') }, /do not overlap/],
