@@ -95,12 +95,13 @@ keeps it — re-run whenever the roster or a convention changes) and run
 `node .agents/verify-team.js` from the target root. Paste its output. Fix every `FAIL` and
 re-run until clean; warnings go into the hand-over. On a greenfield repo the gate-script
 check can only pass after Step 7 creates the manifest — **re-run the verifier after Step 7**
-and paste that output too. It checks placeholders, roster == files,
+and paste that output too; remove the `⚠️ verify scripts exist after first scaffold` marker from
+AGENTS.md once the manifest exists. It checks placeholders, roster == files,
 per-file shape, OC mode/model/policy identity and ordering, builder ownership overlaps,
 CC settings parity, gate scripts, and docs seeding. Then the checks below that need judgment:
 - Placeholder scan result read, not assumed: legitimate braces are `{var}` i18n syntax,
-  lowercase tokens inside Output Format templates the roles copy, and `{ROLE}` in the
-  protocol's generic handoff rule — anything else is unfilled.
+  any lowercase `{token}` (the verifier only flags ALL-CAPS), and `{ROLE}` in the protocol's
+  generic handoff rule — anything else is unfilled.
 - AGENTS.md roster table == files on disk in every generated agent directory; with Both,
   CC roster == OC roster minus PM. Only the directories the Phase 0 choice calls for exist.
 - Every agent file has all of **its template's** sections (custom roles: all skeleton sections)

@@ -183,7 +183,10 @@ that needs a reason.
    - The linter bans the language's escape hatch mechanically (matching the agents'
      `{LANGUAGE_HYGIENE_RULE}`) and runs with a **zero-tolerance policy** — no "warnings are
      fine" tier; a gate either passes clean or fails (`--max-warnings 0` or equivalent).
-   - A formatter with a check script so style never reaches review.
+   - A formatter with a check script named `format:check` (or `format-check` where `:` is
+     not allowed) so style never reaches review.
+   - Lockfiles: CI installs locked (`npm ci`, `uv sync --locked`, …), so the hand-over must
+     tell the user to run the first install and commit the lockfile before CI can pass.
    - Test-runner wiring **with one real passing test committed** — an empty test setup lets
      every later "tests pass" claim be vacuously true; the agents' evidence discipline needs a
      gate that can actually fail.

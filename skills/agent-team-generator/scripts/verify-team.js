@@ -251,7 +251,7 @@ if (exists(P('package.json'))) {
   for (const t of texts) for (const m of t.matchAll(/npm run ([\w:.-]+)/g)) referenced.add(m[1]);
   const missing = [...referenced].filter((s) => !scripts[s]);
   check(missing.length === 0, `every "npm run <script>" quoted as a gate exists in package.json${missing.length ? ` (missing: ${missing.join(', ')})` : ''}`);
-} else if (!/verify scripts exist after first scaffold/.test(agentsMd)) {
+} else if (!/verify\s+scripts\s+exist\s+after\s+first\s+scaffold/.test(agentsMd)) {
   warn('no package.json — gate commands could not be verified; AGENTS.md should carry "⚠️ verify scripts exist after first scaffold"');
 }
 

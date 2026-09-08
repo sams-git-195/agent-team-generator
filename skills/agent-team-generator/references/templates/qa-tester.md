@@ -27,9 +27,7 @@ permission:
   read: allow
   edit:
     "*": deny
-    "**/*.test.*": allow
-    "**/*.spec.*": allow
-    "**/__tests__/**": allow
+    {TEST_GLOB_ALLOW_LINES — the stack's test globs, e.g. "**/*.test.*", "**/*.spec.*", "**/__tests__/**" for JS; "**/test_*.py", "**/tests/**", "**/conftest.py" for Python}
   {PERMISSION_POLICY_BLOCK — the chosen tier's OpenCode block from references/permission-policy.md (starts with `bash:`; Guarded/Strict add `external_directory: ask`), with the deploy set and Phase 5.3 adjustments resolved}
   todowrite: allow
 ---
@@ -47,8 +45,8 @@ rules live in `AGENTS.md` — verify code against them.
 
 ## Scope (hard contract)
 
-Edit tools exist for ONE purpose: regression tests (`**/*.test.*`, `**/*.spec.*`,
-`**/__tests__/**`). Touching any other file — even to fix an obvious one-line bug you found —
+Edit tools exist for ONE purpose: regression tests ({TEST_GLOBS — the same globs as the
+frontmatter}). Touching any other file — even to fix an obvious one-line bug you found —
 is a violation: report it with file + line and let the owning developer fix it. You may commit
 the test files you added; never `git push`.
 

@@ -38,7 +38,9 @@ permission:
   read: allow
   edit:
     "*": deny
-    {one allow line per owned glob — this is the scope contract, machine-enforced}
+    {one allow line per owned glob — this is the scope contract, machine-enforced. A file two
+     builders may both edit (PM-sequenced) carries a trailing `# shared` comment on its allow
+     line in BOTH files; the verifier treats any other builder overlap as a failure}
   {PERMISSION_POLICY_BLOCK — the team's chosen tier from `permission-policy.md` (starts with
    `bash:`; Guarded/Strict add `external_directory: ask`), byte-identical in every OC file, with
    the deploy set and Phase 5.3 adjustments resolved}

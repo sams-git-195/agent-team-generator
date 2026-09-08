@@ -1,8 +1,8 @@
 # Fixture: canned interview for the application-scenario test
 
 Use this to test the skill itself (DESIGN.md §Testing): dispatch a subagent with ONLY the
-skill files, an empty git-initialised temp directory as the target, and this brief as the
-user's answers. The subagent runs the skill end to end without asking questions (every
+skill files, an empty git-initialised temp directory as the target, and this brief passed in
+as the user's messages (the skill itself never reads this file). The subagent runs the skill end to end without asking questions (every
 interview answer is below; anything not covered → "accept the recommended default"). Then
 run `scripts/verify-team.js` against the output and review the generated files against the
 expectations at the bottom.

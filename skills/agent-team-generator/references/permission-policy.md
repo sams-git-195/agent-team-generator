@@ -70,7 +70,8 @@ Include the rows for package managers present in this stack (from the stack hygi
 
 ```yaml
     "npm install*": ask
-    "npm i*": ask
+    "npm i": ask
+    "npm i *": ask
     "npm ci*": ask
     "pnpm add*": ask
     "pnpm install*": ask
@@ -101,6 +102,8 @@ rm`) · CLIs with live/production modes (Stripe, Shopify… — prefer a wholesa
 see "property-based dangers" in `agent-skeleton.md`) · Windows-native deletes (`Remove-Item`,
 `del`) when the team runs PowerShell. Accepted additions become `{POLICY_ADJUSTMENT_ASK_LINES}`
 (ask-type) and `{POLICY_ADJUSTMENT_DENY_LINES}` (deny-type) — each goes in its own band.
+Phase 5.2 never-do items resolved to `ask` under the property-based rule below are emitted
+in the ask band too.
 
 **Property-based and environment-targeted dangers.** Two kinds of never-do item cannot be a
 prefix: (a) a CLI whose danger is a flag or logged-in account (`stripe` in live mode) — emit a
