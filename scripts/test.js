@@ -128,6 +128,81 @@ check(
   'fullstack-developer template exists for Phase 7.0'
 );
 
+check(fs.existsSync(path.join(skillDir, 'fixtures', 'sample-brief.md')), 'fixtures/sample-brief.md exists for the application-scenario test');
+check(/accept the recommended defaults/i.test(interview) && /fast path/i.test(skillMd), 'interview fast path wired (interview <-> SKILL.md Step 1)');
+
+// --- 3b. verify-team.js against a synthetic generated tree ------------------------------
+const verify = path.join(skillDir, 'scripts', 'verify-team.js');
+check(fs.existsSync(verify), 'scripts/verify-team.js exists');
+
+function writeTree(dir, files) {
+  for (const [rel, content] of Object.entries(files)) {
+    const p = path.join(dir, rel);
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, content);
+  }
+}
+const OC_POLICY = [
+  '  bash:', '    "*": allow', '    "git push*": ask', '    "rm *": ask',
+  '    "git push --force*": deny', '    "sudo *": deny', '    "fly deploy*": deny',
+].join('\n');
+const ocAgent = (name, mode, edits, extra = '') =>
+  `---\nname: ${name}\ndescription: x\nmode: ${mode}\n${extra}permission:\n  read: allow\n  edit:\n    "*": deny\n${edits.map((g) => `    "${g}": allow`).join('\n')}\n${OC_POLICY}\n  todowrite: allow\n---\n# ${name}\n\n## Scope (hard contract)\nx\n\n## Handoff\nDone → project-manager\n`;
+const ccAgent = (name) => `---\nname: ${name}\ndescription: x\ntools: Read\nmodel: opus\n---\n# ${name}\n\n## Scope (hard contract)\nx\n\n## Handoff\nDone → project-manager\n`;
+const goodTree = {
+  'AGENTS.md': '# T — Agent Guide\n\n## Agent team\n| Agent | Owns | Hands off to |\n|---|---|---|\n| project-manager (MAIN session) | docs | all |\n| backend-developer | server/** | qa-tester |\n| ui-ux-developer | web/** | qa-tester |\n| qa-tester | tests | project-manager |\n\n## Dev commands\n- `npm run lint`\n',
+  'CLAUDE.md': '@AGENTS.md\n@.agents/rules/claude-agent-protocol.md\n',
+  '.agents/rules/claude-agent-protocol.md': '# Protocol\n\nSee documentation/ and run `npm run lint`. Handoff `{ROLE} Complete → …`.\n',
+  '.claude/agents/backend-developer.md': ccAgent('backend-developer'),
+  '.claude/agents/ui-ux-developer.md': ccAgent('ui-ux-developer'),
+  '.claude/agents/qa-tester.md': ccAgent('qa-tester'),
+  '.claude/settings.json': JSON.stringify({ permissions: { allow: ['Bash'], ask: ['Bash(git push *)', 'Bash(rm *)'], deny: ['Bash(git push --force *)', 'Bash(sudo *)', 'Bash(fly deploy *)'] } }, null, 2),
+  '.opencode/agent/project-manager.md': ocAgent('project-manager', 'primary', ['AGENTS.md', 'documentation/**']),
+  '.opencode/agent/backend-developer.md': ocAgent('backend-developer', 'subagent', ['server/**'], 'model: m\n'),
+  '.opencode/agent/ui-ux-developer.md': ocAgent('ui-ux-developer', 'subagent', ['web/**'], 'model: m\n'),
+  '.opencode/agent/qa-tester.md': ocAgent('qa-tester', 'subagent', ['**/*.test.*'], 'model: m\n'),
+  'documentation/README.md': '# Docs\n',
+  'documentation/pages/.gitkeep': '',
+  'documentation/features/.gitkeep': '',
+  'package.json': JSON.stringify({ name: 't', scripts: { lint: 'x' } }),
+};
+function runVerify(dir) {
+  try {
+    return { code: 0, out: execFileSync(process.execPath, [verify, dir], { encoding: 'utf8' }) };
+  } catch (e) {
+    return { code: e.status, out: String(e.stdout) };
+  }
+}
+const vt = fs.mkdtempSync(path.join(os.tmpdir(), 'atg-verify-'));
+try {
+  writeTree(vt, goodTree);
+  const good = runVerify(vt);
+  check(good.code === 0, `verify-team passes on a consistent generated tree${good.code ? `\n${good.out.split('\n').filter((l) => l.startsWith('FAIL')).join('\n')}` : ''}`);
+
+  const cases = [
+    ['unfilled placeholder', { 'AGENTS.md': goodTree['AGENTS.md'] + '\nColors: {PALETTE}\n' }, /no unfilled placeholders/],
+    ['overlapping builder globs', { '.opencode/agent/ui-ux-developer.md': ocAgent('ui-ux-developer', 'subagent', ['web/**', 'server/lib/**'], 'model: m\n') }, /do not overlap/],
+    ['divergent OC policy', { '.opencode/agent/qa-tester.md': ocAgent('qa-tester', 'subagent', ['**/*.test.*'], 'model: m\n').replace('"rm *": ask\n', '') }, /identical across all OC files/],
+    ['PM with a model pin', { '.opencode/agent/project-manager.md': ocAgent('project-manager', 'primary', ['AGENTS.md'], 'model: m\n') }, /no model pin/],
+    ['CC settings missing a deploy deny', { '.claude/settings.json': JSON.stringify({ permissions: { deny: ['Bash(sudo *)'] } }) }, /covers every OC deny prefix/],
+    ['gate script missing from package.json', { 'package.json': JSON.stringify({ name: 't', scripts: {} }) }, /exists in package.json/],
+    ['roster/file mismatch', { '.claude/agents/mobile-developer.md': ccAgent('mobile-developer') }, /roster minus PM/],
+  ];
+  for (const [label, mutation, expected] of cases) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'atg-verify-bad-'));
+    try {
+      writeTree(dir, { ...goodTree, ...mutation });
+      const r = runVerify(dir);
+      const failLines = r.out.split('\n').filter((l) => l.startsWith('FAIL'));
+      check(r.code === 1 && failLines.some((l) => expected.test(l)), `verify-team catches: ${label}`);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+} finally {
+  fs.rmSync(vt, { recursive: true, force: true });
+}
+
 // --- 4. Plugin/marketplace/package metadata agree ---------------------------------------
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 const plugin = JSON.parse(fs.readFileSync(path.join(root, '.claude-plugin', 'plugin.json'), 'utf8'));

@@ -4,14 +4,21 @@ A [Claude Code](https://claude.com/claude-code) skill that scaffolds a complete,
 AI agent team for your project:
 
 - an **interview** that extracts your stack, risk surfaces, and business rules — including
-  whether you want separate **backend + UI/UX developers** (parallel dispatch) or a single
-  **full-stack developer** (simpler roster)
+  which **harness** (Claude Code, OpenCode, both kept in line, or another), whether you want
+  separate **backend + UI/UX developers** (parallel dispatch) or a single **full-stack
+  developer** (simpler roster), and how the project-manager should **report to you**
+  (technical / direct / plain English — always outcome-first and structured); a fast path
+  accepts the recommended defaults in one question
 - `AGENTS.md` + `CLAUDE.md` foundation files
 - specialist subagents for **both Claude Code** (`.claude/agents/`) **and OpenCode**
   (`.opencode/agent/`), with file-ownership contracts, closed permission lists, and
   per-project non-negotiables
 - a **Fable-level process protocol** (`.agents/rules/claude-agent-protocol.md`) so mid-level
-  models follow frontier-model steps — the quality bar lives in the process files, not the model
+  models follow frontier-model steps — the quality bar lives in the process files, not the
+  model — plus a language-agnostic **engineering standard** with per-stack hygiene rules
+  (TypeScript, Python, Go, Rust)
+- a **mechanical verifier** (`.agents/verify-team.js`) left in your repo: placeholders, roster
+  vs files, ownership overlaps, permission parity across harnesses, gate scripts
 - a plain-English `documentation/` system maintained as part of Definition of Done
 - optional third-party **skill add-ons** ([UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill),
   [Animation Principles](https://github.com/dylantarre/animation-principles),
@@ -75,6 +82,8 @@ phase, propose a roster for approval, and only then generate files. Unknowns bec
 | `skills/agent-team-generator/SKILL.md` | The skill entrypoint (workflow, steps, verification) |
 | `skills/agent-team-generator/references/` | Interview bank, protocol + AGENTS.md templates, role library, Fable playbook |
 | `skills/agent-team-generator/references/templates/` | Pre-filled agent files for the core roles + fullstack-developer |
+| `skills/agent-team-generator/scripts/verify-team.js` | Mechanical post-generation checks; copied into the target's `.agents/` |
+| `skills/agent-team-generator/fixtures/` | Canned interview for testing the skill itself |
 | `bin/cli.js` | The `npx` installer |
 | `.claude-plugin/` | Plugin + marketplace manifests for Claude Code's `/plugin` install path |
 | `scripts/test.js` | Smoke test (`npm test`): installer round-trip + template integrity |

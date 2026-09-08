@@ -50,6 +50,11 @@ agent-team-generator/
     agent-skeleton.md               shared section skeleton + CC/OC frontmatter + writing rules
     role-library.md                 per-role content blocks (core six + optional roles)
     documentation-convention.md     docs templates + PM docs contract
+    permission-policy.md            the five permission tiers (OC blocks + CC settings.json)
+    engineering-standard.md         twelve code rules + the stack hygiene table
+    templates/<role>.md             pre-filled per-role files (v2)
+  scripts/verify-team.js            mechanical checks, copied into the target's .agents/
+  fixtures/sample-brief.md          canned interview for the application-scenario test
 ```
 
 ## Verification (built into the skill)
@@ -77,8 +82,44 @@ non-overlapping; the model matrix names only existing agents; docs folder seeded
 6. Layout confirmed: `.agents/` = protocol + shared rules; personas live only in
    `.claude/agents/` and `.opencode/agent/`.
 
+## v3 (2026-09-08, user-confirmed)
+
+1. **Harness choice (interview Phase 0)**: Claude Code only / OpenCode only / both kept in
+   line (default; `CLAUDE.md` → `AGENTS.md` + protocol, both agent sets) / another harness
+   (neutral persona files in `.agents/agents/` + a pointer file where known).
+2. **Permission tiers** replace the single tuned policy: Sandbox (allow all) · Open (deny
+   destructive only) · Guarded (ask outside the repo) · Standard (recommended) · Strict ·
+   Custom. One source (`references/permission-policy.md`), one `{PERMISSION_POLICY_BLOCK}`
+   placeholder in every OC template, and the same tier written to `.claude/settings.json` so
+   Claude Code enforces it too. Destructive set + deploy set stay `deny` in every tier but
+   Sandbox. Coverage widened (flag-after force pushes, restore/checkout discards, branch -D,
+   stash drop/clear, chown/dd/mkfs, wget, non-npm package managers); wholesale `npx` ask
+   dropped.
+3. **Engineering standard** (`references/engineering-standard.md`): twelve language-agnostic
+   code rules embedded in protocol §2, plus a stack hygiene table (TypeScript / Python / Go /
+   Rust / other) that fills the hygiene, gates, env, unsafe-API and debug-print placeholders.
+   Templates carry no TypeScript-specific rules any more; Phase 8 greenfield gates come from
+   the same table.
+4. **Project-manager answer style** (interview 5.4): Technical / Direct with technical
+   summary (default) / Plain English. The report shape is fixed in protocol §7 (Outcome →
+   What changed → Evidence → Open questions → Next; nothing before the outcome); the preset
+   sets depth only. Mirrored in the OC PM file and one AGENTS.md line.
+5. **Interview fast path**: after Phases 0–4, one question accepts the recommended defaults
+   for the rest (never-do list and OC model pins are always asked).
+6. **Mechanical verification**: `scripts/verify-team.js` is copied into the target's
+   `.agents/` and run in Step 6 — placeholders, roster == files, OC policy identity and
+   ordering, ownership overlaps, CC/OC deny parity, gate scripts, docs seeding. The smoke
+   test exercises it against a synthetic tree with seven deliberate breakages.
+7. `steps:`/`color:` in OC frontmatter and the `"* | sh"` deny lines are flagged "verify
+   against the installed OpenCode version" rather than asserted.
+
 ## Testing plan for the skill itself
 
-Application-scenario test (reference/technique skill): dispatch a subagent with only the skill
-files and a fictional project brief + canned interview answers; review the generated file set
-against the verification checklist. Fix gaps found, re-test if changes are substantive.
+Two layers:
+
+1. **Smoke test** (`npm test`): installer round-trip, template/reference cross-references, and
+   `verify-team.js` against a synthetic generated tree (one good, seven broken variants).
+2. **Application-scenario test** (reference/technique skill): dispatch a subagent with only the
+   skill files, an empty git-initialised temp directory, and `fixtures/sample-brief.md` as the
+   canned interview. Run `scripts/verify-team.js` on the output, then review it against the
+   fixture's Expectations list. Fix gaps found, re-test if changes are substantive.

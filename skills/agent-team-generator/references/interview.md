@@ -6,6 +6,15 @@ or discoverable from an existing repo (read first, then ask only the gaps). Afte
 propose the roster (SKILL.md Step 2 — the authoritative list of what the proposal contains)
 before generating anything.
 
+**Fast path (after Phase 4).** Phases 0–4 are facts only the user has; ask them. Then offer,
+in one AskUserQuestion, to **accept the recommended defaults** for the rest and list them:
+permission tier Standard (5.3) · PM style Direct with technical summary (5.4) · Claude Code
+model matrix as in Phase 6.3 · separate backend + UI developers (7.0) · the full strict
+greenfield menu on an empty repo (8) · no add-ons, security review referenced (9). "Yes"
+skips those questions; anything else walks the phases. Two things are never defaulted: the
+Phase 5.2 never-do list (always ask) and OpenCode model pins when OpenCode was chosen in
+Phase 0 (no sensible default exists — ask Phase 6.1–6.2 even on the fast path).
+
 ## Phase 0 — Harness (always ask first, AskUserQuestion)
 
 > Which harness should the team be generated for?

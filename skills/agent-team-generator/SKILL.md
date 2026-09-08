@@ -28,6 +28,8 @@ commands, and business rules from this project.
 | `references/templates/<role>.md` | Step 4 — **pre-filled files for the core roles (+ fullstack-developer); use these first** |
 | `references/agent-skeleton.md` + `references/role-library.md` | Step 4 — custom roles only + rule meanings |
 | `references/documentation-convention.md` | Step 5 — `documentation/` |
+| `scripts/verify-team.js` | Step 6 — copy to the target's `.agents/` and run; mechanical checks |
+| `fixtures/sample-brief.md` | Testing the skill itself only — never read during a real run |
 
 **Baked defaults (never interview questions):** git/deploy policy (commit freely; push/PR only
 on the user's word or after asking; deploy/db-push never unprompted — protocol §6 verbatim);
@@ -48,8 +50,10 @@ asks what the repo can't answer.
 (AskUserQuestion for enumerable choices, free text otherwise). Do not skip Phase 0 (which
 harness: Claude Code / OpenCode / both kept in line / another), Phase 3 (risk surfaces),
 Phase 5 (git policy, permission tier, and the project-manager's answer style), or Phase 7.0
-(separate backend + UI devs vs a single fullstack-developer) — they parameterise everything. Record answers; anything the
-user defers becomes an explicit `⚠️ undecided` marker in the output, never a guess.
+(separate backend + UI devs vs a single fullstack-developer) — they parameterise everything. After Phase 4, offer the **fast path**
+(interview.md: accept the recommended defaults for the remaining phases in one question).
+Record answers; anything the user defers becomes an explicit `⚠️ undecided` marker in the
+output, never a guess.
 
 **Step 2 — Roster proposal (approval gate).** Propose the adapted roster per interview Phase 7:
 role list with one-line justification for each deviation from the core six, the file-ownership
@@ -83,10 +87,16 @@ differ. What gets written:
 **Step 5 — Documentation.** Seed `documentation/README.md` (+ `pages/`, `features/` dirs, one
 example page doc if concrete pages are known) from `documentation-convention.md`.
 
-**Step 6 — Verify (mandatory, before reporting done).**
-- Grep for unfilled placeholders: zero ALL-CAPS `{LIKE_THIS}` tokens outside fenced output
-  templates. Legitimate braces remain: `{var}` i18n syntax, lowercase tokens inside Output
-  Format templates the roles copy, and `{ROLE}` in the protocol's generic handoff rule.
+**Step 6 — Verify (mandatory, before reporting done).** First the mechanical pass: copy
+`scripts/verify-team.js` from this skill to the target's `.agents/verify-team.js` (the project
+keeps it — re-run whenever the roster or a convention changes) and run
+`node .agents/verify-team.js` from the target root. Paste its output. Fix every `FAIL` and
+re-run until clean; warnings go into the hand-over. It checks placeholders, roster == files,
+per-file shape, OC mode/model/policy identity and ordering, builder ownership overlaps,
+CC settings parity, gate scripts, and docs seeding. Then the checks below that need judgment:
+- Placeholder scan result read, not assumed: legitimate braces are `{var}` i18n syntax,
+  lowercase tokens inside Output Format templates the roles copy, and `{ROLE}` in the
+  protocol's generic handoff rule — anything else is unfilled.
 - AGENTS.md roster table == files on disk in every generated agent directory; with Both,
   CC roster == OC roster minus PM. Only the directories the Phase 0 choice calls for exist.
 - Every agent file has all of **its template's** sections (custom roles: all skeleton sections)
