@@ -22,6 +22,7 @@ commands, and business rules from this project.
 | `references/interview.md` | Step 1 — question bank, phased |
 | `references/permission-policy.md` | Step 1 (Phase 5.3) and Step 4 — the bash-permission tiers, OC blocks, CC settings |
 | `references/fable-playbook.md` | Step 3 — the process bar to embed everywhere |
+| `references/engineering-standard.md` | Step 3 (protocol §2) and Step 4 — the code bar, plus the stack hygiene table that fills `{LANGUAGE_HYGIENE_RULE}`, `{GREENFIELD_GATES}`, `{ENV_CONVENTION}`, `{UNSAFE_RENDER_APIS}`, `{DEBUG_PRINT}` |
 | `references/protocol-template.md` | Step 3 — `.agents/rules/claude-agent-protocol.md` |
 | `references/agents-md-template.md` | Step 3 — `AGENTS.md` + `CLAUDE.md` |
 | `references/templates/<role>.md` | Step 4 — **pre-filled files for the core roles (+ fullstack-developer); use these first** |
@@ -61,7 +62,8 @@ explicit approval before writing any file.**
 **Step 3 — Foundation files.** Generate in this order, filling every placeholder from the
 interview:
 1. `.agents/rules/claude-agent-protocol.md` from `protocol-template.md`, with the Fable playbook
-   embedded and tuned to this project's risk surfaces. PM-as-main-session is §1.
+   and the engineering standard embedded in §2 and tuned to this project's risk surfaces and
+   stack (hygiene table row). PM-as-main-session is §1.
 2. `AGENTS.md` from `agents-md-template.md`; then `CLAUDE.md` (`@AGENTS.md` +
    `@.agents/rules/claude-agent-protocol.md`).
 
@@ -136,6 +138,7 @@ committing is fine, pushing waits for the user).
 |---|---|
 | Generating generic agents ("write clean code") | Every rule names real paths/commands/rules from the interview |
 | Copying another project's facts (its DB platform, money-module path, i18n layout) into a project without them | Role blocks are parameterised — include only what THIS stack has |
+| Leaving TypeScript hygiene (`any`, `console.log`, `.env.example`) in a Python/Go/Rust project | Fill `{LANGUAGE_HYGIENE_RULE}` and friends from the stack hygiene table in `engineering-standard.md` |
 | Creating a `.claude/agents/project-manager.md` | PM is the main session (protocol §1); only OC gets a PM file (`mode: primary`) |
 | Skipping the roster approval gate | Ownership disputes surface after generation — get approval first |
 | Filling unknown business rules with plausible numbers | `⚠️ undecided — ask before implementing` markers, never guesses |

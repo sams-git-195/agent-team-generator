@@ -88,6 +88,27 @@ compensates:
 - **The task is not done when the code is written.** It is done when the self-QA gate (§5)
   passes. Budget time for it.
 
+**Engineering standard (every language, every role that writes code):**
+
+1. Smallest correct change; no speculative abstraction; extend the existing pattern first.
+2. Validate at the boundary ({BOUNDARIES e.g. request, env, third-party response}); trust
+   nothing that crossed one; do not re-validate inside.
+3. Errors fail loudly with context — never swallowed, no silent defaults; retries only for
+   idempotent operations, bounded.
+4. Risk-surface logic ({RISK_SURFACES}) is pure, named, and tested — failing test first,
+   narrowest test then the full suite, both outputs pasted.
+5. {LANGUAGE_HYGIENE_RULE}; every escape hatch carries a comment saying why it is safe here.
+6. Names say intent; functions do one thing; no dead or commented-out code; no `TODO` without
+   context.
+7. No dependency added without flagging it first; versions pinned.
+8. Secrets never in code, client bundles, or logs — {ENV_CONVENTION}.
+9. Structured logging at boundaries and failures; no {DEBUG_PRINT} shipped; no secrets or
+   personal data logged.
+10. Mutations safe to retry: constraints over application checks; no read-modify-write
+    without a transaction or lock.
+11. One logical change per commit; message says why; only files touched for the task.
+12. Done = gates run with output pasted + full diff read as a hostile reviewer + verdict line.
+
 **Red flags — stop and restart the step:** "too small to test" · "I remember this file" ·
 "the spec says so" (verify in code) · "I'll fix this unrelated thing too" · "it probably
 passes" · "the rule is obviously…" · "third retry will work".

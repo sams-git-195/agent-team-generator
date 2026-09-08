@@ -91,6 +91,20 @@ check(policy.includes('"wget *": ask') && policy.includes('"pip install*": ask')
 check(!/"npx \*": ask/.test(policy), 'permission-policy: no wholesale npx ask (collides with add-on installs and npx gates)');
 check(/"allow": \["Bash"\]/.test(policy) && /Bash\(git push \*\)/.test(policy), 'permission-policy: Claude Code settings.json translation present');
 
+// Templates are stack-agnostic: language-specific hygiene comes from engineering-standard.md.
+const standard = fs.readFileSync(path.join(skillDir, 'references', 'engineering-standard.md'), 'utf8');
+for (const stack of ['TypeScript / JS', 'Python', 'Go', 'Rust', 'Other']) {
+  check(standard.includes(`| **${stack}**`), `engineering-standard: stack hygiene row for ${stack}`);
+}
+for (const file of ['backend-developer.md', 'ui-ux-developer.md', 'fullstack-developer.md']) {
+  const text = fs.readFileSync(path.join(templatesDir, file), 'utf8');
+  check(text.includes('{LANGUAGE_HYGIENE_RULE'), `${file}: language hygiene is a placeholder`);
+  check(!/\*\*Zero `any` types/.test(text), `${file}: no hard-coded TypeScript rule`);
+  check(/Engineering Standard/.test(text), `${file}: points at the Engineering Standard`);
+}
+const protocolTpl = fs.readFileSync(path.join(skillDir, 'references', 'protocol-template.md'), 'utf8');
+check(/Engineering standard \(every language/.test(protocolTpl), 'protocol template embeds the engineering standard in §2');
+
 const pm = fs.readFileSync(path.join(templatesDir, 'project-manager.md'), 'utf8');
 check(/mode: primary/.test(pm), 'project-manager is mode: primary');
 check(!/^model:/m.test(pm.split('## Body')[0].replace(/\{[^}]*\}/g, '')), 'project-manager has no model pin');

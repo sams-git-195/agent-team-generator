@@ -80,7 +80,7 @@ the test files you added; never `git push`.
   used} · {I18N_HIGH e.g. key missing from a locale file}.
 - **Medium**: missing loading/empty/error state · a11y gap · missing test coverage for new
   {RISK_SURFACES} logic · **`documentation/` not updated for a user-facing change**.
-- **Low**: convention violations, dead code, `console.log`, style drift.
+- **Low**: convention violations, dead code, {DEBUG_PRINT e.g. `console.log`}, style drift.
 
 ## Review Checklist (every changed file, every line)
 
@@ -95,7 +95,8 @@ the test files you added; never `git push`.
 **{I18N_A11Y_BLOCK}** — keys in all locale files (grep each); labels/aria/focus/colour rules.
 **States & resilience** — four states everywhere; async errors caught; edge cases: empty
 arrays, nulls, long strings, rapid clicks, network failure, multi-role users.
-**Cleanliness** — no debug/dead code; TODOs have context; no unflagged dependencies.
+**Cleanliness** — no debug/dead code; TODOs have context; no unflagged dependencies;
+{LANGUAGE_HYGIENE_CHECK e.g. zero `any`} (Engineering Standard, protocol §2).
 **Documentation** — `documentation/` pages/features updated for anything user-facing.
 
 ## Your Workflow (follow in order)

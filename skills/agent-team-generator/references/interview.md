@@ -50,6 +50,11 @@ Ask as a grid; every answer parameterises ownership maps and gotchas.
 8. Dev commands: dev / build / lint / typecheck / test — exact npm scripts (these become the
    quality gates verbatim).
 9. Mobile/native or other platforms in scope?
+10. Language(s) and hygiene: pick the row(s) of the stack hygiene table in
+    `engineering-standard.md` (TypeScript / Python / Go / Rust / other — "other" asks the five
+    questions in that row). Also: package managers in use (drive the install rows of the
+    permission policy), the secret file agents must never edit (`{SECRET_FILES}`), and the
+    breakpoints or device classes to verify UI at (`{BREAKPOINTS}`; web default 375/768/1440).
 
 ## Phase 3 — Risk surfaces
 
@@ -139,15 +144,16 @@ When the target repo has no code yet, recommend — and scaffold only after appr
 near-impossible to retrofit, so present strict as the default and loosening as the deviation
 that needs a reason.
 
-1. **Quality-gates setup (strict by default)**:
-   - TypeScript `strict: true`, plus `noUncheckedIndexedAccess`, `noFallthroughCasesInSwitch`,
-     `noUnusedLocals`/`noUnusedParameters`; a real typecheck script (`tsc --noEmit`).
-   - Type-aware ESLint with `@typescript-eslint/no-explicit-any: "error"` (matching the agents'
-     zero-`any` rule mechanically), no-floating-promises, and a **zero-tolerance policy**: lint
-     runs with `--max-warnings 0` — there is no "warnings are fine" tier, a gate either passes
-     clean or fails.
-   - A formatter (Prettier or equivalent) with a `format:check` script so style never reaches
-     review.
+1. **Quality-gates setup (strict by default)** — take this stack's row from the stack hygiene
+   table in `engineering-standard.md` (`{GREENFIELD_GATES}`): typechecker, linter, formatter
+   check, and test runner, each as its own script. The rules that hold for every stack:
+   - The typechecker runs in its strictest mode (TypeScript: `strict: true` plus
+     `noUncheckedIndexedAccess`, `noUnusedLocals`/`noUnusedParameters`; Python: `mypy --strict`
+     or pyright strict; Rust: `clippy -D warnings`; Go: `vet` + `staticcheck`).
+   - The linter bans the language's escape hatch mechanically (matching the agents'
+     `{LANGUAGE_HYGIENE_RULE}`) and runs with a **zero-tolerance policy** — no "warnings are
+     fine" tier; a gate either passes clean or fails (`--max-warnings 0` or equivalent).
+   - A formatter with a check script so style never reaches review.
    - Test-runner wiring **with one real passing test committed** — an empty test setup lets
      every later "tests pass" claim be vacuously true; the agents' evidence discipline needs a
      gate that can actually fail.
@@ -158,10 +164,12 @@ that needs a reason.
    recommend enabling branch protection (required checks + no force-push) once the repo is on
    GitHub — that's a repo setting the user must click, not a file; put it in the hand-over
    summary as a reminder.
-3. **Env hygiene**: `.env.example` documenting every env location, `.env` git-ignored, and the
-   no-secrets-in-client-shipped-vars rule wired into AGENTS.md gotchas.
+3. **Env hygiene**: the stack's `{ENV_CONVENTION}` — an example env file documenting every
+   variable, the real one git-ignored, and the no-secrets-in-client-shipped-vars rule wired
+   into AGENTS.md gotchas.
 4. **Further production hardening (optional menu items, recommend but don't push)**:
-   - Node version pinning: `.nvmrc` + `engines` in package.json, and the same version in CI.
+   - Toolchain version pinning (`.nvmrc` + `engines`, `.python-version`, `rust-toolchain.toml`,
+     `go.mod` toolchain line) with the same version in CI.
    - Automated dependency updates: Dependabot config (or Renovate) with grouped minor updates.
    - Coverage floor on risk surfaces only: a coverage threshold scoped to the risk-surface
      modules from Phase 3 (e.g. the money module), not a blanket repo-wide percentage —
