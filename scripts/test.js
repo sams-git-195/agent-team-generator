@@ -90,6 +90,13 @@ check(missingDestructive.length === 0, `permission-policy: destructive set compl
 check(policy.includes('"wget *": ask') && policy.includes('"pip install*": ask') && policy.includes('"bun add*": ask'), 'permission-policy: install/network coverage beyond npm');
 check(!/"npx \*": ask/.test(policy), 'permission-policy: no wholesale npx ask (collides with add-on installs and npx gates)');
 check(/"allow": \["Bash"\]/.test(policy) && /Bash\(git push \*\)/.test(policy), 'permission-policy: Claude Code settings.json translation present');
+{
+  // CC: a trailing " *" matches the bare command only when it is the rule's sole wildcard, so a
+  // two-wildcard rule ending in " *" misses e.g. `git push origin main --force`.
+  const twoStarTrailingSpace = [...policy.matchAll(/Bash\(([^)]*)\)/g)]
+    .map((m) => m[1]).filter((p) => (p.match(/\*/g) || []).length >= 2 && / \*$/.test(p));
+  check(twoStarTrailingSpace.length === 0, `permission-policy: no two-wildcard CC rule ends in " *"${twoStarTrailingSpace.length ? ` (${twoStarTrailingSpace.join(', ')})` : ''}`);
+}
 
 // Templates are stack-agnostic: language-specific hygiene comes from engineering-standard.md.
 const standard = fs.readFileSync(path.join(skillDir, 'references', 'engineering-standard.md'), 'utf8');

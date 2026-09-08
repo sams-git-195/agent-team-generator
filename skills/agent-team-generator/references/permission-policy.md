@@ -229,6 +229,10 @@ tell the user `settings.local.json` is where personal loosening goes.
 
 Translation rules OC → CC:
 - `"git push*": ask` → `"Bash(git push *)"` in `ask`. Same for every prefix rule.
+- A rule with **two** wildcards must end in `*` with no space before it:
+  `Bash(git push * --force*)`. CC matches the bare form of a trailing ` *` only when it is the
+  rule's sole wildcard, so the same rule written with a space before the last star would miss
+  `git push origin main --force`. The no-space form also catches `--force-with-lease`.
 - `"* | sh": deny` has no CC equivalent — CC splits on `|` and checks each subcommand; use
   `"Bash(sh *)"`/`"Bash(bash *)"` at the same level as the OC `sh -c` lines (ask in Standard,
   deny in Strict).
@@ -257,8 +261,8 @@ Translation rules OC → CC:
       "Bash(curl *)", "Bash(wget *)"
     ],
     "deny": [
-      "Bash(git push --force *)", "Bash(git push -f *)", "Bash(git push * --force *)",
-      "Bash(git push * -f *)", "Bash(git reset --hard *)", "Bash(git clean -f *)",
+      "Bash(git push --force *)", "Bash(git push -f *)", "Bash(git push * --force*)",
+      "Bash(git push * -f*)", "Bash(git reset --hard *)", "Bash(git clean -f *)",
       "Bash(git checkout -- *)", "Bash(git branch -D *)", "Bash(git stash drop *)",
       "Bash(git stash clear *)", "Bash(git config --global *)", "Bash(sudo *)",
       "Bash(chmod *)", "Bash(chown *)", "Bash(dd *)", "Bash(mkfs *)", "Bash(npm publish *)"
