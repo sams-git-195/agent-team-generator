@@ -29,11 +29,20 @@ changes or a trap is discovered).
 | project-manager (MAIN session, not a subagent) | Plans, task breakdown, dispatch, `documentation/**`, `AGENTS.md`, roadmaps | all agents |
 {ROSTER_ROWS — one per subagent: | name | owned paths/responsibilities | next role |}
 
-One agent edits a shared file at a time — the project-manager sequences tasks so owners never
-collide. Claude Code: the main session IS the project-manager (see
-`.agents/rules/claude-agent-protocol.md`); the other agents live in `.claude/agents/*.md`.
-OpenCode: same team in `.opencode/agent/*.md`, project-manager is the primary agent. When a
-convention changes, update both sets together.
+**Process protocol:** `.agents/rules/claude-agent-protocol.md` — every session reads it before
+its first task. **Reports to the user:** {PM_STYLE} depth, protocol §7 shape (outcome first,
+structured, no preamble). Claude Code auto-loads it via `CLAUDE.md`; every other harness reads it
+explicitly. One agent edits a shared file at a time — the project-manager sequences tasks so
+owners never collide.
+{HARNESS_PARAGRAPH — per interview Phase 0:
+ Both: "Claude Code: the main session IS the project-manager; the other agents live in
+ `.claude/agents/*.md`, bash policy in `.claude/settings.json`. OpenCode: same team in
+ `.opencode/agent/*.md`, project-manager is the primary agent. When a convention changes,
+ update both sets together — same roster, same rules, same policy."
+ Claude Code only: the first sentence of the above.
+ OpenCode only: the second sentence of the above.
+ Other: "Persona files live in `.agents/agents/*.md` (harness-neutral). Adopt the matching
+ persona before any task; dispatch mechanics for {HARNESS_NAME}: ⚠️ verify."}
 
 ## Dev commands
 - `{DEV_COMMAND}` — {what it does, port, quirks}

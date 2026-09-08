@@ -1,6 +1,6 @@
 {
   "name": "agent-team-generator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Claude Code skill that scaffolds a disciplined AI agent team for a project: interview, AGENTS.md, CLAUDE.md, specialist subagents for Claude Code and OpenCode, an agent protocol, and a plain-English documentation system.",
   "bin": {
     "agent-team-generator": "bin/cli.js"

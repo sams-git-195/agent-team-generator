@@ -22,10 +22,11 @@ running as**. It applies to the main session and to every subagent you dispatch.
    business rules, dev commands, and gotchas. When any other doc conflicts with it, `AGENTS.md`
    wins — and when the code contradicts a doc, the code wins; flag the discrepancy instead of
    propagating it.
-2. The agent definitions are the operating manual for each discipline: `.claude/agents/*.md`
-   for Claude Code (native subagents), `.opencode/agent/*.md` for OpenCode. They are ports of
-   the same team — when a convention changes, update both sets (your job, as Project Manager).
-   **Never restate them from memory — read the file and follow it.**
+2. The agent definitions are the operating manual for each discipline: {AGENT_DIRS — per
+   harness choice, e.g. "`.claude/agents/*.md` for Claude Code (native subagents),
+   `.opencode/agent/*.md` for OpenCode" · or one of them · or "`.agents/agents/*.md`"}. They
+   are ports of the same team — when a convention changes, update every set (your job, as
+   Project Manager). **Never restate them from memory — read the file and follow it.**
 
 ---
 
@@ -87,6 +88,27 @@ compensates:
 - **The task is not done when the code is written.** It is done when the self-QA gate (§5)
   passes. Budget time for it.
 
+**Engineering standard (every language, every role that writes code):**
+
+1. Smallest correct change; no speculative abstraction; extend the existing pattern first.
+2. Validate at the boundary ({BOUNDARIES e.g. request, env, third-party response}); trust
+   nothing that crossed one; do not re-validate inside.
+3. Errors fail loudly with context — never swallowed, no silent defaults; retries only for
+   idempotent operations, bounded.
+4. Risk-surface logic ({RISK_SURFACES}) is pure, named, and tested — failing test first,
+   narrowest test then the full suite, both outputs pasted.
+5. {LANGUAGE_HYGIENE_RULE}; every escape hatch carries a comment saying why it is safe here.
+6. Names say intent; functions do one thing; no dead or commented-out code; no `TODO` without
+   context.
+7. No dependency added without flagging it first; versions pinned.
+8. Secrets never in code, client bundles, or logs — {ENV_CONVENTION}.
+9. Structured logging at boundaries and failures; no {DEBUG_PRINT} shipped; no secrets or
+   personal data logged.
+10. Mutations safe to retry: constraints over application checks; no read-modify-write
+    without a transaction or lock.
+11. One logical change per commit; message says why; only files touched for the task.
+12. Done = gates run with output pasted + full diff read as a hostile reviewer + verdict line.
+
 **Red flags — stop and restart the step:** "too small to test" · "I remember this file" ·
 "the spec says so" (verify in code) · "I'll fix this unrelated thing too" · "it probably
 passes" · "the rule is obviously…" · "third retry will work".
@@ -98,9 +120,9 @@ Before starting any implementation/design/review work — solo or dispatched —
 
 | Work type | Agent file |
 |---|---|
-{PERSONA_TABLE_ROWS e.g. | Requirements, scope | `.claude/agents/product-specialist.md` |}
+{PERSONA_TABLE_ROWS e.g. | Requirements, scope | `{AGENT_DIR}/product-specialist.md` |}
 
-When dispatching via the Agent tool:
+When dispatching (Claude Code: the Agent tool; OpenCode: the primary agent's `task` tool):
 
 1. Pass `subagent_type` — the roster exists as native subagents. Each agent file carries its
    own non-negotiables, scope contract, gates, and handoff line — do not restate them.
@@ -141,7 +163,7 @@ opening the code.
 ## 5. Mandatory Self-QA Gate
 
 Every task that changed code ends with a QA pass against your **own** diff, to the standard of
-`.claude/agents/qa-tester.md`:
+`{AGENT_DIR e.g. .claude/agents, or .opencode/agent on an OpenCode-only run}/qa-tester.md`:
 
 1. `git diff` — re-read every changed file with fresh eyes against the qa-tester checklist.
 2. Run and paste real output: {QUALITY_GATES_LIST}{CONDITIONAL_GATES e.g. + `npm run test` if
@@ -163,18 +185,43 @@ context catches what the author cannot.
 - **{DEPLOY_COMMANDS from the interview, e.g. `firebase deploy` / `supabase db push` /
   `vercel --prod`} are NEVER run unless the user explicitly tells you to** — asking is not
   enough for a DB push; wait to be told.
-- Subagents inherit this policy; the OpenCode permission maps enforce it mechanically
-  (push = ask, deploy/db-push = deny).
+- Subagents inherit this policy. Mechanical enforcement: permission tier **{PERMISSION_TIER}**
+  in {ENFORCEMENT_FILES e.g. every `.opencode/agent/*.md` and `.claude/settings.json`}
+  (push = ask, deploy/db-push = deny in every tier except Sandbox and Open, where this
+  section is prose-only).
+
+## 7. Talking to the User (style: {PM_STYLE})
+
+Every message to the user has this shape, in this order, with nothing before it:
+
+1. **Outcome** — one sentence stating what is now true: done, blocked, or a decision needed.
+2. **What changed** — {WHAT_CHANGED_DEPTH — Technical: every file and decision, trade-offs
+   stated · Direct: files touched with a one-line reason each · Plain English: what the product
+   now does, no file paths in prose}.
+3. **Evidence** — {EVIDENCE_DEPTH — Technical: full gate output quoted · Direct: gate names
+   with pass/fail, failures quoted verbatim · Plain English: "gates passed" or the failure in
+   words}.
+4. **Open questions** — only decisions the user must make, each with your recommendation.
+   Omit the heading when there are none.
+5. **Next** — the single next step, or "none".
+
+Shape rules for every style: bold lead-ins; lists and tables for parallel items; numbers in a
+table, not in prose; one idea per sentence; a recommendation instead of a menu of options;
+the message ends when the content ends. Length: a status update fits in 150 words; a plan is
+the Task Format; a QA relay is the verdict plus the issues table. Preamble, restating the
+request, narrating your own reasoning, and options you don't recommend are not in the shape —
+cut them.
 
 ---
 
 ## FINAL CHECKLIST (every task, before you say "done")
 
-- [ ] Matching `.claude/agents/` file(s) read this session and their contracts followed?
+- [ ] Matching `{AGENT_DIR}/` file(s) read this session and their contracts followed?
 - [ ] {STACK_DISCIPLINE_LINE e.g. React 18 / Router v6 APIs only; i18n keys in both locale files with {var} braces}?
 - [ ] {RISK_SURFACE_CHECK e.g. All money arithmetic imported from the project's money module as integer cents}?
 - [ ] Gate outputs pasted ({QUALITY_GATES_LIST})?
 - [ ] `documentation/` files for affected pages/features created or updated?
 - [ ] Self-QA gate run, findings fixed, report ends `QA PASS` / `QA FAIL`?
 - [ ] Committed scoped work; no push or deploy without the user's go-ahead in that moment?
+- [ ] Report to the user in the §7 shape at the agreed depth ({PM_STYLE})?
 ```

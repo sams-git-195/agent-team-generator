@@ -29,8 +29,6 @@ name: {same-name}
 description: {same description}
 mode: {primary for project-manager, subagent for everyone else}
 color: "{distinct hex per role}"
-steps: {20 for product, 35 for architect/qa, 50 for developers; the PM (primary) has NO steps
-  cap — omit the line}
 temperature: 0.1
 model: {OC_MODEL from interview, asked PER AGENT. The project-manager (primary) gets NO model
   line — it uses OpenCode's standard model selector.}
@@ -40,41 +38,39 @@ permission:
   read: allow
   edit:
     "*": deny
-    {one allow line per owned glob — this is the scope contract, machine-enforced}
-  bash:
-    # Allow-by-default with an ask/deny exception list — agents work freely, risky commands
-    # prompt, destructive/deploy commands are impossible.
-    "*": allow
-    "git push*": ask          # pushes and PR creation prompt the user in-flow
-    "gh pr create*": ask
-    "rm *": ask
-    "npm install*": ask
-    "npx *": ask
-    "pnpm add*": ask
-    "yarn add*": ask
-    "curl *": ask
-    "git push --force*": deny # destructive git can never run
-    "git push -f*": deny
-    "git reset --hard*": deny
-    "git clean -fd*": deny
-    "sudo *": deny
-    "chmod *": deny
-    "* | sh": deny            # no piping downloads into a shell
-    "* | bash": deny
-    {DEPLOY_DENY_LINES — one deny per command in the deploy-deny set: the UNION of the
-     stack's deploy channels (interview Phase 2.6) and the Phase 5 never-do list, e.g.
-     "supabase db push*": deny · "firebase deploy*": deny · "netlify deploy*": deny.}
-    {POLICY_ADJUSTMENT_LINES — extra ask/deny lines from the Phase 5.3 permission-policy answer,
-     e.g. "npm publish*": deny · "terraform apply*": ask; delete if none.}
+    {one allow line per owned glob — this is the scope contract, machine-enforced. A file two
+     builders may both edit (PM-sequenced) carries a trailing `# shared` comment on its allow
+     line in BOTH files; the verifier treats any other builder overlap as a failure}
+  {PERMISSION_POLICY_BLOCK — the team's chosen tier from `permission-policy.md` (starts with
+   `bash:`; Guarded/Strict add `external_directory: ask`), byte-identical in every OC file, with
+   the deploy set and Phase 5.3 adjustments resolved}
   todowrite: allow
 ---
 ```
+
+No `steps:` cap on any agent. `color:` is not in OpenCode's documented markdown-agent field list —
+keep it (harmless if ignored) but mark "verify against installed OpenCode version" in the hand-over.
 
 **Property-based dangers**: some risks are a property of the invocation, not a command prefix —
 e.g. a payments CLI in live mode (`--live` anywhere, a live API key argument, or a session
 logged into a live account with no flag at all). Globs cannot capture these reliably. For any
 such tool, prefer a wholesale `"tool *": ask` line over trying to enumerate dangerous shapes,
 optionally plus deny lines for the obvious patterns.
+
+## Other harnesses (interview Phase 0 = "another harness")
+
+Write each role's **body only** (no frontmatter) to `.agents/agents/<role>.md`, project-manager
+included; the scope contract stays as prose. Most harnesses read `AGENTS.md` natively; add a
+pointer file only where the harness has its own instruction file. Verify each row against the
+harness's current docs before writing — mark the file `⚠️ verify` if unsure.
+
+| Harness | Reads `AGENTS.md`? | Pointer file to write |
+|---|---|---|
+| Codex CLI | yes | none |
+| Gemini CLI | via import | `GEMINI.md` containing `@AGENTS.md` and `@.agents/rules/claude-agent-protocol.md` |
+| Cursor | yes | `.cursor/rules/agent-protocol.mdc` (`alwaysApply: true`) — two lines: read `AGENTS.md`, then the protocol, before any task |
+| GitHub Copilot | yes | `.github/copilot-instructions.md` — the same two lines |
+| unknown | ask | the same two lines in whatever file the user names |
 
 ## Section order (the body, both tools)
 
@@ -127,7 +123,7 @@ optionally plus deny lines for the obvious patterns.
   beat open descriptions.
 - Subagents can't reach the user: non-PM agents put questions under "Questions for the user"
   in their report; the PM relays.
-- Keep each agent file roughly 100–130 lines of **body** (the OC frontmatter permission map is
+- Keep each agent file roughly 80–130 lines of **body** (the OC frontmatter permission map is
   excluded from the budget). Longer = diluted; the facts live in AGENTS.md.
 - The two tools' versions are the SAME persona: same name, rules, workflow, output format.
   Only frontmatter and enforcement mechanics differ (CC = prose contract, OC = permission map —

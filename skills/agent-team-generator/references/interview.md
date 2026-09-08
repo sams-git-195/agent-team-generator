@@ -6,6 +6,30 @@ or discoverable from an existing repo (read first, then ask only the gaps). Afte
 propose the roster (SKILL.md Step 2 — the authoritative list of what the proposal contains)
 before generating anything.
 
+**Fast path (after Phase 4).** Phases 0–4 are facts only the user has; ask them. Then offer,
+in one AskUserQuestion, to **accept the recommended defaults** for the rest and list them:
+permission tier Standard (5.3) · PM style Direct with technical summary (5.4) · Claude Code
+model matrix as in Phase 6.3 · separate backend + UI developers (7.0) · the full strict
+greenfield menu on an empty repo (8) · no add-ons, security review referenced (9). "Yes"
+skips those questions; anything else walks the phases. Two things are never defaulted: the
+Phase 5.2 never-do list (always ask) and OpenCode model pins when OpenCode was chosen in
+Phase 0 (no sensible default exists — ask Phase 6.1–6.2 even on the fast path).
+
+## Phase 0 — Harness (always ask first, AskUserQuestion)
+
+> Which harness should the team be generated for?
+> - **Both Claude Code and OpenCode, kept in line** (recommended — `CLAUDE.md` points at
+>   `AGENTS.md` + the protocol; both agent sets are generated and must be updated together)
+> - **Claude Code only**
+> - **OpenCode only**
+> - **Another harness** (name it — Codex, Gemini CLI, Cursor, Copilot, …)
+
+Auto-detect first: `.claude/` or `CLAUDE.md` present → Claude Code in use; `.opencode/` →
+OpenCode in use; both → propose Both. Still ask — the answer decides which files are written
+(SKILL.md Step 4 table). "Another harness" gets harness-neutral persona files under
+`.agents/agents/` plus a pointer file where one is known (`agent-skeleton.md` §Other
+harnesses); subagent dispatch mechanics for that harness are marked `⚠️ verify`.
+
 ## Phase 1 — Product
 
 1. Project name and one-line pitch. What does it do, for whom?
@@ -20,8 +44,9 @@ before generating anything.
 
 Ask as a grid; every answer parameterises ownership maps and gotchas.
 
-1. Frontend: framework + version (React 18? Vue? none?), build tool, styling (Tailwind version
-   matters: v4 = CSS-first, no config file), component library, and — if decided — brand
+1. Frontend: framework + version (React 18? Vue? none?), build tool, **routing library** (or
+   "undecided" — never assume one from the route list), styling (Tailwind version matters: v4 =
+   CSS-first, no config file), component library, and — if decided — brand
    palette + fonts (feeds AGENTS.md §UI; "undecided" gets a ⚠️ marker, don't invent one).
 2. Backend/data: Supabase/Firebase/custom API/none; database; where server logic lives
    (Edge Functions, API routes, none).
@@ -32,9 +57,16 @@ Ask as a grid; every answer parameterises ownership maps and gotchas.
 6. Hosting/deploy: platform + how deploys are triggered, and which commands agents must never run
    unprompted.
 7. Testing: runner, what coverage exists, whether component/E2E testing is available.
-8. Dev commands: dev / build / lint / typecheck / test — exact npm scripts (these become the
-   quality gates verbatim).
+8. Dev commands: dev / build / lint / typecheck / test — exact scripts (these become the
+   quality gates verbatim), **and the directory each runs from**. A monorepo (`web/` + `api/`)
+   needs root-level proxies (`package.json` workspace scripts, a `Makefile`) so one command
+   per gate works from the root; propose them if absent.
 9. Mobile/native or other platforms in scope?
+10. Language(s) and hygiene: pick the row(s) of the stack hygiene table in
+    `engineering-standard.md` (TypeScript / Python / Go / Rust / other — "other" asks the five
+    questions in that row). Also: package managers in use (drive the install rows of the
+    permission policy), the secret file agents must never edit (`{SECRET_FILES}`), and the
+    breakpoints or device classes to verify UI at (`{BREAKPOINTS}`; web default 375/768/1440).
 
 ## Phase 3 — Risk surfaces
 
@@ -55,33 +87,45 @@ user can't answer yet goes in AGENTS.md as an explicit `⚠️ undecided` marker
 1. Specific rules and recommendations, verbatim (they go into AGENTS.md gotchas and, where
    behavioural, into the protocol).
 2. Anything agents must NEVER do in this project — every deploy/DB-push/dangerous command named
-   here goes verbatim into the protocol §6 and the OpenCode `deny` lists.
-3. **Agent bash-permission policy (AskUserQuestion — always ask).** Present the recommended
-   default and let the user adopt or adjust it. The shape is fixed (allow-by-default with
-   ask/deny exceptions); the exception lists are theirs to tune. Recommended default:
-   - `"*": allow` — agents run builds, tests, gates, grep, and `git commit` freely.
-   - **deny** (can never run): this stack's deploy/DB-push commands · `git push --force`/`-f` ·
-     `git reset --hard` · `git clean -fd` · `sudo` · `chmod` · piping downloads into a shell.
-   - **ask** (prompts in-flow): `git push` · `gh pr create` (PR creation) · `rm` ·
-     package installs (`npm install`, `npx`, `pnpm add`, `yarn add`) · `curl`.
-   Rationale to present: irreversible-destructive or environment-changing → deny;
-   recoverable-destructive or outward-facing → ask; everything else → allow.
-   Offer: **recommended default** / **stricter** (installs + `curl` → deny; add asks for
-   `docker *`, `gh *` wholesale) / **looser** (ask list shrinks to `git push` + `gh pr create`
-   only) / **custom** (walk the deny and ask lists category by category).
-   Then RECOMMEND stack-specific additions the user may not have thought of — only ones that
-   exist in this stack: migration deploys (`prisma migrate deploy`, `drizzle-kit push`) ·
-   infra (`terraform apply`, `pulumi up`) · publishing (`npm publish`) · container destruction
-   (`docker system prune`, `docker volume rm`) · CLIs with live/production modes (Stripe,
-   Shopify… — prefer a wholesale `"tool *": ask` per agent-skeleton.md's property-based-danger
-   note) · Windows-native deletes (`Remove-Item`, `del`) when the team runs PowerShell.
-   The answer becomes `{POLICY_ADJUSTMENT_LINES}` and applies to EVERY OC agent identically —
-   one policy for the whole team; per-role bash variation is not offered.
+   here goes verbatim into the protocol §6 and the `deny` lists. Items that are property-based
+   (a CLI's live mode) or environment-targeted (a migration whose target is `DATABASE_URL`)
+   cannot be a deny prefix — handle them per `permission-policy.md` §Property-based dangers
+   (wholesale ask + obvious-shape denies; ask instead of deny when a local form is routine).
+3. **Agent bash-permission policy (AskUserQuestion — always ask).** Read
+   `permission-policy.md` first. Present its tier table (Sandbox / Open / Guarded / Standard /
+   Strict / Custom) with the one-line "recommend when" for each, and **recommend Standard**.
+   Present the rationale: irreversible or environment-changing → deny; recoverable-destructive
+   or outward-facing → ask; everything else → allow. Every tier except Sandbox keeps the
+   destructive set and this stack's deploy set as `deny`; if the user picks Sandbox, say in
+   those words that there is no mechanical safety net and the git/deploy policy becomes
+   prose-only. Custom starts from Standard and walks the ask and deny lists category by
+   category.
+   Then RECOMMEND the stack-specific additions listed in `permission-policy.md` — only ones
+   that exist in this stack. Accepted additions become `{POLICY_ADJUSTMENT_ASK_LINES}` /
+   `{POLICY_ADJUSTMENT_DENY_LINES}`, each emitted in its own band.
+   The chosen tier applies to EVERY agent identically, in every OC file and in
+   `.claude/settings.json` — one policy for the whole team; per-role bash variation is not
+   offered.
+
+4. **Project-manager answer style (AskUserQuestion — always ask).** How should the
+   project-manager (the main session) report to the user? The report *shape* is fixed
+   (protocol §7: Outcome → What changed → Evidence → Open questions → Next, structured,
+   nothing before the outcome); the preset sets only the depth of the middle two parts:
+   - **Technical** — every file and decision, trade-offs stated; full gate output quoted.
+     For an engineer who will review the diff.
+   - **Direct with technical summary** (recommended default) — files touched with a one-line
+     reason each; gate names with pass/fail, failures quoted. For an engineer who trusts
+     the process.
+   - **Plain English** — product-level description, no file paths in prose; "gates passed" or
+     the failure in words. For a founder or non-engineer.
+   The answer becomes `{PM_STYLE}` in protocol §7, the OC project-manager file, and one line
+   in AGENTS.md.
 
 Do NOT ask about git policy — it is fixed (protocol template §6): commit freely; push/PR only
 when the user says so or after asking; deploys and DB pushes never without being told. The
-Phase 5.3 policy implements this mechanically (`git push`/`gh pr create` = ask, deploys =
-deny); the policy question tunes the exception lists, never the git policy itself.
+Phase 5.3 tier implements this mechanically (`git push`/`gh pr create` = ask, deploys = deny)
+in every tier except Sandbox and Open, where it is prose-only; the tier question tunes the
+enforcement, never the git policy itself.
 
 ## Phase 6 — OpenCode models
 
@@ -130,15 +174,19 @@ When the target repo has no code yet, recommend — and scaffold only after appr
 near-impossible to retrofit, so present strict as the default and loosening as the deviation
 that needs a reason.
 
-1. **Quality-gates setup (strict by default)**:
-   - TypeScript `strict: true`, plus `noUncheckedIndexedAccess`, `noFallthroughCasesInSwitch`,
-     `noUnusedLocals`/`noUnusedParameters`; a real typecheck script (`tsc --noEmit`).
-   - Type-aware ESLint with `@typescript-eslint/no-explicit-any: "error"` (matching the agents'
-     zero-`any` rule mechanically), no-floating-promises, and a **zero-tolerance policy**: lint
-     runs with `--max-warnings 0` — there is no "warnings are fine" tier, a gate either passes
-     clean or fails.
-   - A formatter (Prettier or equivalent) with a `format:check` script so style never reaches
-     review.
+1. **Quality-gates setup (strict by default)** — take this stack's row from the stack hygiene
+   table in `engineering-standard.md` (`{GREENFIELD_GATES}`): typechecker, linter, formatter
+   check, and test runner, each as its own script. The rules that hold for every stack:
+   - The typechecker runs in its strictest mode (TypeScript: `strict: true` plus
+     `noUncheckedIndexedAccess`, `noUnusedLocals`/`noUnusedParameters`; Python: `mypy --strict`
+     or pyright strict; Rust: `clippy -D warnings`; Go: `vet` + `staticcheck`).
+   - The linter bans the language's escape hatch mechanically (matching the agents'
+     `{LANGUAGE_HYGIENE_RULE}`) and runs with a **zero-tolerance policy** — no "warnings are
+     fine" tier; a gate either passes clean or fails (`--max-warnings 0` or equivalent).
+   - A formatter with a check script named `format:check` (or `format-check` where `:` is
+     not allowed) so style never reaches review.
+   - Lockfiles: CI installs locked (`npm ci`, `uv sync --locked`, …), so the hand-over must
+     tell the user to run the first install and commit the lockfile before CI can pass.
    - Test-runner wiring **with one real passing test committed** — an empty test setup lets
      every later "tests pass" claim be vacuously true; the agents' evidence discipline needs a
      gate that can actually fail.
@@ -149,10 +197,12 @@ that needs a reason.
    recommend enabling branch protection (required checks + no force-push) once the repo is on
    GitHub — that's a repo setting the user must click, not a file; put it in the hand-over
    summary as a reminder.
-3. **Env hygiene**: `.env.example` documenting every env location, `.env` git-ignored, and the
-   no-secrets-in-client-shipped-vars rule wired into AGENTS.md gotchas.
+3. **Env hygiene**: the stack's `{ENV_CONVENTION}` — an example env file documenting every
+   variable, the real one git-ignored, and the no-secrets-in-client-shipped-vars rule wired
+   into AGENTS.md gotchas.
 4. **Further production hardening (optional menu items, recommend but don't push)**:
-   - Node version pinning: `.nvmrc` + `engines` in package.json, and the same version in CI.
+   - Toolchain version pinning (`.nvmrc` + `engines`, `.python-version`, `rust-toolchain.toml`,
+     `go.mod` toolchain line) with the same version in CI.
    - Automated dependency updates: Dependabot config (or Renovate) with grouped minor updates.
    - Coverage floor on risk surfaces only: a coverage threshold scoped to the risk-surface
      modules from Phase 3 (e.g. the money module), not a blanket repo-wide percentage —
@@ -160,8 +210,9 @@ that needs a reason.
    - A pre-push git hook running the gates locally (husky or a plain `.git/hooks` script) —
      optional because CI is the real gate; the hook just shortens the feedback loop.
 
-Whatever is scaffolded here must match the gate commands quoted in the generated agent files
-verbatim — the agents' quality gates and the CI steps are the same commands, so nothing passes
+This phase may ADD gates the Phase 2.8 list lacked (typically the format check); every added
+gate is quoted in the agent files and protocol like the others. Whatever is scaffolded here
+must match the gate commands quoted in the generated agent files verbatim — the agents' quality gates and the CI steps are the same commands, so nothing passes
 locally that fails in CI. Present these as a short menu with what each creates; the user picks.
 Skip the phase entirely on repos that already have code.
 

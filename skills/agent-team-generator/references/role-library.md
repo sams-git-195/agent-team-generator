@@ -14,8 +14,8 @@ on the user's word or after asking, deploy/db-push never unprompted.
 ## project-manager — MAIN agent (protocol §1 in Claude Code; `mode: primary` in OpenCode)
 
 - **CC**: no subagent file. The persona lives in the protocol. **OC**: primary agent file; body
-  = protocol §1 content + this block. No `model:` pin and no `steps:` cap — the primary agent
-  uses OpenCode's standard model selector and runs uncapped.
+  = protocol §1 content + this block. No `model:` pin — the primary agent uses OpenCode's
+  standard model selector.
 - Owns (edit allow-list): `AGENTS.md`, `.claude/agents/*.md`, `.opencode/agent/*.md`,
   `.agents/**`, `documentation/**`, `*.roadmap.*`. Bash: git status/log/diff/add/commit, grep,
   the project's gate commands. Never edits `src/**` or the data layer — even one character.
@@ -79,8 +79,9 @@ on the user's word or after asking, deploy/db-push never unprompted.
 - Non-negotiables (compose from stack): singleton client only · {money: integer minor units,
   all arithmetic from the money module, test after touching} · access control on every table,
   per role, no bare allow-all · sensitive mutations server-side only · migration discipline
-  (never edit applied; at most one unpushed) · no secrets in client-shipped vars · zero `any`,
-  no `console.log` shipped · unclear data shape/business rule → stop and report.
+  (never edit applied; at most one unpushed) · no secrets in client-shipped vars · the stack's
+  `{LANGUAGE_HYGIENE_RULE}` from engineering-standard.md (TS: zero `any`, no `console.log`) ·
+  unclear data shape/business rule → stop and report.
 - Workflow: spec → AGENTS.md → check migration state → read code to touch + one neighbouring
   example → implement in dependency order ({e.g. migration → RPC → types → context}) → risky
   logic pure + tested → run gates (paste output) → self-review full diff → self-check → handoff.
