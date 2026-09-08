@@ -20,6 +20,7 @@ commands, and business rules from this project.
 | File | Read when |
 |---|---|
 | `references/interview.md` | Step 1 — question bank, phased |
+| `references/permission-policy.md` | Step 1 (Phase 5.3) and Step 4 — the bash-permission tiers, OC blocks, CC settings |
 | `references/fable-playbook.md` | Step 3 — the process bar to embed everywhere |
 | `references/protocol-template.md` | Step 3 — `.agents/rules/claude-agent-protocol.md` |
 | `references/agents-md-template.md` | Step 3 — `AGENTS.md` + `CLAUDE.md` |
@@ -30,9 +31,9 @@ commands, and business rules from this project.
 **Baked defaults (never interview questions):** git/deploy policy (commit freely; push/PR only
 on the user's word or after asking; deploy/db-push never unprompted — protocol §6 verbatim);
 the senior + security bar for product-specialist and architect; the Fable QA process for
-qa-tester; the SHAPE of the OpenCode bash policy (allow-by-default with ask/deny exception
-lists) — the exception lists themselves are tuned with the user in interview Phase 5.3, one
-policy applied identically to every agent.
+qa-tester; the destructive set and this stack's deploy set are `deny` in every permission
+tier except Sandbox — the tier itself (Sandbox / Open / Guarded / Standard / Strict / Custom)
+is chosen in interview Phase 5.3 and applied identically to every agent in every harness.
 
 ## Workflow
 
@@ -70,8 +71,10 @@ Output: `.claude/agents/<role>.md` for every role EXCEPT project-manager, and
 `.opencode/agent/<role>.md` for every role INCLUDING project-manager (`mode: primary`, no
 model pin, docs-only edit rights; its body carries the PM sections since OpenCode has no
 auto-loaded protocol). Same persona in both tools; only frontmatter/enforcement mechanics
-differ. Every OC file carries the standard bash policy with this project's deploy commands in
-the `deny` list.
+differ. Every OC file carries the team's chosen tier from `permission-policy.md` in place of
+`{PERMISSION_POLICY_BLOCK}`, byte-identical across files, with this project's deploy set
+resolved into its `deny` lines. Then write `.claude/settings.json` with the same policy in
+Claude Code syntax (the CC section of `permission-policy.md`).
 
 **Step 5 — Documentation.** Seed `documentation/README.md` (+ `pages/`, `features/` dirs, one
 example page doc if concrete pages are known) from `documentation-convention.md`.
@@ -87,12 +90,14 @@ example page doc if concrete pages are known) from `documentation-convention.md`
   are qa-tester's test globs (overlap builders' co-located tests by design) and files
   explicitly declared shared + PM-sequenced. Anything else overlapping is a failure.
 - Model matrix names only roles that exist; OC edit allow-lists match the prose scope.
-- Every OC bash block is allow-by-default with the ask/deny lists agreed in interview
-  Phase 5.3 (identical across all agents — including `git push*`/`gh pr create*` at least at
-  ask) AND a `deny` line for every command in the deploy-deny set — the **union** of the
-  stack's deploy channels (interview Phase 2.6) and the Phase 5 never-do list; if the two
-  disagree, the union wins. `{POLICY_ADJUSTMENT_LINES}` resolved in every file (extra lines
-  inserted, or the placeholder deleted).
+- Every OC bash block is the chosen tier's block from `permission-policy.md`, byte-identical
+  across all agents, `"*"` default first and denies last (OpenCode: last match wins), AND a
+  `deny` line for every command in the deploy set — the **union** of the stack's deploy
+  channels (interview Phase 2.6) and the Phase 5 never-do list; if the two disagree, the union
+  wins. Sandbox is the only tier without it, and the hand-over must then say "no mechanical
+  deploy guard". `{POLICY_ADJUSTMENT_LINES}` resolved in every file (extra lines inserted, or
+  the placeholder deleted). `.claude/settings.json` exists, is valid JSON, and its `deny`
+  array carries the same deploy set and destructive set in `Bash(… *)` form.
   The OC project-manager has `mode: primary`, no `model:` line, and docs-only edit rights.
 - Quality-gate commands quoted in protocol/agents exist in package.json (or equivalent). In a
   greenfield repo with no manifest yet, instead mark the gates in AGENTS.md with

@@ -50,37 +50,46 @@ try {
 }
 
 // --- 2. Template integrity ------------------------------------------------------------
-const REQUIRED_BASH_LINES = [
-  '"*": allow',
-  '"git push*": ask',
-  '"gh pr create*": ask',
-  '"rm *": ask',
-  '"npm install*": ask',
-  '"npx *": ask',
-  '"pnpm add*": ask',
-  '"yarn add*": ask',
-  '"curl *": ask',
-  '"git push --force*": deny',
-  '"git push -f*": deny',
-  '"git reset --hard*": deny',
-  '"git clean -fd*": deny',
-  '"sudo *": deny',
-  '"* | sh": deny',
-  '"* | bash": deny',
-  '{DEPLOY_DENY_LINES',
-  '{POLICY_ADJUSTMENT_LINES',
-];
+// The bash policy lives in ONE place (references/permission-policy.md); every template and
+// the skeleton carry only the placeholder. A literal policy line in a template is drift.
+const OLD_POLICY_LINES = ['"git push*": ask', '"git push --force*": deny', '"sudo *": deny'];
 
 const templates = fs.readdirSync(templatesDir).filter((f) => f.endsWith('.md'));
 check(templates.length >= 7, `templates present (found ${templates.length}, expected >= 7)`);
 
 for (const file of templates) {
   const text = fs.readFileSync(path.join(templatesDir, file), 'utf8');
-  const missing = REQUIRED_BASH_LINES.filter((line) => !text.includes(line));
-  check(missing.length === 0, `${file}: full bash policy block${missing.length ? ` (missing: ${missing.join(', ')})` : ''}`);
+  check(text.includes('{PERMISSION_POLICY_BLOCK'), `${file}: carries {PERMISSION_POLICY_BLOCK}`);
+  check(!OLD_POLICY_LINES.some((l) => text.includes(l)), `${file}: no inlined bash policy lines`);
   check(/## Handoff/.test(text), `${file}: has a Handoff section`);
   check(/mode: (subagent|primary)/.test(text), `${file}: has an OpenCode mode`);
 }
+
+const skeleton = fs.readFileSync(path.join(skillDir, 'references', 'agent-skeleton.md'), 'utf8');
+check(skeleton.includes('{PERMISSION_POLICY_BLOCK'), 'agent-skeleton carries {PERMISSION_POLICY_BLOCK}');
+
+const policy = fs.readFileSync(path.join(skillDir, 'references', 'permission-policy.md'), 'utf8');
+for (const tier of ['Sandbox', 'Open', 'Guarded', 'Standard', 'Strict']) {
+  check(new RegExp(`\\*\\*${tier}\\*\\*`).test(policy), `permission-policy: ${tier} tier has an OC block`);
+}
+const DESTRUCTIVE = [
+  '"git push --force*": deny',
+  '"git push* --force*": deny',
+  '"git reset --hard*": deny',
+  '"git clean -f*": deny',
+  '"git branch -D*": deny',
+  '"git stash drop*": deny',
+  '"sudo *": deny',
+  '"chmod *": deny',
+  '"chown *": deny',
+  '"npm publish*": deny',
+  '{DEPLOY_DENY_LINES}',
+];
+const missingDestructive = DESTRUCTIVE.filter((l) => !policy.includes(l));
+check(missingDestructive.length === 0, `permission-policy: destructive set complete${missingDestructive.length ? ` (missing: ${missingDestructive.join(', ')})` : ''}`);
+check(policy.includes('"wget *": ask') && policy.includes('"pip install*": ask') && policy.includes('"bun add*": ask'), 'permission-policy: install/network coverage beyond npm');
+check(!/"npx \*": ask/.test(policy), 'permission-policy: no wholesale npx ask (collides with add-on installs and npx gates)');
+check(/"allow": \["Bash"\]/.test(policy) && /Bash\(git push \*\)/.test(policy), 'permission-policy: Claude Code settings.json translation present');
 
 const pm = fs.readFileSync(path.join(templatesDir, 'project-manager.md'), 'utf8');
 check(/mode: primary/.test(pm), 'project-manager is mode: primary');

@@ -19,8 +19,10 @@ AI agent team for your project:
   [Superpowers](https://github.com/obra/superpowers)) — offered during the interview,
   installed at project or user level, your choice — plus a security-review command for
   OpenCode parity with Claude Code's built-in `/security-review`
-- an **agent bash-permission policy** you tune in the interview (allow-by-default; deploys
-  denied; pushes, PR creation, deletes, and installs prompt first)
+- an **agent bash-permission policy** chosen once in the interview from five tiers —
+  Sandbox (allow all), Open (deny destructive only), Guarded (ask outside the repo), Standard
+  (recommended), Strict — and written to every OpenCode agent AND `.claude/settings.json`, so
+  both harnesses enforce the same rules
 
 The project-manager runs as the **main session**, not a subagent; specialists
 (product-specialist, architect, developers, qa-tester) are dispatched with tight contracts

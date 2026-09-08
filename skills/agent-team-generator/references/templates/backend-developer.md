@@ -30,26 +30,7 @@ permission:
   edit:
     "*": deny
     {OWNED_GLOB_ALLOW_LINES — one `allow` per owned glob from the ownership map}
-  bash:
-    "*": allow
-    "git push*": ask
-    "gh pr create*": ask
-    "rm *": ask
-    "npm install*": ask
-    "npx *": ask
-    "pnpm add*": ask
-    "yarn add*": ask
-    "curl *": ask
-    "git push --force*": deny
-    "git push -f*": deny
-    "git reset --hard*": deny
-    "git clean -fd*": deny
-    "sudo *": deny
-    "chmod *": deny
-    "* | sh": deny
-    "* | bash": deny
-    {DEPLOY_DENY_LINES}
-    {POLICY_ADJUSTMENT_LINES — extra ask/deny lines from interview Phase 5.3; delete this line if none}
+  {PERMISSION_POLICY_BLOCK — the chosen tier's OpenCode block from references/permission-policy.md (starts with `bash:`; Guarded/Strict add `external_directory: ask`), with the deploy set and Phase 5.3 adjustments resolved}
   todowrite: allow
 ---
 ```

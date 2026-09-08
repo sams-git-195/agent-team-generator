@@ -41,34 +41,15 @@ permission:
   edit:
     "*": deny
     {one allow line per owned glob — this is the scope contract, machine-enforced}
-  bash:
-    # Allow-by-default with an ask/deny exception list — agents work freely, risky commands
-    # prompt, destructive/deploy commands are impossible.
-    "*": allow
-    "git push*": ask          # pushes and PR creation prompt the user in-flow
-    "gh pr create*": ask
-    "rm *": ask
-    "npm install*": ask
-    "npx *": ask
-    "pnpm add*": ask
-    "yarn add*": ask
-    "curl *": ask
-    "git push --force*": deny # destructive git can never run
-    "git push -f*": deny
-    "git reset --hard*": deny
-    "git clean -fd*": deny
-    "sudo *": deny
-    "chmod *": deny
-    "* | sh": deny            # no piping downloads into a shell
-    "* | bash": deny
-    {DEPLOY_DENY_LINES — one deny per command in the deploy-deny set: the UNION of the
-     stack's deploy channels (interview Phase 2.6) and the Phase 5 never-do list, e.g.
-     "supabase db push*": deny · "firebase deploy*": deny · "netlify deploy*": deny.}
-    {POLICY_ADJUSTMENT_LINES — extra ask/deny lines from the Phase 5.3 permission-policy answer,
-     e.g. "npm publish*": deny · "terraform apply*": ask; delete if none.}
+  {PERMISSION_POLICY_BLOCK — the team's chosen tier from `permission-policy.md` (starts with
+   `bash:`; Guarded/Strict add `external_directory: ask`), byte-identical in every OC file, with
+   the deploy set and Phase 5.3 adjustments resolved}
   todowrite: allow
 ---
 ```
+
+`steps:` and `color:` are not in OpenCode's documented markdown-agent field list — keep them
+(harmless if ignored) but mark "verify against installed OpenCode version" in the hand-over.
 
 **Property-based dangers**: some risks are a property of the invocation, not a command prefix —
 e.g. a payments CLI in live mode (`--live` anywhere, a live API key argument, or a session
