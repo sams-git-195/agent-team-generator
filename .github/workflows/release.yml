@@ -37,6 +37,22 @@ jobs:
 
       - run: npm test
 
+      # Reruns of an already-published tag would otherwise fail with "cannot
+      # publish over the previously published versions"; check first so a rerun
+      # is a no-op instead of a red X.
+      - name: Check whether this version is already on npm
+        id: check
+        run: |
+          name="$(node -p "require('./package.json').name")"
+          version="$(node -p "require('./package.json').version")"
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "$name@$version is already published - skipping the publish step."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
       # No NODE_AUTH_TOKEN: OIDC authenticates the publish, and provenance is
       # attached automatically.
-      - run: npm publish
+      - if: steps.check.outputs.published == 'false'
+        run: npm publish
