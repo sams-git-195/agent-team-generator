@@ -6,6 +6,21 @@ or discoverable from an existing repo (read first, then ask only the gaps). Afte
 propose the roster (SKILL.md Step 2 — the authoritative list of what the proposal contains)
 before generating anything.
 
+## Phase 0 — Harness (always ask first, AskUserQuestion)
+
+> Which harness should the team be generated for?
+> - **Both Claude Code and OpenCode, kept in line** (recommended — `CLAUDE.md` points at
+>   `AGENTS.md` + the protocol; both agent sets are generated and must be updated together)
+> - **Claude Code only**
+> - **OpenCode only**
+> - **Another harness** (name it — Codex, Gemini CLI, Cursor, Copilot, …)
+
+Auto-detect first: `.claude/` or `CLAUDE.md` present → Claude Code in use; `.opencode/` →
+OpenCode in use; both → propose Both. Still ask — the answer decides which files are written
+(SKILL.md Step 4 table). "Another harness" gets harness-neutral persona files under
+`.agents/agents/` plus a pointer file where one is known (`agent-skeleton.md` §Other
+harnesses); subagent dispatch mechanics for that harness are marked `⚠️ verify`.
+
 ## Phase 1 — Product
 
 1. Project name and one-line pitch. What does it do, for whom?

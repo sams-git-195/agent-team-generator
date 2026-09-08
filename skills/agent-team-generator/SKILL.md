@@ -44,8 +44,9 @@ approval. Read the codebase (package.json, config files, folder layout) so the i
 asks what the repo can't answer.
 
 **Step 1 — Interview.** Run `references/interview.md` phase by phase, one topic per message
-(AskUserQuestion for enumerable choices, free text otherwise). Do not skip Phase 3 (risk
-surfaces), Phase 5 (git policy), or Phase 7.0 (separate backend + UI devs vs a single
+(AskUserQuestion for enumerable choices, free text otherwise). Do not skip Phase 0 (which
+harness: Claude Code / OpenCode / both kept in line / another), Phase 3 (risk surfaces),
+Phase 5 (git policy + permission tier), or Phase 7.0 (separate backend + UI devs vs a single
 fullstack-developer) — they parameterise everything. Record answers; anything the
 user defers becomes an explicit `⚠️ undecided` marker in the output, never a guess.
 
@@ -64,17 +65,18 @@ interview:
 2. `AGENTS.md` from `agents-md-template.md`; then `CLAUDE.md` (`@AGENTS.md` +
    `@.agents/rules/claude-agent-protocol.md`).
 
-**Step 4 — Agent files.** For each core role, start from its pre-filled file in
-`references/templates/` and fill the placeholders — do not re-derive sections the template
-already has. Custom roles (not in templates/) are composed from skeleton + role library.
-Output: `.claude/agents/<role>.md` for every role EXCEPT project-manager, and
-`.opencode/agent/<role>.md` for every role INCLUDING project-manager (`mode: primary`, no
-model pin, docs-only edit rights; its body carries the PM sections since OpenCode has no
-auto-loaded protocol). Same persona in both tools; only frontmatter/enforcement mechanics
-differ. Every OC file carries the team's chosen tier from `permission-policy.md` in place of
-`{PERMISSION_POLICY_BLOCK}`, byte-identical across files, with this project's deploy set
-resolved into its `deny` lines. Then write `.claude/settings.json` with the same policy in
-Claude Code syntax (the CC section of `permission-policy.md`).
+**Step 4 — Agent files (per the Phase 0 harness choice).** For each core role, start from
+its pre-filled file in `references/templates/` and fill the placeholders — do not re-derive
+sections the template already has. Custom roles (not in templates/) are composed from
+skeleton + role library. Same persona everywhere; only frontmatter/enforcement mechanics
+differ. What gets written:
+
+| Harness choice | Generates (in addition to Steps 3 and 5) |
+|---|---|
+| **Both** (default) | everything in the two rows below, plus the "keep both sets in step" rule in AGENTS.md |
+| **Claude Code** | `CLAUDE.md` (two `@` lines) · `.claude/agents/<role>.md` for every role EXCEPT project-manager (PM = main session) · `.claude/settings.json` with the chosen tier in CC syntax (`permission-policy.md` §Claude Code) |
+| **OpenCode** | `.opencode/agent/<role>.md` for every role INCLUDING project-manager (`mode: primary`, no model pin, docs-only edit rights; its body carries the PM sections since OpenCode has no auto-loaded protocol) · every OC file carries the chosen tier in place of `{PERMISSION_POLICY_BLOCK}`, byte-identical across files, deploy set resolved into `deny` · no `CLAUDE.md`; AGENTS.md's protocol pointer is how OC sessions reach the protocol |
+| **Other harness** | `.agents/agents/<role>.md` for every role INCLUDING project-manager — the template bodies with no frontmatter, scope contract kept as prose · a pointer file if the harness is in `agent-skeleton.md` §Other harnesses · `⚠️ verify` on protocol §3's dispatch mechanics · the tier as prose in AGENTS.md gotchas (no mechanical enforcement outside CC/OC) |
 
 **Step 5 — Documentation.** Seed `documentation/README.md` (+ `pages/`, `features/` dirs, one
 example page doc if concrete pages are known) from `documentation-convention.md`.
@@ -83,7 +85,8 @@ example page doc if concrete pages are known) from `documentation-convention.md`
 - Grep for unfilled placeholders: zero ALL-CAPS `{LIKE_THIS}` tokens outside fenced output
   templates. Legitimate braces remain: `{var}` i18n syntax, lowercase tokens inside Output
   Format templates the roles copy, and `{ROLE}` in the protocol's generic handoff rule.
-- AGENTS.md roster table == files on disk; CC roster == OC roster minus PM.
+- AGENTS.md roster table == files on disk in every generated agent directory; with Both,
+  CC roster == OC roster minus PM. Only the directories the Phase 0 choice calls for exist.
 - Every agent file has all of **its template's** sections (custom roles: all skeleton sections)
   and ends with a literal handoff line.
 - Ownership globs mutually exclusive **between builder roles**; the two sanctioned exceptions
@@ -120,9 +123,10 @@ add-on. Also offer the security-review option: built-in `/security-review` on Cl
 `.opencode/command/security-review.md` tuned to the project's risk surfaces (see interview
 Phase 9 for its required shape).
 
-**Step 8 — Hand over.** Summarise what was generated, list the `⚠️ undecided` markers to
-resolve, and remind the user: gotchas in AGENTS.md grow over the project's life — append when
-a convention changes; keep `.claude/agents/` and `.opencode/agent/` in step.
+**Step 8 — Hand over.** Summarise what was generated, list the `⚠️ undecided` and `⚠️ verify`
+markers to resolve, name the permission tier and where it is enforced (and, for Sandbox/Open,
+that the git policy is prose-only), and remind the user: gotchas in AGENTS.md grow over the
+project's life — append when a convention changes; keep every generated agent set in step.
 If the repo is git-initialised, make a single scoped commit (per the fixed git policy —
 committing is fine, pushing waits for the user).
 

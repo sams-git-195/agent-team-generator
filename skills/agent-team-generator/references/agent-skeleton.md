@@ -57,6 +57,21 @@ logged into a live account with no flag at all). Globs cannot capture these reli
 such tool, prefer a wholesale `"tool *": ask` line over trying to enumerate dangerous shapes,
 optionally plus deny lines for the obvious patterns.
 
+## Other harnesses (interview Phase 0 = "another harness")
+
+Write each role's **body only** (no frontmatter) to `.agents/agents/<role>.md`, project-manager
+included; the scope contract stays as prose. Most harnesses read `AGENTS.md` natively; add a
+pointer file only where the harness has its own instruction file. Verify each row against the
+harness's current docs before writing — mark the file `⚠️ verify` if unsure.
+
+| Harness | Reads `AGENTS.md`? | Pointer file to write |
+|---|---|---|
+| Codex CLI | yes | none |
+| Gemini CLI | via import | `GEMINI.md` containing `@AGENTS.md` and `@.agents/rules/claude-agent-protocol.md` |
+| Cursor | yes | `.cursor/rules/agent-protocol.mdc` (`alwaysApply: true`) — two lines: read `AGENTS.md`, then the protocol, before any task |
+| GitHub Copilot | yes | `.github/copilot-instructions.md` — the same two lines |
+| unknown | ask | the same two lines in whatever file the user names |
+
 ## Section order (the body, both tools)
 
 1. **`# Role Name`** + intro paragraph: "You are the {role} for **{PROJECT}**, {one-line pitch

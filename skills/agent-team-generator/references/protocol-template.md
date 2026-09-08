@@ -22,10 +22,11 @@ running as**. It applies to the main session and to every subagent you dispatch.
    business rules, dev commands, and gotchas. When any other doc conflicts with it, `AGENTS.md`
    wins — and when the code contradicts a doc, the code wins; flag the discrepancy instead of
    propagating it.
-2. The agent definitions are the operating manual for each discipline: `.claude/agents/*.md`
-   for Claude Code (native subagents), `.opencode/agent/*.md` for OpenCode. They are ports of
-   the same team — when a convention changes, update both sets (your job, as Project Manager).
-   **Never restate them from memory — read the file and follow it.**
+2. The agent definitions are the operating manual for each discipline: {AGENT_DIRS — per
+   harness choice, e.g. "`.claude/agents/*.md` for Claude Code (native subagents),
+   `.opencode/agent/*.md` for OpenCode" · or one of them · or "`.agents/agents/*.md`"}. They
+   are ports of the same team — when a convention changes, update every set (your job, as
+   Project Manager). **Never restate them from memory — read the file and follow it.**
 
 ---
 
@@ -163,8 +164,10 @@ context catches what the author cannot.
 - **{DEPLOY_COMMANDS from the interview, e.g. `firebase deploy` / `supabase db push` /
   `vercel --prod`} are NEVER run unless the user explicitly tells you to** — asking is not
   enough for a DB push; wait to be told.
-- Subagents inherit this policy; the OpenCode permission maps enforce it mechanically
-  (push = ask, deploy/db-push = deny).
+- Subagents inherit this policy. Mechanical enforcement: permission tier **{PERMISSION_TIER}**
+  in {ENFORCEMENT_FILES e.g. every `.opencode/agent/*.md` and `.claude/settings.json`}
+  (push = ask, deploy/db-push = deny in every tier except Sandbox and Open, where this
+  section is prose-only).
 
 ---
 
