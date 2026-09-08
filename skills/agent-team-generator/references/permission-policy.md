@@ -82,8 +82,10 @@ Include the rows for package managers present in this stack (from the stack hygi
     "pip install*": ask
     "pip3 install*": ask
     "uv add*": ask
+    "uv sync*": ask
     "uv pip install*": ask
     "poetry add*": ask
+    "poetry install*": ask
     "cargo add*": ask
     "cargo install*": ask
     "go get*": ask
@@ -97,7 +99,16 @@ Only ones that exist in this stack: migration deploys (`prisma migrate deploy`,
 `cargo publish`, `twine upload`) · container destruction (`docker system prune`, `docker volume
 rm`) · CLIs with live/production modes (Stripe, Shopify… — prefer a wholesale `"tool *": ask`,
 see "property-based dangers" in `agent-skeleton.md`) · Windows-native deletes (`Remove-Item`,
-`del`) when the team runs PowerShell. Accepted additions become `{POLICY_ADJUSTMENT_LINES}`.
+`del`) when the team runs PowerShell. Accepted additions become `{POLICY_ADJUSTMENT_ASK_LINES}`
+(ask-type) and `{POLICY_ADJUSTMENT_DENY_LINES}` (deny-type) — each goes in its own band.
+
+**Property-based and environment-targeted dangers.** Two kinds of never-do item cannot be a
+prefix: (a) a CLI whose danger is a flag or logged-in account (`stripe` in live mode) — emit a
+wholesale `"tool *": ask` plus deny lines for the obvious shapes (`"stripe --live*"`,
+`"stripe * --live*"`); (b) a command whose target is an env var (`alembic upgrade head`,
+`prisma migrate deploy` — production only when `DATABASE_URL` says so) — emit `ask`, not
+`deny`, when the same command has a routine local form, and say so in protocol §6. `deny` is
+right only when production is the command's default target (`fly deploy`, `vercel --prod`).
 
 ## OpenCode blocks (paste into `{PERMISSION_POLICY_BLOCK}`)
 
@@ -136,8 +147,9 @@ indentation (two spaces) and starts with `bash:`.
     "go install*": ask
     "curl *": ask
     "wget *": ask
+    {POLICY_ADJUSTMENT_ASK_LINES}
     {DESTRUCTIVE_SET}
-    {POLICY_ADJUSTMENT_LINES}
+    {POLICY_ADJUSTMENT_DENY_LINES}
   external_directory: ask
 ```
 
@@ -154,8 +166,9 @@ indentation (two spaces) and starts with `bash:`.
     {PACKAGE_INSTALL_SET}
     "curl *": ask
     "wget *": ask
+    {POLICY_ADJUSTMENT_ASK_LINES}
     {DESTRUCTIVE_SET}
-    {POLICY_ADJUSTMENT_LINES}
+    {POLICY_ADJUSTMENT_DENY_LINES}
 ```
 
 **Strict**
@@ -188,13 +201,16 @@ indentation (two spaces) and starts with `bash:`.
     "wget *": deny
     {PACKAGE_INSTALL_SET with ask → deny}
     {DESTRUCTIVE_SET}
-    {POLICY_ADJUSTMENT_LINES}
+    {POLICY_ADJUSTMENT_DENY_LINES — Strict has no ask band; adjustments that were "ask" become deny}
   external_directory: ask
 ```
 
 Resolve `{DESTRUCTIVE_SET}`, `{PACKAGE_INSTALL_SET}`, `{DEPLOY_DENY_LINES}`,
-`{POLICY_ADJUSTMENT_LINES}` and `{GATE_COMMAND_ALLOW_LINES}` before writing — the generated
-file contains no braces from this reference. Delete `{POLICY_ADJUSTMENT_LINES}` if none.
+`{POLICY_ADJUSTMENT_ASK_LINES}`, `{POLICY_ADJUSTMENT_DENY_LINES}` and
+`{GATE_COMMAND_ALLOW_LINES}` before writing — the generated file contains no braces from this
+reference. Delete an adjustment placeholder if it has no lines. **Strip the `# comments`** from
+the destructive set when emitting: the block must be bare `"pattern": action` lines so the
+verifier's ordering and parity checks see every line.
 
 **Caveats to state in the hand-over:**
 - `steps:` and `color:` in OC agent frontmatter are not in the documented markdown-agent field
@@ -235,7 +251,8 @@ Translation rules OC → CC:
       "Bash(sh *)", "Bash(bash *)",
       "Bash(npm install *)", "Bash(npm i *)", "Bash(npm ci *)", "Bash(pnpm add *)",
       "Bash(pnpm install *)", "Bash(yarn *)", "Bash(bun add *)", "Bash(bun install *)",
-      "Bash(pip install *)", "Bash(pip3 install *)", "Bash(uv add *)", "Bash(poetry add *)",
+      "Bash(pip install *)", "Bash(pip3 install *)", "Bash(uv add *)", "Bash(uv sync *)",
+      "Bash(poetry add *)", "Bash(poetry install *)",
       "Bash(cargo add *)", "Bash(cargo install *)", "Bash(go get *)", "Bash(go install *)",
       "Bash(curl *)", "Bash(wget *)"
     ],
@@ -249,7 +266,7 @@ Translation rules OC → CC:
   }
 }
 ```
-Append the deploy set and `{POLICY_ADJUSTMENT_LINES}` to `deny`/`ask` in CC syntax. Trim the
+Append the deploy set and the adjustment lines to `deny`/`ask` in CC syntax. Trim the
 install rows to the stack's package managers if the user prefers a short file.
 
 ## Verification (SKILL.md Step 6)

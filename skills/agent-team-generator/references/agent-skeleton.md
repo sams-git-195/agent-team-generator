@@ -123,7 +123,7 @@ harness's current docs before writing — mark the file `⚠️ verify` if unsur
   beat open descriptions.
 - Subagents can't reach the user: non-PM agents put questions under "Questions for the user"
   in their report; the PM relays.
-- Keep each agent file roughly 100–130 lines of **body** (the OC frontmatter permission map is
+- Keep each agent file roughly 80–130 lines of **body** (the OC frontmatter permission map is
   excluded from the budget). Longer = diluted; the facts live in AGENTS.md.
 - The two tools' versions are the SAME persona: same name, rules, workflow, output format.
   Only frontmatter and enforcement mechanics differ (CC = prose contract, OC = permission map —

@@ -189,7 +189,10 @@ if (hasOC) {
   check(distinct.size <= 1, `bash policy identical across all OC files${distinct.size > 1 ? ` (${distinct.size} variants)` : ''}`);
 
   const sample = policies.find((p) => p.policy)?.policy || '';
-  const bashLines = sample.split('\n').filter((l) => /^".*":\s*(allow|ask|deny)$/.test(l));
+  // Tolerate trailing "# comments" so a commented line can't silently drop out of the checks.
+  const bashLines = sample.split('\n')
+    .map((l) => l.replace(/\s+#.*$/, ''))
+    .filter((l) => /^".*":\s*(allow|ask|deny)$/.test(l));
   if (bashLines.length) {
     check(/^"\*":\s*(allow|ask)$/.test(bashLines[0]), `bash block starts with the "*" default (${bashLines[0]})`);
     const lastAskIdx = bashLines.map((l) => /: ask$/.test(l)).lastIndexOf(true);
@@ -226,12 +229,14 @@ if (hasOC) {
     try { settings = JSON.parse(read(P('.claude', 'settings.json'))); } catch (e) { settings = null; }
     check(settings && settings.permissions, '.claude/settings.json is valid JSON with a permissions key');
     if (settings && settings.permissions) {
-      const ccDeny = (settings.permissions.deny || []).join('\n');
+      // Compare shapes, not spacing: OC `git push* --force*` and CC `Bash(git push * --force *)`
+      // both normalise to `gitpush--force`.
+      const norm = (s) => s.replace(/^Bash\((.*)\)$/, '$1').replace(/[\s*]/g, '');
+      const ccDeny = (settings.permissions.deny || []).map(norm);
       const ocDenies = bashLines.filter((l) => /: deny$/.test(l)).map((l) => l.match(/^"([^"]+)"/)[1]);
       const missing = ocDenies
         .filter((d) => !/\|/.test(d)) // pipe-to-shell has no CC equivalent
-        .map((d) => d.replace(/\*$/, '').trim())
-        .filter((prefix) => !ccDeny.includes(prefix));
+        .filter((d) => !ccDeny.some((c) => c === norm(d)));
       check(missing.length === 0, `.claude/settings.json deny covers every OC deny prefix${missing.length ? ` (missing: ${missing.slice(0, 5).join(', ')}${missing.length > 5 ? ', …' : ''})` : ''}`);
     }
   }

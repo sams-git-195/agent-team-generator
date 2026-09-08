@@ -7,7 +7,9 @@ the code. File paths may be named as anchors, but no code blocks longer than a s
 
 Seed on generation: `README.md` with the sections below (empty tables are fine on day one),
 plus one page doc per route the interview named (Phase 1, question 5) — never invent pages the
-user didn't name. Add a `.gitkeep` to any directory left empty so git tracks it.
+user didn't name. Add a `.gitkeep` to any directory left empty so git tracks it. A page doc
+seeded before its spec exists keeps every section, each filled with `⚠️ undecided — spec
+pending`; an index table with no rows yet gets one italic `*(none documented yet)*` row.
 
 ## `documentation/README.md`
 

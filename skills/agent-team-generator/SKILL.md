@@ -69,7 +69,9 @@ interview:
    and the engineering standard embedded in §2 and tuned to this project's risk surfaces and
    stack (hygiene table row). PM-as-main-session is §1.
 2. `AGENTS.md` from `agents-md-template.md`; then `CLAUDE.md` (`@AGENTS.md` +
-   `@.agents/rules/claude-agent-protocol.md`).
+   `@.agents/rules/claude-agent-protocol.md`) when Claude Code is a target. `{AGENT_DIR}` in
+   the protocol is the primary harness's agent directory (`.claude/agents` when Claude Code is
+   a target, else `.opencode/agent`, else `.agents/agents`).
 
 **Step 4 — Agent files (per the Phase 0 harness choice).** For each core role, start from
 its pre-filled file in `references/templates/` and fill the placeholders — do not re-derive
@@ -91,7 +93,9 @@ example page doc if concrete pages are known) from `documentation-convention.md`
 `scripts/verify-team.js` from this skill to the target's `.agents/verify-team.js` (the project
 keeps it — re-run whenever the roster or a convention changes) and run
 `node .agents/verify-team.js` from the target root. Paste its output. Fix every `FAIL` and
-re-run until clean; warnings go into the hand-over. It checks placeholders, roster == files,
+re-run until clean; warnings go into the hand-over. On a greenfield repo the gate-script
+check can only pass after Step 7 creates the manifest — **re-run the verifier after Step 7**
+and paste that output too. It checks placeholders, roster == files,
 per-file shape, OC mode/model/policy identity and ordering, builder ownership overlaps,
 CC settings parity, gate scripts, and docs seeding. Then the checks below that need judgment:
 - Placeholder scan result read, not assumed: legitimate braces are `{var}` i18n syntax,
@@ -112,8 +116,8 @@ CC settings parity, gate scripts, and docs seeding. Then the checks below that n
   `deny` line for every command in the deploy set — the **union** of the stack's deploy
   channels (interview Phase 2.6) and the Phase 5 never-do list; if the two disagree, the union
   wins. Sandbox is the only tier without it, and the hand-over must then say "no mechanical
-  deploy guard". `{POLICY_ADJUSTMENT_LINES}` resolved in every file (extra lines inserted, or
-  the placeholder deleted). `.claude/settings.json` exists, is valid JSON, and its `deny`
+  deploy guard". `{POLICY_ADJUSTMENT_ASK_LINES}` / `{POLICY_ADJUSTMENT_DENY_LINES}` resolved
+  in every file, each in its own band (extra lines inserted, or the placeholder deleted). `.claude/settings.json` exists, is valid JSON, and its `deny`
   array carries the same deploy set and destructive set in `Bash(… *)` form.
   The OC project-manager has `mode: primary`, no `model:` line, and docs-only edit rights.
 - Quality-gate commands quoted in protocol/agents exist in package.json (or equivalent). In a

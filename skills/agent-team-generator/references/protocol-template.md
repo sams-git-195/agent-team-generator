@@ -120,9 +120,9 @@ Before starting any implementation/design/review work — solo or dispatched —
 
 | Work type | Agent file |
 |---|---|
-{PERSONA_TABLE_ROWS e.g. | Requirements, scope | `.claude/agents/product-specialist.md` |}
+{PERSONA_TABLE_ROWS e.g. | Requirements, scope | `{AGENT_DIR}/product-specialist.md` |}
 
-When dispatching via the Agent tool:
+When dispatching (Claude Code: the Agent tool; OpenCode: the primary agent's `task` tool):
 
 1. Pass `subagent_type` — the roster exists as native subagents. Each agent file carries its
    own non-negotiables, scope contract, gates, and handoff line — do not restate them.
@@ -163,7 +163,7 @@ opening the code.
 ## 5. Mandatory Self-QA Gate
 
 Every task that changed code ends with a QA pass against your **own** diff, to the standard of
-`.claude/agents/qa-tester.md`:
+`{AGENT_DIR e.g. .claude/agents, or .opencode/agent on an OpenCode-only run}/qa-tester.md`:
 
 1. `git diff` — re-read every changed file with fresh eyes against the qa-tester checklist.
 2. Run and paste real output: {QUALITY_GATES_LIST}{CONDITIONAL_GATES e.g. + `npm run test` if
@@ -216,7 +216,7 @@ cut them.
 
 ## FINAL CHECKLIST (every task, before you say "done")
 
-- [ ] Matching `.claude/agents/` file(s) read this session and their contracts followed?
+- [ ] Matching `{AGENT_DIR}/` file(s) read this session and their contracts followed?
 - [ ] {STACK_DISCIPLINE_LINE e.g. React 18 / Router v6 APIs only; i18n keys in both locale files with {var} braces}?
 - [ ] {RISK_SURFACE_CHECK e.g. All money arithmetic imported from the project's money module as integer cents}?
 - [ ] Gate outputs pasted ({QUALITY_GATES_LIST})?

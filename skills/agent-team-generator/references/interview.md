@@ -44,8 +44,9 @@ harnesses); subagent dispatch mechanics for that harness are marked `⚠️ veri
 
 Ask as a grid; every answer parameterises ownership maps and gotchas.
 
-1. Frontend: framework + version (React 18? Vue? none?), build tool, styling (Tailwind version
-   matters: v4 = CSS-first, no config file), component library, and — if decided — brand
+1. Frontend: framework + version (React 18? Vue? none?), build tool, **routing library** (or
+   "undecided" — never assume one from the route list), styling (Tailwind version matters: v4 =
+   CSS-first, no config file), component library, and — if decided — brand
    palette + fonts (feeds AGENTS.md §UI; "undecided" gets a ⚠️ marker, don't invent one).
 2. Backend/data: Supabase/Firebase/custom API/none; database; where server logic lives
    (Edge Functions, API routes, none).
@@ -56,8 +57,10 @@ Ask as a grid; every answer parameterises ownership maps and gotchas.
 6. Hosting/deploy: platform + how deploys are triggered, and which commands agents must never run
    unprompted.
 7. Testing: runner, what coverage exists, whether component/E2E testing is available.
-8. Dev commands: dev / build / lint / typecheck / test — exact npm scripts (these become the
-   quality gates verbatim).
+8. Dev commands: dev / build / lint / typecheck / test — exact scripts (these become the
+   quality gates verbatim), **and the directory each runs from**. A monorepo (`web/` + `api/`)
+   needs root-level proxies (`package.json` workspace scripts, a `Makefile`) so one command
+   per gate works from the root; propose them if absent.
 9. Mobile/native or other platforms in scope?
 10. Language(s) and hygiene: pick the row(s) of the stack hygiene table in
     `engineering-standard.md` (TypeScript / Python / Go / Rust / other — "other" asks the five
@@ -84,7 +87,10 @@ user can't answer yet goes in AGENTS.md as an explicit `⚠️ undecided` marker
 1. Specific rules and recommendations, verbatim (they go into AGENTS.md gotchas and, where
    behavioural, into the protocol).
 2. Anything agents must NEVER do in this project — every deploy/DB-push/dangerous command named
-   here goes verbatim into the protocol §6 and the OpenCode `deny` lists.
+   here goes verbatim into the protocol §6 and the `deny` lists. Items that are property-based
+   (a CLI's live mode) or environment-targeted (a migration whose target is `DATABASE_URL`)
+   cannot be a deny prefix — handle them per `permission-policy.md` §Property-based dangers
+   (wholesale ask + obvious-shape denies; ask instead of deny when a local form is routine).
 3. **Agent bash-permission policy (AskUserQuestion — always ask).** Read
    `permission-policy.md` first. Present its tier table (Sandbox / Open / Guarded / Standard /
    Strict / Custom) with the one-line "recommend when" for each, and **recommend Standard**.
@@ -95,7 +101,8 @@ user can't answer yet goes in AGENTS.md as an explicit `⚠️ undecided` marker
    prose-only. Custom starts from Standard and walks the ask and deny lists category by
    category.
    Then RECOMMEND the stack-specific additions listed in `permission-policy.md` — only ones
-   that exist in this stack. Accepted additions become `{POLICY_ADJUSTMENT_LINES}`.
+   that exist in this stack. Accepted additions become `{POLICY_ADJUSTMENT_ASK_LINES}` /
+   `{POLICY_ADJUSTMENT_DENY_LINES}`, each emitted in its own band.
    The chosen tier applies to EVERY agent identically, in every OC file and in
    `.claude/settings.json` — one policy for the whole team; per-role bash variation is not
    offered.
@@ -200,8 +207,9 @@ that needs a reason.
    - A pre-push git hook running the gates locally (husky or a plain `.git/hooks` script) —
      optional because CI is the real gate; the hook just shortens the feedback loop.
 
-Whatever is scaffolded here must match the gate commands quoted in the generated agent files
-verbatim — the agents' quality gates and the CI steps are the same commands, so nothing passes
+This phase may ADD gates the Phase 2.8 list lacked (typically the format check); every added
+gate is quoted in the agent files and protocol like the others. Whatever is scaffolded here
+must match the gate commands quoted in the generated agent files verbatim — the agents' quality gates and the CI steps are the same commands, so nothing passes
 locally that fails in CI. Present these as a short menu with what each creates; the user picks.
 Skip the phase entirely on repos that already have code.
 

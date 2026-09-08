@@ -19,10 +19,13 @@ The project is fictional. Nothing here may be copied into a real project by the 
   `/clients`, `/settings`.
 - **Phase 2 — Stack:** Frontend React 18 + Vite + Tailwind v4, no component library, palette
   undecided. Backend Python 3.12 FastAPI + Postgres via SQLAlchemy + Alembic migrations, server
-  logic in `api/app/services/`. Auth: session cookies, roles table (`translator`, `agency`,
+  logic in `api/app/services/`; monorepo `web/` + `api/`, gates run from the root through a
+  root `package.json` workspace and a root `Makefile`. Routing library: undecided. Auth:
+  session cookies, roles table (`translator`, `agency`,
   `admin`). Payments: Stripe (test mode locally). i18n: `en` and `es`, JSON files in
   `web/src/i18n/`, `{{var}}` interpolation. Hosting: Fly.io, deploy by `fly deploy`; DB
-  migrations by `alembic upgrade head` against production — never unprompted. Testing:
+  migrations by `alembic upgrade head` against production — never unprompted (the same
+  command runs routinely against the local DB, so it is ask, not deny). Testing:
   pytest (backend, some coverage), vitest (frontend, none yet), no E2E. Dev commands:
   `npm run dev` (web, port 5173), `npm run build`, `npm run lint`, `npm run typecheck`,
   `npm run test`; backend `make lint` (ruff), `make typecheck` (pyright), `make test`
@@ -30,9 +33,10 @@ The project is fictional. Nothing here may be copied into a real project by the 
   secret file `.env` (only `.env.example` editable); breakpoints 375/768/1440.
 - **Phase 3 — Risk surfaces:** money/currency math · auth/permissions · migrations on a live
   DB · Stripe integration.
-- **Phase 4 — Business rules:** platform fee 2.5% of invoice total, minimum 50 cents; amounts
-  stored as integer minor units in the invoice currency; FX rate captured at invoice creation,
-  never recomputed; refund window ⚠️ undecided.
+- **Phase 4 — Business rules:** platform fee 2.5% of invoice total, minimum 50 minor units of
+  the invoice currency, rounded half-up; amounts stored as integer minor units in the invoice
+  currency; FX rate captured at invoice creation, never recomputed; refund window
+  ⚠️ undecided.
 - **Phase 5 — House rules:** 5.1 "Never call Stripe outside `api/app/services/payments.py`."
   5.2 Never: `fly deploy`, `alembic upgrade head` against prod, `stripe` CLI in live mode.
   5.3 Permission tier: **Standard**, plus `"stripe *": ask`. 5.4 PM style: **Direct with
@@ -51,7 +55,9 @@ The project is fictional. Nothing here may be copied into a real project by the 
 - `AGENTS.md` business rules carry the 2.5% / 50-cent table and a `⚠️ undecided` refund row.
 - Both agent sets exist; CC roster == OC roster minus PM; OC PM is `mode: primary`, no model.
 - Every OC file's bash block is the Standard tier with `"fly deploy*": deny`,
-  `"alembic upgrade*": deny` and `"stripe *": ask`; `.claude/settings.json` carries the same.
+  `"alembic upgrade*": ask` (env-targeted, local form is routine), `"stripe *": ask` plus
+  `"stripe --live*": deny`; ask-type adjustments sit in the ask band, deny-type in the deny
+  band; `.claude/settings.json` carries the same.
 - backend-developer's hygiene rule is the **Python** row (type hints, no bare `except`, no
   `print`), ui-ux-developer's is the **TypeScript** row (zero `any`, no `console.log`).
 - Protocol §2 embeds the engineering standard; §7 says "Direct with technical summary".
