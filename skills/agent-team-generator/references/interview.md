@@ -91,6 +91,20 @@ user can't answer yet goes in AGENTS.md as an explicit `⚠️ undecided` marker
    `.claude/settings.json` — one policy for the whole team; per-role bash variation is not
    offered.
 
+4. **Project-manager answer style (AskUserQuestion — always ask).** How should the
+   project-manager (the main session) report to the user? The report *shape* is fixed
+   (protocol §7: Outcome → What changed → Evidence → Open questions → Next, structured,
+   nothing before the outcome); the preset sets only the depth of the middle two parts:
+   - **Technical** — every file and decision, trade-offs stated; full gate output quoted.
+     For an engineer who will review the diff.
+   - **Direct with technical summary** (recommended default) — files touched with a one-line
+     reason each; gate names with pass/fail, failures quoted. For an engineer who trusts
+     the process.
+   - **Plain English** — product-level description, no file paths in prose; "gates passed" or
+     the failure in words. For a founder or non-engineer.
+   The answer becomes `{PM_STYLE}` in protocol §7, the OC project-manager file, and one line
+   in AGENTS.md.
+
 Do NOT ask about git policy — it is fixed (protocol template §6): commit freely; push/PR only
 when the user says so or after asking; deploys and DB pushes never without being told. The
 Phase 5.3 tier implements this mechanically (`git push`/`gh pr create` = ask, deploys = deny)

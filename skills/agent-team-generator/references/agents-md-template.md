@@ -30,7 +30,8 @@ changes or a trap is discovered).
 {ROSTER_ROWS — one per subagent: | name | owned paths/responsibilities | next role |}
 
 **Process protocol:** `.agents/rules/claude-agent-protocol.md` — every session reads it before
-its first task. Claude Code auto-loads it via `CLAUDE.md`; every other harness reads it
+its first task. **Reports to the user:** {PM_STYLE} depth, protocol §7 shape (outcome first,
+structured, no preamble). Claude Code auto-loads it via `CLAUDE.md`; every other harness reads it
 explicitly. One agent edits a shared file at a time — the project-manager sequences tasks so
 owners never collide.
 {HARNESS_PARAGRAPH — per interview Phase 0:

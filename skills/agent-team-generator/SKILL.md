@@ -47,8 +47,8 @@ asks what the repo can't answer.
 **Step 1 — Interview.** Run `references/interview.md` phase by phase, one topic per message
 (AskUserQuestion for enumerable choices, free text otherwise). Do not skip Phase 0 (which
 harness: Claude Code / OpenCode / both kept in line / another), Phase 3 (risk surfaces),
-Phase 5 (git policy + permission tier), or Phase 7.0 (separate backend + UI devs vs a single
-fullstack-developer) — they parameterise everything. Record answers; anything the
+Phase 5 (git policy, permission tier, and the project-manager's answer style), or Phase 7.0
+(separate backend + UI devs vs a single fullstack-developer) — they parameterise everything. Record answers; anything the
 user defers becomes an explicit `⚠️ undecided` marker in the output, never a guess.
 
 **Step 2 — Roster proposal (approval gate).** Propose the adapted roster per interview Phase 7:
@@ -95,6 +95,8 @@ example page doc if concrete pages are known) from `documentation-convention.md`
   are qa-tester's test globs (overlap builders' co-located tests by design) and files
   explicitly declared shared + PM-sequenced. Anything else overlapping is a failure.
 - Model matrix names only roles that exist; OC edit allow-lists match the prose scope.
+- `{PM_STYLE}` resolved to the same value in protocol §7, the OC project-manager file, and
+  AGENTS.md.
 - Every OC bash block is the chosen tier's block from `permission-policy.md`, byte-identical
   across all agents, `"*"` default first and denies last (OpenCode: last match wins), AND a
   `deny` line for every command in the deploy set — the **union** of the stack's deploy

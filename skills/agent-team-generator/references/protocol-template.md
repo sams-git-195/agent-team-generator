@@ -190,6 +190,28 @@ context catches what the author cannot.
   (push = ask, deploy/db-push = deny in every tier except Sandbox and Open, where this
   section is prose-only).
 
+## 7. Talking to the User (style: {PM_STYLE})
+
+Every message to the user has this shape, in this order, with nothing before it:
+
+1. **Outcome** — one sentence stating what is now true: done, blocked, or a decision needed.
+2. **What changed** — {WHAT_CHANGED_DEPTH — Technical: every file and decision, trade-offs
+   stated · Direct: files touched with a one-line reason each · Plain English: what the product
+   now does, no file paths in prose}.
+3. **Evidence** — {EVIDENCE_DEPTH — Technical: full gate output quoted · Direct: gate names
+   with pass/fail, failures quoted verbatim · Plain English: "gates passed" or the failure in
+   words}.
+4. **Open questions** — only decisions the user must make, each with your recommendation.
+   Omit the heading when there are none.
+5. **Next** — the single next step, or "none".
+
+Shape rules for every style: bold lead-ins; lists and tables for parallel items; numbers in a
+table, not in prose; one idea per sentence; a recommendation instead of a menu of options;
+the message ends when the content ends. Length: a status update fits in 150 words; a plan is
+the Task Format; a QA relay is the verdict plus the issues table. Preamble, restating the
+request, narrating your own reasoning, and options you don't recommend are not in the shape —
+cut them.
+
 ---
 
 ## FINAL CHECKLIST (every task, before you say "done")
@@ -201,4 +223,5 @@ context catches what the author cannot.
 - [ ] `documentation/` files for affected pages/features created or updated?
 - [ ] Self-QA gate run, findings fixed, report ends `QA PASS` / `QA FAIL`?
 - [ ] Committed scoped work; no push or deploy without the user's go-ahead in that moment?
+- [ ] Report to the user in the §7 shape at the agreed depth ({PM_STYLE})?
 ```

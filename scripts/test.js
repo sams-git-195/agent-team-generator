@@ -115,6 +115,12 @@ const interview = fs.readFileSync(path.join(skillDir, 'references', 'interview.m
 check(/Phase 0/.test(skillMd) && /## Phase 0 — Harness/.test(interview), 'harness question wired (SKILL.md <-> interview Phase 0)');
 check(/settings\.json/.test(skillMd) && /Claude Code only/.test(interview) && /OpenCode only/.test(interview) && /Another harness/.test(interview), 'harness choice offers CC / OC / both / other, and CC settings.json is generated');
 check(/Phase 5\.3/.test(skillMd) && /Agent bash-permission policy/.test(interview), 'permission-policy question wired (SKILL.md <-> interview Phase 5.3)');
+{
+  const agentsTpl = fs.readFileSync(path.join(skillDir, 'references', 'agents-md-template.md'), 'utf8');
+  const wired = /Project-manager answer style/.test(interview) && /## 7\. Talking to the User/.test(protocolTpl)
+    && /## Talking to the User/.test(pm) && /\{PM_STYLE\}/.test(agentsTpl) && /PM_STYLE/.test(skillMd);
+  check(wired, 'PM answer style wired (interview 5.4 <-> protocol §7 <-> OC PM template <-> AGENTS.md <-> SKILL.md verify)');
+}
 check(/Phase 7\.0/.test(skillMd) && /Builder split/.test(interview), 'builder-split question wired (SKILL.md <-> interview Phase 7.0)');
 check(/Phase 9/.test(skillMd) && /Optional skill add-ons/.test(interview), 'add-ons phase wired (SKILL.md <-> interview Phase 9)');
 check(
