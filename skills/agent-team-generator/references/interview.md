@@ -73,7 +73,7 @@ Ask as a grid; every answer parameterises ownership maps and gotchas.
 10. Language(s) and hygiene: pick the row(s) of the stack hygiene table in
     `engineering-standard.md` (TypeScript / Python / Go / Rust / other — "other" asks the five
     questions in that row). Also: package managers in use (drive the install rows of the
-    permission policy), the secret file agents must never edit (`{SECRET_FILES}`), and the
+    permission policy), the local secret file(s) (`{SECRET_FILES}` — agents may read and update them, never expose or commit their values), and the
     breakpoints or device classes to verify UI at (`{BREAKPOINTS}`; web default 375/768/1440).
 
 ## Phase 3 — Risk surfaces
@@ -217,6 +217,11 @@ that needs a reason.
    - A pre-push git hook running the gates locally (husky or a plain `.git/hooks` script) —
      optional because CI is the real gate; the hook just shortens the feedback loop.
 
+**Every gate runs on every change** — typecheck, lint, format check, tests, build. There is
+no "tests only when money was touched" tier: `{GATE_COMMANDS}` in every generated file is
+the full list, tests included. A risk surface adds scrutiny (failing test first, a mutation
+check), never the decision to run the suite.
+
 This phase may ADD gates the Phase 2.8 list lacked (typically the format check); every added
 gate is quoted in the agent files and protocol like the others. Whatever is scaffolded here
 must match the gate commands quoted in the generated agent files verbatim — the agents' quality gates and the CI steps are the same commands, so nothing passes
@@ -251,14 +256,15 @@ with this team's Fable protocol. Offer it as optional and say the agent protocol
 two conflict; a note to that effect goes in AGENTS.md gotchas if installed.
 
 **Security review** (offer alongside the add-ons, but it is generated, not installed):
-- Claude Code ships `/security-review` built in — no install; recommend it as a pre-merge step
-  and reference it in the qa-tester checklist and protocol.
+- Claude Code ships `/security-review` built in — no install; recommend it as a pre-merge step.
+  A "yes" fills the two slots that exist for it: `{SECURITY_REVIEW_PARAGRAPH}` in protocol §5
+  and `{SECURITY_REVIEW_LINE}` in the qa-tester Security checklist. A "no" deletes both.
 - OpenCode has no built-in equivalent. If the user wants parity, generate
   `.opencode/commands/security-review.md`: an OpenCode command whose body is a security-review
   prompt tuned to THIS project — the interview's risk surfaces, per-role access model, secret
   locations, and money/PII rules — instructing a review of the current diff for injection,
   authn/authz gaps, secret exposure, unsafe rendering, and risk-surface-specific issues, with
-  findings reported file:line by severity and NO code edits. Frontmatter: `description` plus
+  findings reported file:line on the five lights (protocol §5) and NO code edits. Frontmatter: `description` plus
   `agent: qa-tester` so it runs under qa-tester's report-don't-fix rules.
 
 Notes: `npm install -g` is machine-wide either way (it's the CLI, not the skill) — say so when

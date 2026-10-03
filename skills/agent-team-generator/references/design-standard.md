@@ -67,7 +67,7 @@ it, say "visually unverified" in the report — never claim a look you did not s
 - `AGENTS.md` §UI: the design direction (tone, type pairing, palette as tokens, token file
   path) or the `⚠️ undecided` marker.
 - qa-tester and code-reviewer checklists: "design bar held — tokens used, states designed,
-  no slop-list item" (a slop-list item is 🟠 Should fix for the code-reviewer, Medium for QA).
+  no slop-list item" (a slop-list item is 🟠 Should fix for both).
 - Interview Phase 9 recommends the design skills (`frontend-design`, Impeccable, UI/UX Pro
   Max). When one is installed, add one line to the Design bar: "Load the `<skill>` skill
   before any UI work" — the skill deepens the bar; it does not replace it.

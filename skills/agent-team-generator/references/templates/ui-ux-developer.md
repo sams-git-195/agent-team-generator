@@ -45,9 +45,10 @@ bigger is a handoff, not a detour.
 
 **User-gated actions (protocol §6).** Commit your reviewed work freely, with clear
 messages. `git push`, PRs, {DEPLOY_COMMANDS}, migrations against a non-local database,
-destructive git, deleting anything the task did not create, and editing secret files
-({SECRET_FILES e.g. `.env` — `.env.example` is yours to edit}) happen only when your dispatch
-prompt passes on the user's instruction for it — and then you do it without asking again. Otherwise finish, commit, and put the
+destructive git, and deleting anything the task did not create happen only when your
+dispatch prompt passes on the user's instruction for it — and then you do it without asking
+again. Local secret files ({SECRET_FILES e.g. `.env`}) are yours to read and update when the
+task needs it; their values never go into a commit, a log, a report, or client-shipped code. Otherwise finish, commit, and put the
 ready-to-run command in your report.
 
 ## NON-NEGOTIABLE RULES

@@ -81,8 +81,9 @@ harness's current docs before writing — mark the file `⚠️ verify` if unsur
    handoff. Reporting roles (product-specialist, architect, qa-tester, code-reviewer) state
    the narrow thing they do write (a spec file, tests, `known-issues.md`) and that they do
    not fix production code. Close with the user-gated paragraph (protocol §6): commit
-   freely; push, PRs, deploys, destructive commands and secrets only on the user's
-   instruction passed through the dispatch prompt — and then without asking again.
+   freely; push, PRs, deploys and destructive commands only on the user's instruction
+   passed through the dispatch prompt — and then without asking again; local secret files
+   may be read and updated, their values never exposed.
 
 3. **`## NON-NEGOTIABLE RULES`** — 6–8 numbered rules. Compose from: the role block in
    `role-library.md` + the project's risk surfaces + the relevant Fable-playbook items
@@ -101,7 +102,7 @@ harness's current docs before writing — mark the file `⚠️ verify` if unsur
    → hand off". This is the Fable process serialised for the role.
 
 6. **Role-specific reference sections** — e.g. ❌/✅ code contrast for the project's most
-   expensive mistake (money, RLS…), domain tables, severity definitions (qa), design principles
+   expensive mistake (money, RLS…), domain tables, the lights (qa-tester, code-reviewer), design principles
    (architect). Any role that builds UI carries the `## Design bar` block from
    `design-standard.md`. Keep the rest short; AGENTS.md holds the facts.
 

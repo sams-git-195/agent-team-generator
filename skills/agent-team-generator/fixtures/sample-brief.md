@@ -30,7 +30,7 @@ The project is fictional. Nothing here may be copied into a real project by the 
   `npm run dev` (web, port 5173), `npm run build`, `npm run lint`, `npm run typecheck`,
   `npm run test`; backend `make lint` (ruff), `make typecheck` (pyright), `make test`
   (pytest). No mobile. Languages: TypeScript row + Python row; package managers npm and uv;
-  secret file `.env` (only `.env.example` editable); breakpoints 375/768/1440.
+  local secret file `.env` (agents may read and update it; `.env.example` documents every variable); breakpoints 375/768/1440.
 - **Phase 3 — Risk surfaces:** money/currency math · auth/permissions · migrations on a live
   DB · Stripe integration.
 - **Phase 4 — Business rules:** platform fee 2.5% of invoice total, minimum 50 minor units of
@@ -72,12 +72,19 @@ The project is fictional. Nothing here may be copied into a real project by the 
   carry the senior ladder with its floor.
 - ui-ux-developer carries the full Design bar; AGENTS.md §UI marks the design direction
   `⚠️ undecided` with "propose a direction and get it approved before the first screen".
+- qa-tester and code-reviewer grade on the same five lights as protocol §5; QA fails on any
+  🔴 or 🟠. No generated file makes the test run conditional on a risk surface.
+- `.env` is described as readable and editable by agents, with its values never committed,
+  logged or reported; it is not on the user-gated list.
+- The main agent's roster row lists the shared root files (root `package.json`, `Makefile`).
+- Protocol §5 carries the security-review paragraph and qa-tester's Security checklist the
+  security-review line (the brief said yes to security review).
 - code-reviewer defines the five lights, the mutation check, the fix-prompt blocks, and the
   known-issues entry format; `documentation/known-issues.md` is seeded.
 - Protocol §2 embeds the senior ladder and the engineering standard; §7 says "Direct with
   technical summary".
 - Money rule names one module under `api/app/services/` and integer minor units.
-- `documentation/pages/` has four page docs; `.opencode/commands/security-review.md` exists
+- `documentation/pages/` has four page docs, `/invoices/new` as `invoices-new.md`; `.opencode/commands/security-review.md` exists
   with `agent: qa-tester` and names the four risk surfaces.
 - The hand-over lists: the refund-window marker, the design-direction marker, that the
   Autonomous tier blocks nothing mechanically and §6 is the guard, and "verify against the

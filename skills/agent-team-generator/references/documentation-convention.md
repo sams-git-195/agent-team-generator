@@ -10,8 +10,10 @@ Seed on generation: `known-issues.md` (template at the bottom — the code-revie
 `README.md` with the sections below (empty tables are fine on day one),
 plus one page doc per route the interview named (Phase 1, question 5) — never invent pages the
 user didn't name. Add a `.gitkeep` to any directory left empty so git tracks it. A page doc
-seeded before its spec exists keeps every section, each filled with `⚠️ undecided — spec
-pending`; an index table with no rows yet gets one italic `*(none documented yet)*` row.
+seeded before its spec exists keeps every section and the header fields (Access, Purpose),
+each filled with `⚠️ undecided — spec pending`; its README one-liner is written from the
+interview if the user described the page, otherwise the same marker; its footer reads
+`*Last updated: <today> — seeded*`; an index table with no rows yet gets one italic `*(none documented yet)*` row.
 
 ## `documentation/README.md`
 
@@ -34,6 +36,13 @@ fix the doc and note what drifted.
 ```
 
 ## `documentation/pages/<page>.md`
+
+**Filename from the route**, so two people always pick the same name: drop the leading slash,
+turn every remaining `/` into `-`, and replace a parameter segment with what it identifies
+followed by `-detail`. `/` → `home.md` · `/invoices` → `invoices.md` · `/invoices/new` →
+`invoices-new.md` · `/invoices/:id` → `invoices-detail.md` · `/clients/:id/edit` →
+`clients-detail-edit.md`. One doc per route; a modal or tab without its own route is a
+section of its parent page's doc, not a file.
 
 ```markdown
 # {Page Name}
@@ -95,7 +104,7 @@ split", not SQL}
 
 ## `documentation/known-issues.md`
 
-The code-reviewer appends a 🟣 Minor entry here the moment it finds one, so small issues are
+The code-reviewer and qa-tester append a 🟣 Minor entry here the moment they find one, so small issues are
 never lost and never block a merge. Each entry carries a ready-to-run fix prompt. Seed the
 file with the header and no entries.
 

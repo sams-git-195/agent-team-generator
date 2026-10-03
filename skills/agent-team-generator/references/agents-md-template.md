@@ -38,9 +38,11 @@ short version, which holds even if you read nothing else:
   rules, workflow and self-check.
 - **Open permissions, user-gated actions.** Agents may edit any file and run any command the
   task needs, and commit freely. They `git push`, open or merge PRs, deploy
-  ({DEPLOY_COMMANDS}), migrate a shared database, edit secret files, or delete/destroy anything **only when the
+  ({DEPLOY_COMMANDS}), migrate a shared database, or delete/destroy anything **only when the
   user has said so in this conversation** — and when the user has said so, they do it without
-  asking again. Not asked yet → finish, commit, and offer the exact command.
+  asking again. Not asked yet → finish, commit, and offer the exact command. Local secret
+  files ({SECRET_FILES}) may be read and updated; their values never reach a commit, a log,
+  or a report.
 - **Stay in your lane.** Each agent focuses on what it owns (table below). A small adjacent
   edit the task needs is fine and gets named in the report; anything larger goes to its owner.
 - **Senior ladder before any code:** (1) does this need to exist? (2) is it already in this
@@ -55,7 +57,7 @@ short version, which holds even if you read nothing else:
 ## Agent team
 | Agent | Focus (owns) | Hands off to |
 |---|---|---|
-| **Main agent** (the session itself — no file) | Plans, dispatch, tracking, small direct changes, `AGENTS.md`, roadmaps | all agents |
+| **Main agent** (the session itself — no file) | Plans, dispatch, tracking, small direct changes; `AGENTS.md`, agent files, roadmaps; **shared root files** — {SHARED_ROOT_FILES e.g. root `package.json`, `Makefile`, lockfiles, `.github/workflows/**`, lint/format/tsconfig} — which it edits itself or assigns to one builder at a time | all agents |
 {ROSTER_ROWS — one per subagent: | name | owned paths/responsibilities | next role |}
 | code-reviewer | Independent review of a diff, on the user's request; logs minor issues to `documentation/known-issues.md` | main agent |
 

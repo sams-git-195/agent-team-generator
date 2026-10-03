@@ -144,6 +144,15 @@ Supersedes Decision 1, v2.2–v2.4 and v3.2 where they conflict.
 6. **code-reviewer** core role: user-invoked, independent, reviews the diff and around it,
    grades 🔴 Blocker / 🟠 Should fix / 🟡 Nit / 🔵 FYI / 🟣 Minor, runs a mutation check,
    logs Minors to `documentation/known-issues.md`, and returns fix prompts.
+8. **One scale.** Self-QA, qa-tester and code-reviewer all grade on the five lights, defined
+   once in protocol §5; QA fails on any 🔴 or 🟠, and qa-tester may log 🟣 to known-issues too.
+9. **Tests are a gate on every change** — no "only when a risk surface is touched" tier.
+10. **Local secrets are readable and editable** by agents; the rule is that their values never
+    reach a commit, a log, a report or client-shipped code.
+11. **Shared root files** (root manifests, lockfiles, CI, tooling config) belong to the main
+    agent. Page-doc filenames follow a route → filename rule. The optional security review
+    has fixed slots in protocol §5 and the qa-tester checklist. `{RISK_SURFACES}` is always a
+    bracketed list after the words "risk surface".
 7. Verifier and smoke test reworked for all of the above; the builder-glob overlap check is
    gone with the `edit` maps and is now a judgment check in SKILL.md Step 6.
 

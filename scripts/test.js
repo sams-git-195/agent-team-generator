@@ -128,6 +128,25 @@ check(/Mutation check/.test(reviewer) && /shasum/.test(reviewer), 'code-reviewer
 check(/Fix prompt — required/.test(reviewer) && /known-issues\.md/.test(reviewer), 'code-reviewer: emits fix prompts and logs minors to known-issues.md');
 check(/known-issues\.md/.test(ref('documentation-convention.md')), 'documentation convention seeds known-issues.md');
 
+// One scale, one meaning per placeholder, tests always a gate.
+const qa = fs.readFileSync(path.join(templatesDir, 'qa-tester.md'), 'utf8');
+for (const light of ['🔴 **Blocker**', '🟠 **Should fix**', '🟡 **Nit**', '🔵 **FYI**', '🟣 **Minor**']) {
+  check(qa.includes(light) && protocolTpl.includes(light), `lights shared: ${light} in qa-tester and protocol §5`);
+}
+check(!/\*\*(Critical|High|Medium|Low)\*\*:/.test(qa) && /any 🔴 or 🟠 ⇒ FAIL/.test(qa), 'qa-tester: no second severity scale; fails on 🔴 or 🟠');
+for (const file of templates) {
+  const text = fs.readFileSync(path.join(templatesDir, file), 'utf8');
+  const bare = [...text.matchAll(/.{0,12}\{RISK_SURFACES\}/g)].map((m) => m[0]).filter((x) => !/\(\{RISK_SURFACES\}$/.test(x));
+  check(bare.length === 0, `${file}: {RISK_SURFACES} only appears as a bracketed list${bare.length ? ` (${bare.join(' | ')})` : ''}`);
+  check(!/\{TEST_COMMAND\}[^\n]{0,20}\bif\b|CONDITIONAL_GATES/.test(text), `${file}: the test run is never conditional`);
+}
+check(!/CONDITIONAL_GATES/.test(protocolTpl) && /test suite is one of the gates on\s+every change/.test(protocolTpl), 'protocol: tests are a gate on every change');
+check(/Local secrets are not gated/.test(protocolTpl) && !/editing secret files/.test(protocolTpl + agentsTplEarly()), 'secrets: local secret files are readable and editable, never exposed');
+check(/SHARED_ROOT_FILES/.test(protocolTpl) && /SHARED_ROOT_FILES/.test(agentsTplEarly()), 'shared root files (manifests, CI, tooling) are owned by the main agent');
+check(/SECURITY_REVIEW_PARAGRAPH/.test(protocolTpl) && /SECURITY_REVIEW_LINE/.test(qa), 'security review has a slot in protocol §5 and the qa-tester checklist');
+check(/`\/invoices\/:id` → `invoices-detail\.md`/.test(ref('documentation-convention.md')), 'documentation convention: page-doc filename rule for nested routes');
+function agentsTplEarly() { return ref('agents-md-template.md'); }
+
 // --- 3. Skill/interview cross-references ------------------------------------------------
 const skillMd = fs.readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8');
 const interview = ref('interview.md');

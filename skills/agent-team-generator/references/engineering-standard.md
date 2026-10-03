@@ -96,7 +96,14 @@ means ask the user the five questions in that row and fill from the answers.
 | **Rust** | no `unwrap`/`expect` outside tests (use `?` with typed errors); `unsafe` blocks commented | `cargo clippy -- -D warnings` · `cargo fmt --check` · `cargo test` with one real test | config into a typed struct at startup; `.env` git-ignored if dotenv is used | `unsafe`, raw HTML in templates, `Command` with user input | `println!`/`dbg!` in library code (use `tracing`) |
 | **Other** | ask: the language's escape hatch, and its lint rule that bans it | ask: typechecker · linter · formatter · test runner | ask: where env lives, what prefix ships to clients | ask: the raw-HTML / eval / shell-injection APIs | ask: the debug-print call |
 
+`{RISK_SURFACES}` is always filled with the same plain list ("money math, auth and
+permissions, migrations, Stripe") and only ever appears in brackets after the words "risk
+surface" — one filling fits every sentence.
+
+`{GATE_COMMANDS}` / `{QUALITY_GATES_LIST}` always mean the FULL gate list, test command
+included; no generated file makes the test run conditional.
+
 Also stack-dependent, asked in interview Phase 2 rather than tabled: `{BREAKPOINTS}` (web:
 375 / 768 / 1440 px; native: the two device classes the app targets), `{SECRET_FILES}` (the
-file agents must never edit, e.g. `.env`), and the package managers present (drive the
+local secret file, e.g. `.env` — readable and editable, never committed or exposed), and the package managers present (drive the
 install rows in `permission-policy.md`).

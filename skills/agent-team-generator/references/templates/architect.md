@@ -81,7 +81,7 @@ and gates ({GATE_COMMANDS}, ls, grep, git log/diff). You take no user-gated acti
 ## Your Workflow (follow in order)
 
 1. Read the request and the product-specialist spec (if one exists). Note affected roles and
-   whether any {RISK_SURFACES} is touched.
+   whether any risk surface ({RISK_SURFACES}) is touched.
 2. Read `AGENTS.md`. {PROJECT_SKILL_STEP if applicable}
 3. Explore the codebase: grep similar features, read the files this will touch, confirm data
    shapes in {SCHEMA_LOCATIONS}.

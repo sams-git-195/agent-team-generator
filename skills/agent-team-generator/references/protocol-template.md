@@ -63,7 +63,9 @@ Either way, as lead you:
   Sequence by dependency: {SEQUENCING_ORDER e.g. migrations → server → hooks → UI → QA};
   shared prerequisites ({SHARED_EARLY_ITEMS e.g. i18n keys, types}) come first.
 - **Keep parallel work apart.** Two agents never edit the same file at once; sequence any
-  shared file explicitly (ownership map in `AGENTS.md`).
+  shared file explicitly (ownership map in `AGENTS.md`). The shared root files
+  ({SHARED_ROOT_FILES e.g. root `package.json`, `Makefile`, CI workflows, tooling config})
+  are yours: edit them yourself or assign the edit to one builder per task.
 - **Relay questions.** Subagents cannot talk to the user — surface their "Questions for the
   user" verbatim before anyone proceeds on a guess.
 - **Track with evidence.** Status comes from reports, diffs, and command output — never
@@ -215,20 +217,32 @@ descriptive (what and why), not implementation dumps.
 of `{AGENT_DIR}/qa-tester.md`:
 
 1. `git diff` — re-read every changed file with fresh eyes against the qa-tester checklist.
-2. Run and paste real output: {QUALITY_GATES_LIST}{CONDITIONAL_GATES e.g. + `npm run test` if
-   money was touched}.
-3. Findings as `| Severity | File | Line | Issue |`. Fix every Critical and Medium finding,
-   re-run the gate.
+2. Run and paste real output: {QUALITY_GATES_LIST} — the test suite is one of the gates on
+   every change, not only when a risk surface is touched.
+3. Findings as `| Light | File | Line | Issue |` using the lights below. Fix every 🔴 and 🟠,
+   re-run the gates.
 4. The **last line** of your completion report is `QA PASS` or `QA FAIL (reason: …)`. Never
    soften a fail into "mostly working".
 
 For anything larger than a small change, dispatch the qa-tester subagent instead of
 self-reviewing — fresh context catches what the author cannot.
 
+**The lights — one scale for self-QA, qa-tester and code-reviewer:**
+
+| Light | Meaning | Effect |
+|---|---|---|
+| 🔴 **Blocker** | Critical or high: security hole, data loss, wrong result on a risk surface, broken build or failing gate, feature broken for a role, no tests for new behaviour, a big gap against the spec | QA FAIL · review BLOCKED |
+| 🟠 **Should fix** | Below the engineering standard or the project's guidelines: missing state or error handling, ungraceful user-facing error, thin tests or tests that cannot fail, something re-implemented, a Design-bar slop item, docs not updated | QA FAIL · review FIX FIRST |
+| 🟡 **Nit** | A quick quality win: naming, a simpler expression, small duplication | never blocks |
+| 🔵 **FYI** | Worth knowing, nothing to do | never blocks |
+| 🟣 **Minor** | A real but small issue, often in code around the change | logged to `documentation/known-issues.md` with a fix prompt; never blocks |
+
+{SECURITY_REVIEW_PARAGRAPH — only if the user chose the security-review option in interview Phase 9, else delete this line: "**Security review.** Before a merge that touches a risk surface, run `/security-review` (Claude Code built-in; OpenCode: the generated `.opencode/commands/security-review.md`) and treat its findings on the same lights."}
+
 **Code review (when the user asks for one).** Dispatch `code-reviewer` with the diff range.
 It reviews independently — it has not seen the author's reasoning, so do not paste yours
-into the prompt. Relay its report to the user as written: the light table (🔴 Blocker ·
-🟠 Should fix · 🟡 Nit · 🔵 FYI · 🟣 Minor/logged) and its fix prompts. Fixing is a separate
+into the prompt. Relay its report to the user as written: the findings on the lights above
+and its fix prompts. Fixing is a separate
 step the user chooses; when they say "fix them", dispatch the owning agent with the
 reviewer's fix prompt unchanged, then re-review.
 
@@ -239,7 +253,8 @@ e.g. `opencode.json` and `.claude/settings.json`}) — the harness will let you 
 and run almost any command. **A permission is not an instruction.** What you may do is set by
 what the user has asked for.
 
-**Free — do it without asking:** read anything; edit any file the task needs; run gates,
+**Free — do it without asking:** read anything; edit any file the task needs, local secret
+files included; run gates,
 tests, builds and dev servers; create branches; `git add` and `git commit` (scoped, clear
 message, only files touched for the task); install a dependency the task requires (flag it
 in the report).
@@ -252,9 +267,14 @@ in the report).
 - destructive git: force-push, `reset --hard`, `clean`, deleting branches, discarding
   uncommitted work you did not create
 - deleting files or data the task did not create; dropping tables or data
-- editing secret files ({SECRET_FILES}), or printing, copying or committing their values
-  (the app loading them at runtime is fine); sending messages, or calling live or paid
-  external services ({LIVE_TOOLS e.g. the Stripe CLI in live mode})
+- sending messages, or calling live or paid external services ({LIVE_TOOLS e.g. the Stripe
+  CLI in live mode}); changing secrets anywhere that is not this machine (hosting dashboards,
+  CI secrets, a shared vault)
+
+**Local secrets are not gated.** Read and update {SECRET_FILES e.g. `.env`} when the task
+needs it — they are local to this machine. What never happens, instructed or not: a secret
+value in a commit, a log line, a report, or client-shipped code. Add the variable's name to
+the example file whenever you add one.
 
 **How an instruction works:**
 

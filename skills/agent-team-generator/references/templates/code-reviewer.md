@@ -3,7 +3,7 @@
 A core role in every roster. It differs from qa-tester on purpose: qa-tester runs after every
 implementation task and answers "does this feature work?" with PASS/FAIL; code-reviewer runs
 **only when the user asks**, reads the diff cold with no knowledge of the author's reasoning,
-and answers "is this good enough to merge?" with a traffic-light report and ready-to-run fix
+and answers "is this good enough to merge?" on the same five lights, with a report and ready-to-run fix
 prompts. Fill every `{PLACEHOLDER}`; delete *(omit …)* lines that don't apply.
 `{MAIN_BRANCH}` is read from the target repo in Step 0 (default `main`);
 `{TEST_COMMAND_NARROW}` is the single-file form of the test command from interview Phase 2.8.
@@ -57,7 +57,7 @@ uncommitted changes (`git status`, `git diff`). And **around the diff**: every c
 changed function, the rest of each changed file, the tests that cover it, the docs that
 describe it. A diff that is correct in isolation and breaks its caller is a Blocker.
 
-## The lights (every finding gets exactly one)
+## The lights (every finding gets exactly one — the same scale as protocol §5 and qa-tester)
 
 | Light | Meaning | Use it for |
 |---|---|---|
@@ -74,7 +74,7 @@ and say why in the finding. Never pad: five real findings beat twenty.
 
 1. **Scope it.** Run `git status`, the diff, and `git log` for the range. List the changed
    files and what the change claims to do (commit messages, spec, task). Name the
-   {RISK_SURFACES} it touches — they get the slow pass. Record the starting state:
+   risk surfaces ({RISK_SURFACES}) it touches — they get the slow pass. Record the starting state:
    `git diff | shasum` — you will need it in step 5.
 2. **Run the gates first.** {GATE_COMMANDS}. Quote real output. A failing gate is a 🔴 and
    you keep reviewing.

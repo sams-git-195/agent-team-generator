@@ -125,9 +125,9 @@ place. Write plain JSON (no comments) so the verifier can parse it.
 }
 ```
 The explicit rule sits after OpenCode's built-in defaults, so it also lifts the default
-`external_directory` and `.env`-read prompts. Say so; if the user wants those two prompts
-back, append `{ "action": "external_directory", "resource": "*", "effect": "ask" }` and
-`{ "action": "read", "resource": "*.env", "effect": "ask" }`.
+`external_directory` and `.env`-read prompts. That is intended: local secret files are the
+agents' to read and update (protocol §6 — values never committed, logged or reported). Say
+so in the hand-over.
 
 **Open / Guarded / Standard** — the same file, with rules appended in order:
 ```json

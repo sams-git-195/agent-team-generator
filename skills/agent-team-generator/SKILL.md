@@ -73,7 +73,9 @@ code-reviewer), the lane map (globs per role, shared files that must be sequence
 matrix (CC baselines + escalation triggers from risk surfaces; OC `provider/model#variant`
 per agent), and — on greenfield — any **prescribed conventions** the interview didn't supply
 (the client-singleton path, the money module, schema/migration and test locations, the
-design-token file, who owns root manifests and CI files), labelled as proposals, not facts. **Get
+design-token file), labelled as proposals, not facts. Root manifests, lockfiles, CI
+workflows and tooling config are the main agent's shared root files unless the roster has a
+devops-engineer — list them in the lane map so no file is unowned. **Get
 explicit approval before writing any file.**
 
 **Step 3 — Foundation files.** Generate in this order, filling every placeholder from the

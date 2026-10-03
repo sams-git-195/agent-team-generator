@@ -46,9 +46,10 @@ not a detour.
 
 **User-gated actions (protocol §6).** Commit your reviewed work freely, with clear
 messages. `git push`, PRs, {DEPLOY_COMMANDS}, migrations against a non-local database,
-destructive git, deleting anything the task did not create, and editing secret files
-({SECRET_FILES e.g. `.env` — `.env.example` is yours to edit}) happen only when your dispatch
-prompt passes on the user's instruction for it — and then you do it without asking again. Otherwise finish, commit, and put the
+destructive git, and deleting anything the task did not create happen only when your
+dispatch prompt passes on the user's instruction for it — and then you do it without asking
+again. Local secret files ({SECRET_FILES e.g. `.env`}) are yours to read and update when the
+task needs it; their values never go into a commit, a log, a report, or client-shipped code. Otherwise finish, commit, and put the
 ready-to-run command in your report.
 
 ## NON-NEGOTIABLE RULES
@@ -70,7 +71,7 @@ ready-to-run command in your report.
    {SECRET_LOCATIONS}.
 7. **{LANGUAGE_HYGIENE_RULE — from the stack hygiene table in engineering-standard.md, e.g. zero `any`, no `console.log` ships}.**
    {GATE_COMMANDS} must pass.
-8. **Unclear data shape, business rule, or {RISK_SURFACES} calculation → stop and report the
+8. **Unclear data shape, business rule, or risk-surface calculation ({RISK_SURFACES}) → stop and report the
    question.** Never implement a guess.
 
 ## Grounding Rules
@@ -101,7 +102,7 @@ ready-to-run command in your report.
 7. Handle the unhappy path as you go: every call that can fail returns or raises an error
    the caller can act on, with context — {ERROR_SHAPE e.g. a typed error result the UI can
    map to a message}.
-8. Verify: run {GATE_COMMANDS} ({TEST_COMMAND} if {RISK_SURFACES} touched) — paste real output.
+8. Verify: run {GATE_COMMANDS} — tests included, on every change — and paste real output.
 9. Self-review: read your entire `git diff` as a hostile reviewer — debug code, accidental
    deletions, out-of-scope edits. Fix what you find.
 10. Run the Final Self-Check, commit, hand off.
@@ -115,7 +116,7 @@ through the money module. Write it with this stack's real syntax.}
 ## FINAL SELF-CHECK (run before handing off)
 
 - [ ] {GATE_COMMANDS} all pass — actually ran, output quoted if anything failed
-- [ ] {RISK_SURFACES} touched ⇒ tests pass; logic pure + imported from the right module
+- [ ] Risk surface touched ({RISK_SURFACES}) ⇒ its tests written first and proven able to fail; logic pure + imported from the right module
 - [ ] Senior ladder climbed — nothing speculative, nothing re-implemented; error paths handled
 - [ ] Full `git diff` read; only task-required changes; anything outside my lane is listed
 - [ ] New {ACCESS_CONTROL_UNIT}s have per-role rules + indexes for filtered columns

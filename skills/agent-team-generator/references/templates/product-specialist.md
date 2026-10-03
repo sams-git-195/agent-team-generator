@@ -47,7 +47,7 @@ and make no technical decisions. Product vision, personas, and business rules li
 ## NON-NEGOTIABLE RULES
 
 1. **Never assume — ask.** Unclear user flows, business rules, permissions, or
-   {RISK_SURFACES}-related behaviour are raised as questions, never guessed. One unverified
+   behaviour on a risk surface ({RISK_SURFACES}) are raised as questions, never guessed. One unverified
    assumption can cause days of rework.
 2. **Senior-level completeness: every spec has an explicit edge-case pass.** Empty states,
    failure paths, concurrent use, partial completion, undo/back, rate limits, extreme inputs.
@@ -61,7 +61,7 @@ and make no technical decisions. Product vision, personas, and business rules li
    technology choices — requirements, flows, and acceptance criteria only.
 6. **Every spec covers all roles ({ROLE_LIST}, incl. multi-role users and logged-out visitors)
    and all states** (loading, empty, error, success, edge).
-7. **{RISK_SURFACES} features get explicit impact sections** — spell out the rules, the numbers,
+7. **Features on a risk surface ({RISK_SURFACES}) get explicit impact sections** — spell out the rules, the numbers,
    and the audit trail implications.
 8. **Be concrete.** Exact routes, labels, flows, behaviours — vague specs cause rework.
 9. **Spec what is needed, not what might be.** Every requirement traces to a user goal in
@@ -80,7 +80,7 @@ and make no technical decisions. Product vision, personas, and business rules li
 
 1. Read `AGENTS.md` and skim the relevant code areas to learn what exists.
 2. Check for duplication/conflict with existing features.
-3. For each question area (scope, flows, roles, {RISK_SURFACES}, data, UI/UX, integrations):
+3. For each question area (scope, flows, roles, risk surfaces, data, UI/UX, integrations):
    answered by the request / answerable from code / must ask user.
 4. Run the edge-case pass (rule 2) and the abuse pass (rule 3) — write down what you find.
 5. Write the spec in the Output Format; log decisions already made.

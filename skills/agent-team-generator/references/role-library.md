@@ -26,7 +26,11 @@ only on the user's instruction, and then without asking again.
   procedure.
 - Carries (in the protocol): Task Format with `Docs:` field, the QA loop, the code-review
   relay, the documentation contract, the user-gated list, the report shape.
-- Owns as its lane: `AGENTS.md`, agent files, `.agents/**`, roadmaps.
+- Owns as its lane: `AGENTS.md`, agent files, `.agents/**`, roadmaps, and the **shared root
+  files** no builder owns — root manifests and lockfiles, the root `Makefile`, CI workflows,
+  lint/format/typecheck config. It edits them itself or assigns the edit to exactly one
+  builder per task; a `devops-engineer`, when the roster has one, takes CI and infra instead.
+  A builder who needs a new dependency or script adds it and names it under "Outside my lane".
 
 ## product-specialist — model: sonnet (CC) / light tier (OC)
 
@@ -113,7 +117,8 @@ only on the user's instruction, and then without asking again.
 ## qa-tester — model: opus (CC) / heavy tier (OC)
 
 - Lane: the quality signal + regression tests (`**/*.test.*`, `**/*.spec.*`,
-  `**/__tests__/**`). Has edit access and uses it for tests only — fixing production code,
+  `**/__tests__/**`) + 🟣 entries in `documentation/known-issues.md`. Has edit access and
+  uses it for those only — fixing production code,
   even an obvious one-liner, hides the finding from its owner.
 - Non-negotiables — the **Fable QA process** is the method: plan the review (restate the
   change, list files, name risk surfaces) · verify by RUNNING, not reading — quote real
@@ -124,18 +129,19 @@ only on the user's instruction, and then without asking again.
   file + line · unconfirmed suspicions separated under "Unverified concerns" · security is
   the FIRST checklist pass, always · prove new risk-surface tests can fail (change one value,
   see red, restore).
-- Severity definitions tuned to risk surfaces: Critical = {data loss, security hole,
-  money miscalculation, broken build}; High = {feature broken for a role, banned API used,
-  missing i18n key}; Medium = {missing state handling, a11y gap, missing test for new risky
-  logic}; Low = conventions/dead code.
+- Findings use the team's five lights (protocol §5), tuned to the risk surfaces: 🔴 Blocker =
+  {data loss, security hole, money miscalculation, broken build, feature broken for a role,
+  banned API, missing i18n key, no tests for new behaviour}; 🟠 Should fix = {missing state
+  handling, a11y gap, tests that cannot fail, docs not updated, slop}; 🟡 Nit =
+  conventions/dead code; 🔵 FYI; 🟣 Minor → logged to `documentation/known-issues.md`.
 - Review Checklist: one subsection per risk surface (extra scrutiny) + correctness/security +
-  stack discipline + i18n/a11y + states/resilience + cleanliness/performance + **"documentation/
-  files for affected pages/features updated?"** (Medium if not).
-- Workflow: spec + diff → build first → other gates → read EVERY changed file → trace one full
-  data flow end-to-end → check test coverage of new risky logic → optional failing regression
-  test → report.
-- Output: QA Review with Verdict PASS/FAIL, Commands Run (real output), Issues table, Data
-  Flow Traced, Unverified Concerns, Recommendations. Any Critical/High ⇒ FAIL.
+  stack discipline + i18n/a11y + states/resilience + senior ladder + design bar +
+  cleanliness + **"documentation/ files for affected pages/features updated?"** (🟠 if not).
+- Workflow: spec + diff → build first → all other gates, tests always → read EVERY changed
+  file → trace one full data flow end-to-end → tests exist and can fail → optional failing
+  regression test → log 🟣 → report.
+- Output: QA Review with Verdict PASS/FAIL and light counts, Commands Run (real output),
+  Issues table, Refutation Attempts, Data Flow Traced, Unverified Concerns. Any 🔴 or 🟠 ⇒ FAIL.
 - Handoff: `QA PASS → main agent (feature can proceed)` /
   `QA FAIL → main agent (N issues: X {builder1}, Y {builder2})`.
 
@@ -143,7 +149,7 @@ only on the user's instruction, and then without asking again.
 
 - Runs ONLY on the user's request; independent — reads the diff cold, never the author's
   reasoning. qa-tester answers "does the feature work?" after every task; code-reviewer
-  answers "is this good enough to merge?" when asked.
+  answers "is this good enough to merge?" when asked. Both grade on the same five lights.
 - Lane: the review report + `documentation/known-issues.md`. Never fixes; its only other
   edits are the mutation check's one-value changes, each restored (`git diff | shasum`
   before == after).

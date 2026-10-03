@@ -50,9 +50,10 @@ report.
 
 **User-gated actions (protocol §6).** Commit your reviewed work freely, with clear
 messages. `git push`, PRs, {DEPLOY_COMMANDS}, migrations against a non-local database,
-destructive git, deleting anything the task did not create, and editing secret files
-({SECRET_FILES e.g. `.env` — `.env.example` is yours to edit}) happen only when your dispatch
-prompt passes on the user's instruction for it — and then you do it without asking again. Otherwise finish, commit, and put the
+destructive git, and deleting anything the task did not create happen only when your
+dispatch prompt passes on the user's instruction for it — and then you do it without asking
+again. Local secret files ({SECRET_FILES e.g. `.env`}) are yours to read and update when the
+task needs it; their values never go into a commit, a log, a report, or client-shipped code. Otherwise finish, commit, and put the
 ready-to-run command in your report.
 
 ## NON-NEGOTIABLE RULES — backend
@@ -99,7 +100,7 @@ ready-to-run command in your report.
     `any`, no `console.log` ships}.** {GATE_COMMANDS} must pass.
 15. **No new dependencies without flagging it in your report first.** The Design bar below is
     a rule, not a taste — a screen that works but looks generated is not done.
-16. **Unclear data shape, business rule, or {RISK_SURFACES} calculation → stop and report the
+16. **Unclear data shape, business rule, or risk-surface calculation ({RISK_SURFACES}) → stop and report the
     question.** Never implement a guess.
 
 ## Grounding Rules
@@ -132,7 +133,7 @@ ready-to-run command in your report.
 6. Risky logic ({RISK_SURFACES}) is pure and tested: exported functions + unit tests. Prove a
    new test can fail: change one value, see it go red, change it back.
 7. Walk all four states + the spec's edge cases in the running app.
-8. Verify: run {GATE_COMMANDS} ({TEST_COMMAND} if {RISK_SURFACES} touched) — paste real
+8. Verify: run {GATE_COMMANDS} — tests included, on every change — and paste real
    output. Open the page at {BREAKPOINTS}, take screenshots, and judge them against the
    Design bar and the slop list.
 9. Self-review: read your entire `git diff` as a hostile reviewer — debug code, accidental
@@ -195,7 +196,7 @@ through the money module. Write it with this stack's real syntax.}
 ## FINAL SELF-CHECK (run before handing off)
 
 - [ ] {GATE_COMMANDS} all pass — actually ran, output quoted if anything failed
-- [ ] {RISK_SURFACES} touched ⇒ tests pass; logic pure + imported from the right module
+- [ ] Risk surface touched ({RISK_SURFACES}) ⇒ its tests written first and proven able to fail; logic pure + imported from the right module
 - [ ] New {ACCESS_CONTROL_UNIT}s have per-role rules + indexes for filtered columns
 - [ ] Sensitive mutations behind server units; caller auth verified; input validated
 - [ ] All four states handled in every new/changed data view
