@@ -51,10 +51,15 @@ The bar does not scale down with the model — the process compensates.
   timezone conversion, failure of the external call.
 - Prefer pure, unit-testable functions for the risky logic; name what must be tested.
 
-## 6. Minimal, deliberate diffs
+## 6. The senior ladder, then a deliberate diff
 
-- The smallest change that fully solves the task. No drive-by refactors — flag improvements as
-  `TODO:` with context instead.
+- Before writing code, climb the ladder and stop at the first rung that answers: does this
+  need to exist at all (speculative → skip it, say so in one line) → is it already in this
+  codebase (reuse it — look before you write) → does an already-installed dependency solve it
+  → can it be one line → only then, the minimum code that works as intended.
+- The floor under "minimum": error handling, graceful user-facing failures, every state and
+  every part of the user experience, and the full ask. Clean is not thin.
+- No drive-by refactors — note improvements in the report instead.
 - Match the surrounding code's conventions, comment density, and naming.
 - Comments state constraints the code can't show — never narrate the change or address a reviewer.
 
@@ -73,12 +78,17 @@ The bar does not scale down with the model — the process compensates.
 - End with the explicit verdict line the role defines (`QA PASS` / `QA FAIL (reason: …)`,
   `{ROLE} Complete → …`). Done means gates passed, not code written.
 
-## 9. Scope contracts are hard
+## 9. Open access, held by judgment
 
-- Each role may only edit its owned paths. A one-character fix outside them is a violation —
-  report it with file + line and the owning role instead.
-- Permission to do X once is not standing permission. Deploys, pushes, and destructive commands
-  need the user's explicit go-ahead *each time*.
+- Every agent can edit every file and run almost any command. Each role still works in its
+  own lane: a small adjacent change the task needs is fine and gets named in the report;
+  anything larger goes to the role that owns it.
+- **A permission is not an instruction.** Committing is free. Pushing, opening or merging
+  PRs, deploying, migrating a shared database, destructive git, deleting what the task did
+  not create — only when the user has asked for it in the conversation.
+- When the user HAS asked, do it without asking again — that is what the open permissions
+  are for. The instruction covers what it says, for that task; it is not a standing grant.
+- Unsure whether something is gated? Hard to undo, or visible outside this machine → it is.
 
 ## Red flags — stop and restart the step
 
@@ -91,3 +101,7 @@ The bar does not scale down with the model — the process compensates.
 | "It probably passes" | Run it. Paste it. |
 | "The business rule is obviously Y" | Obvious guesses cause days of rework. Ask. |
 | "Third retry will work" | Same input, same error. Stop, report verbatim. |
+| "I'll write a quick helper for this" | It probably exists three files over. Grep first. |
+| "Error handling can come later" | Later never ships. It is part of the minimum. |
+| "The tool let me, so I should" | Permission is not instruction. Did the user ask? |
+| "I'll ask before pushing" (when the user said push) | They already told you. Do it. |

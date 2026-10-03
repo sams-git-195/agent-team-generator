@@ -37,12 +37,15 @@ check(exists(protocolPath), '.agents/rules/claude-agent-protocol.md exists');
 check(exists(P('documentation', 'README.md')), 'documentation/README.md exists');
 
 const ccDir = P('.claude', 'agents');
-const ocDir = P('.opencode', 'agent');
+const ocDir = P('.opencode', 'agents');
+const ocLegacyDir = P('.opencode', 'agent');
+const ocConfigPath = [P('opencode.json'), P('.opencode', 'opencode.json')].find((p) => fs.existsSync(p)) || P('opencode.json');
 const neutralDir = P('.agents', 'agents');
 const hasCC = exists(ccDir);
 const hasOC = exists(ocDir);
 const hasNeutral = exists(neutralDir);
-check(hasCC || hasOC || hasNeutral, 'at least one agent directory exists (.claude/agents, .opencode/agent, .agents/agents)');
+check(hasCC || hasOC || hasNeutral, 'at least one agent directory exists (.claude/agents, .opencode/agents, .agents/agents)');
+check(!exists(ocLegacyDir), 'no legacy OpenCode 1 directory (.opencode/agent/ — OpenCode 2 reads .opencode/agents/)');
 
 if (hasCC) {
   check(exists(P('CLAUDE.md')), 'CLAUDE.md exists (Claude Code harness)');
@@ -50,8 +53,11 @@ if (hasCC) {
     const c = read(P('CLAUDE.md'));
     check(/@AGENTS\.md/.test(c) && /@\.agents\/rules\/claude-agent-protocol\.md/.test(c), 'CLAUDE.md imports AGENTS.md and the protocol');
   }
-  check(!exists(path.join(ccDir, 'project-manager.md')), 'no .claude/agents/project-manager.md (PM is the main session)');
   check(exists(P('.claude', 'settings.json')), '.claude/settings.json exists (permission tier for Claude Code)');
+}
+if (hasOC) check(exists(ocConfigPath), 'opencode.json exists (permission tier for OpenCode 2)');
+for (const d of [ccDir, ocDir, neutralDir]) {
+  if (exists(d)) check(!exists(path.join(d, 'project-manager.md')), `no ${path.relative(root, d)}/project-manager.md (the main agent leads; there is no PM file)`);
 }
 
 // ---------------------------------------------------------------- 2. placeholders
@@ -85,9 +91,9 @@ function walk(dir, out = []) {
 }
 
 const generated = [
-  P('AGENTS.md'), P('CLAUDE.md'), P('GEMINI.md'), protocolPath, P('.claude', 'settings.json'),
+  P('AGENTS.md'), P('CLAUDE.md'), P('GEMINI.md'), protocolPath, P('.claude', 'settings.json'), ocConfigPath,
   ...walk(ccDir), ...walk(ocDir), ...walk(neutralDir), ...walk(P('documentation')),
-  ...walk(P('.opencode', 'command')),
+  ...walk(P('.opencode', 'commands')),
 ].filter(exists);
 
 for (const f of generated) {
@@ -103,21 +109,6 @@ function frontmatter(text) {
 function fmValue(fm, key) {
   const m = fm.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
   return m ? m[1].trim() : null;
-}
-// Lines of an indented YAML sub-block: from `<indent>key:` to the next line at <= indent.
-function subBlock(fm, key, indent) {
-  const lines = fm.split('\n');
-  const start = lines.findIndex((l) => l === `${' '.repeat(indent)}${key}:`);
-  if (start < 0) return null;
-  const out = [];
-  for (let i = start + 1; i < lines.length; i++) {
-    const l = lines[i];
-    if (l.trim() === '') continue;
-    const ind = l.match(/^ */)[0].length;
-    if (ind <= indent) break;
-    out.push(l);
-  }
-  return out;
 }
 
 // ---------------------------------------------------------------- 4. roster vs files
@@ -135,26 +126,29 @@ const rosterNames = new Set();
 const cc = new Set(mdFiles(ccDir).map(stem));
 const oc = new Set(mdFiles(ocDir).map(stem));
 const neutral = new Set(mdFiles(neutralDir).map(stem));
-const rosterMinusPM = new Set([...rosterNames].filter((n) => n !== 'project-manager'));
 const same = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
 const diff = (a, b) => [...a].filter((x) => !b.has(x));
+const rosterCheck = (set, label) => check(same(set, rosterNames), `${label} == AGENTS.md roster${same(set, rosterNames) ? '' : ` (extra: ${diff(set, rosterNames).join(',') || '-'}; missing: ${diff(rosterNames, set).join(',') || '-'})`}`);
 
-if (hasCC) check(same(cc, rosterMinusPM), `.claude/agents == roster minus PM${same(cc, rosterMinusPM) ? '' : ` (extra: ${diff(cc, rosterMinusPM).join(',') || '-'}; missing: ${diff(rosterMinusPM, cc).join(',') || '-'})`}`);
-if (hasOC) check(same(oc, rosterNames), `.opencode/agent == full roster incl. PM${same(oc, rosterNames) ? '' : ` (extra: ${diff(oc, rosterNames).join(',') || '-'}; missing: ${diff(rosterNames, oc).join(',') || '-'})`}`);
-if (hasNeutral) check(same(neutral, rosterNames), `.agents/agents == full roster incl. PM`);
-if (hasCC && hasOC) check(same(cc, new Set([...oc].filter((n) => n !== 'project-manager'))), 'CC roster == OC roster minus PM');
+check(!rosterNames.has('project-manager'), 'roster has no project-manager row (the main agent is not a file)');
+if (hasCC) rosterCheck(cc, '.claude/agents');
+if (hasOC) rosterCheck(oc, '.opencode/agents');
+if (hasNeutral) rosterCheck(neutral, '.agents/agents');
+if (hasCC && hasOC) check(same(cc, oc), 'CC roster == OC roster');
 
 // ---------------------------------------------------------------- 5. per-agent file shape
 function checkAgentFile(file, kind) {
   const text = read(file);
   const rel = path.relative(root, file);
   const fm = frontmatter(text);
-  if (kind !== 'neutral') {
-    check(fm.length > 0, `${rel}: has frontmatter`);
+  if (kind !== 'neutral') check(fm.length > 0, `${rel}: has frontmatter`);
+  if (kind === 'cc') {
     check(fmValue(fm, 'name') === stem(path.basename(file)), `${rel}: frontmatter name matches filename`);
+    check(fmValue(fm, 'tools') === null, `${rel}: no tools: line (agents inherit every tool)`);
   }
   check(/^## Handoff/m.test(text), `${rel}: has a Handoff section`);
-  check(/^## (Scope \(hard contract\)|Scope)/m.test(text), `${rel}: has a Scope contract`);
+  check(/^## Scope/m.test(text), `${rel}: has a Scope & focus section`);
+  check(!/→ project-manager/.test(text), `${rel}: hands off to the main agent, not a project-manager`);
   return { text, fm, rel };
 }
 
@@ -163,83 +157,72 @@ for (const f of mdFiles(neutralDir)) checkAgentFile(path.join(neutralDir, f), 'n
 
 const ocFiles = mdFiles(ocDir).map((f) => ({ name: stem(f), ...checkAgentFile(path.join(ocDir, f), 'oc') }));
 
-// ---------------------------------------------------------------- 6. OpenCode specifics
+// ---------------------------------------------------------------- 6. OpenCode 2 specifics
+const readJson = (p) => { try { return JSON.parse(read(p)); } catch (e) { return null; } };
 if (hasOC) {
-  const pmFile = ocFiles.find((a) => a.name === 'project-manager');
-  if (pmFile) {
-    check(fmValue(pmFile.fm, 'mode') === 'primary', 'OC project-manager is mode: primary');
-    check(fmValue(pmFile.fm, 'model') === null, 'OC project-manager has no model pin');
-    const edit = subBlock(pmFile.fm, 'edit', 2) || [];
-    check(!edit.some((l) => /src|server|app\//.test(l) && /allow/.test(l)), 'OC project-manager edit rights are docs-only (no src/server/app allow)');
-  } else fail('OC project-manager.md exists');
-
-  for (const a of ocFiles.filter((x) => x.name !== 'project-manager')) {
+  for (const a of ocFiles) {
     check(fmValue(a.fm, 'mode') === 'subagent', `${a.rel}: mode: subagent`);
+    const model = fmValue(a.fm, 'model');
+    check(model !== null && /^[\w.-]+\/[\w.:\/-]+(#[\w.-]+)?$/.test(model), `${a.rel}: model is provider/model with an optional #variant (${model || 'missing'})`);
+    const v1 = ['permission', 'tools', 'temperature', 'name', 'maxSteps', 'options'].filter((k) => new RegExp(`^${k}:`, 'm').test(a.fm));
+    check(v1.length === 0, `${a.rel}: no OpenCode 1 frontmatter keys${v1.length ? ` (found: ${v1.join(', ')})` : ''}`);
+    check(!/^permissions:/m.test(a.fm), `${a.rel}: no per-agent permissions list (one policy, in opencode.json)`);
   }
 
-  // One policy: the bash block (and external_directory, if any) identical in every OC file.
-  const policyOf = (a) => {
-    const bash = subBlock(a.fm, 'bash', 2);
-    const ext = fmValue(a.fm, '  external_directory') || (a.fm.match(/^  external_directory:\s*(.+)$/m) || [])[1] || '';
-    return bash ? `${bash.map((l) => l.trim()).join('\n')}\n[external_directory=${ext.trim()}]` : null;
-  };
-  const policies = ocFiles.map((a) => ({ rel: a.rel, policy: policyOf(a) }));
-  for (const p of policies) check(p.policy !== null, `${p.rel}: has a bash permission block`);
-  const distinct = new Set(policies.map((p) => p.policy).filter(Boolean));
-  check(distinct.size <= 1, `bash policy identical across all OC files${distinct.size > 1 ? ` (${distinct.size} variants)` : ''}`);
-
-  const sample = policies.find((p) => p.policy)?.policy || '';
-  // Tolerate trailing "# comments" so a commented line can't silently drop out of the checks.
-  const bashLines = sample.split('\n')
-    .map((l) => l.replace(/\s+#.*$/, ''))
-    .filter((l) => /^".*":\s*(allow|ask|deny)$/.test(l));
-  if (bashLines.length) {
-    check(/^"\*":\s*(allow|ask)$/.test(bashLines[0]), `bash block starts with the "*" default (${bashLines[0]})`);
-    const lastAskIdx = bashLines.map((l) => /: ask$/.test(l)).lastIndexOf(true);
-    const firstDenyIdx = bashLines.findIndex((l) => /: deny$/.test(l));
-    check(firstDenyIdx === -1 || lastAskIdx === -1 || firstDenyIdx > lastAskIdx, 'bash block: deny lines come after ask lines (OpenCode: last match wins)');
-    const isSandbox = bashLines.length === 1 && /allow$/.test(bashLines[0]);
-    if (isSandbox) warn('Sandbox tier: no mechanical deploy guard — the hand-over must say so');
-    else check(bashLines.some((l) => /git push --force\*": deny/.test(l)), 'destructive set present (force push denied)');
+  const config = exists(ocConfigPath) ? readJson(ocConfigPath) : null;
+  const rules = config && Array.isArray(config.permissions) ? config.permissions : null;
+  if (exists(ocConfigPath)) {
+    check(config !== null, 'opencode.json is valid JSON (no comments)');
+    check(!(config && config.permission), 'opencode.json has no OpenCode 1 "permission" map');
+    check(rules !== null, 'opencode.json has a "permissions" rule list');
   }
+  if (rules) {
+    const wellFormed = rules.every((r) => r && typeof r.action === 'string' && typeof r.resource === 'string' && ['allow', 'ask', 'deny'].includes(r.effect));
+    check(wellFormed, 'every permission rule is { action, resource, effect: allow|ask|deny }');
+    const legacy = rules.filter((r) => r && ['bash', 'task'].includes(r.action)).map((r) => r.action);
+    check(legacy.length === 0, `permission rules use OpenCode 2 action names (shell, subagent)${legacy.length ? ` — found ${[...new Set(legacy)].join(', ')}` : ''}`);
+    const first = rules[0] || {};
+    check(first.action === '*' && first.resource === '*' && first.effect === 'allow', 'first permission rule is the allow-all default (edits stay open for every agent)');
+    const lastAskIdx = rules.map((r) => r.effect === 'ask').lastIndexOf(true);
+    const firstDenyIdx = rules.findIndex((r) => r.effect === 'deny');
+    check(firstDenyIdx === -1 || lastAskIdx === -1 || firstDenyIdx > lastAskIdx, 'permission rules: deny rules come after ask rules (OpenCode: last match wins)');
+    const editDeny = rules.some((r) => r.action === 'edit' && r.effect === 'deny');
+    check(!editDeny, 'no edit deny rule (edit access is open; lanes are held by each agent\'s Scope & focus)');
+    const autonomous = rules.every((r) => r.effect === 'allow');
+    if (autonomous) warn('Autonomous tier: nothing is blocked mechanically — protocol §6 (user-gated actions) is the guard; the hand-over must say so');
 
-  // Ownership: builder edit globs must not overlap unless a line is marked "# shared".
-  const builders = ocFiles.filter((a) => !['project-manager', 'qa-tester', 'product-specialist', 'architect'].includes(a.name));
-  const globsOf = (a) => (subBlock(a.fm, 'edit', 2) || [])
-    .filter((l) => /:\s*allow/.test(l) && !/# shared/.test(l))
-    .map((l) => (l.match(/"([^"]+)"/) || [])[1]).filter(Boolean);
-  // Single-pass glob → regex so replacement text is never re-processed.
-  const toRegex = (g) => new RegExp('^' + g.replace(/\*\*\/|\*\*|\*|[.+^${}()|[\]\\]/g, (t) =>
-    t === '**/' ? '(?:.*/)?' : t === '**' ? '.*' : t === '*' ? '[^/]*' : `\\${t}`) + '$');
-  const samplePath = (g) => g.replace(/\*\*\//g, 'x/y/').replace(/\*\*/g, 'x/y').replace(/\*/g, 'x');
-  for (let i = 0; i < builders.length; i++) {
-    for (let j = i + 1; j < builders.length; j++) {
-      const A = builders[i]; const B = builders[j];
-      const overlaps = [];
-      for (const ga of globsOf(A)) for (const gb of globsOf(B)) {
-        if (ga === gb || toRegex(ga).test(samplePath(gb)) || toRegex(gb).test(samplePath(ga))) overlaps.push(`${ga} ~ ${gb}`);
+    // Claude Code settings carry the same shell denies, if CC is also generated.
+    if (hasCC && exists(P('.claude', 'settings.json'))) {
+      const settings = readJson(P('.claude', 'settings.json'));
+      check(settings && settings.permissions, '.claude/settings.json is valid JSON with a permissions key');
+      if (settings && settings.permissions) {
+        const allow = settings.permissions.allow || [];
+        check(allow.includes('Edit') || allow.includes('Edit(**)'), '.claude/settings.json allows Edit (edit access is open)');
+        // Compare shapes, not spacing: `git push * --force*` and `Bash(git push * --force *)`
+        // both normalise to `gitpush--force`.
+        const norm = (x) => x.replace(/^Bash\((.*)\)$/, '$1').replace(/[\s*]/g, '');
+        const ccDeny = (settings.permissions.deny || []).map(norm);
+        const ocDenies = rules.filter((r) => r.action === 'shell' && r.effect === 'deny').map((r) => r.resource);
+        const missing = ocDenies.filter((d) => !ccDeny.some((c) => c === norm(d)));
+        check(missing.length === 0, `.claude/settings.json deny covers every OpenCode shell deny${missing.length ? ` (missing: ${missing.slice(0, 5).join(', ')}${missing.length > 5 ? ', …' : ''})` : ''}`);
       }
-      check(overlaps.length === 0, `ownership: ${A.name} and ${B.name} do not overlap${overlaps.length ? ` (${overlaps.join('; ')}) — mark deliberate shared files with "# shared"` : ''}`);
     }
   }
+} else if (hasCC && exists(P('.claude', 'settings.json'))) {
+  const settings = readJson(P('.claude', 'settings.json'));
+  check(settings && settings.permissions, '.claude/settings.json is valid JSON with a permissions key');
+}
 
-  // Claude Code settings carry the same denies, if CC is also generated.
-  if (hasCC && exists(P('.claude', 'settings.json'))) {
-    let settings = null;
-    try { settings = JSON.parse(read(P('.claude', 'settings.json'))); } catch (e) { settings = null; }
-    check(settings && settings.permissions, '.claude/settings.json is valid JSON with a permissions key');
-    if (settings && settings.permissions) {
-      // Compare shapes, not spacing: OC `git push* --force*` and CC `Bash(git push * --force *)`
-      // both normalise to `gitpush--force`.
-      const norm = (s) => s.replace(/^Bash\((.*)\)$/, '$1').replace(/[\s*]/g, '');
-      const ccDeny = (settings.permissions.deny || []).map(norm);
-      const ocDenies = bashLines.filter((l) => /: deny$/.test(l)).map((l) => l.match(/^"([^"]+)"/)[1]);
-      const missing = ocDenies
-        .filter((d) => !/\|/.test(d)) // pipe-to-shell has no CC equivalent
-        .filter((d) => !ccDeny.some((c) => c === norm(d)));
-      check(missing.length === 0, `.claude/settings.json deny covers every OC deny prefix${missing.length ? ` (missing: ${missing.slice(0, 5).join(', ')}${missing.length > 5 ? ', …' : ''})` : ''}`);
-    }
-  }
+// ---------------------------------------------------------------- 6b. behavioural guard present
+// With open permissions the user-gated list is the guard, so it must exist where agents read it.
+if (exists(protocolPath)) {
+  const proto = read(protocolPath);
+  check(/^## 6\. Autonomy & User-Gated Actions/m.test(proto), 'protocol has §6 Autonomy & User-Gated Actions');
+  check(/senior ladder/i.test(proto), 'protocol embeds the senior ladder');
+}
+check(/^## How we work/m.test(agentsMd) && /user-gated/i.test(agentsMd), 'AGENTS.md has "How we work" with the user-gated rule');
+for (const a of [...mdFiles(ccDir).map((f) => path.join(ccDir, f)), ...mdFiles(ocDir).map((f) => path.join(ocDir, f)), ...mdFiles(neutralDir).map((f) => path.join(neutralDir, f))]) {
+  check(/user-gated/i.test(read(a)), `${path.relative(root, a)}: states the user-gated rule`);
 }
 
 // ---------------------------------------------------------------- 7. gate commands exist
@@ -256,6 +239,7 @@ if (exists(P('package.json'))) {
 }
 
 // ---------------------------------------------------------------- 8. docs seeded
+if (rosterNames.has('code-reviewer')) check(exists(P('documentation', 'known-issues.md')), 'documentation/known-issues.md exists (code-reviewer logs minor issues there)');
 for (const d of ['pages', 'features']) {
   const dir = P('documentation', d);
   check(exists(dir) && fs.readdirSync(dir).length > 0, `documentation/${d}/ exists and is tracked (.gitkeep or a doc)`);
