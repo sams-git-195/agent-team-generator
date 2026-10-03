@@ -190,6 +190,10 @@ function withTree(files, fn) {
 }
 const failLines = (r) => r.out.split('\n').filter((l) => l.startsWith('FAIL'));
 
+// A lowercase first cell in a later AGENTS.md table is not a roster row.
+withTree({ ...goodTree, 'AGENTS.md': goodTree['AGENTS.md'] + '\n## Business rules\n| Role | Sees |\n|---|---|\n| translator | own invoices |\n' },
+  (r) => check(r.code === 0, `verify-team reads roster rows from the Agent team section only${r.code ? `\n${failLines(r).join('\n')}` : ''}`));
+
 withTree(goodTree, (r) => check(r.code === 0, `verify-team passes on a consistent generated tree (Standard tier)${r.code ? `\n${failLines(r).join('\n')}` : ''}`));
 
 // The recommended tier: allow-all in both harnesses passes, with a warning that names the guard.
@@ -224,6 +228,9 @@ const cases = [
   ['AGENTS.md missing How we work', { 'AGENTS.md': agentsNoGuard }, /How we work/],
   ['protocol missing §6', { '.agents/rules/claude-agent-protocol.md': '# Protocol\n\nThe senior ladder. documentation/ `npm run lint` `{ROLE} Complete`.\n' }, /§6 Autonomy/],
   ['missing known-issues.md', { 'documentation/known-issues.md': null }, /known-issues\.md exists/],
+  ['unfilled placeholder in the comma form', { 'AGENTS.md': goodTree['AGENTS.md'] + '\n## {DATA_LAYER_SECTION_NAME, named for the platform}\n' }, /no unfilled placeholders/],
+  ['template prose above the AGENTS.md heading', { 'AGENTS.md': '`AGENTS.md` template below.\n\n' + goodTree['AGENTS.md'] }, /starts with its heading/],
+  ['make gate missing from the Makefile', { 'AGENTS.md': goodTree['AGENTS.md'] + '- `make lint`\n', Makefile: 'test:\n\ttrue\n' }, /exists in the Makefile/],
   ['gate script missing from package.json', { 'package.json': JSON.stringify({ name: 't', scripts: {} }) }, /exists in package.json/],
   ['roster/file mismatch', { '.claude/agents/mobile-developer.md': ccAgent('mobile-developer') }, /== AGENTS\.md roster/],
 ];

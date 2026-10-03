@@ -178,14 +178,13 @@ tool with the agent's ID):
    produced, the exact files in scope, the acceptance criteria, and what is already ruled
    out. If the user has authorised a user-gated action for this task (§6), say so in the
    prompt in their words; otherwise the subagent must not take it.
-3. **Model selection**: each agent's frontmatter pins its baseline; override per-dispatch when
-   a trigger applies. Escalate to the heavy model when the task touches
-   {ESCALATION_TRIGGERS from risk surfaces}; de-escalate to the light model for minor,
-   non-risky changes.
+3. **Model selection**: each agent's frontmatter pins its baseline model. Override it for one
+   dispatch only when the row's trigger applies — step up for work touching
+   {ESCALATION_TRIGGERS from risk surfaces}, step down for minor, non-risky changes.
 
-   | Agent | Baseline | Override |
-   |---|---|---|
-{MODEL_MATRIX_ROWS}
+   | Agent | Claude Code | OpenCode | Step up / down when |
+   |---|---|---|---|
+{MODEL_MATRIX_ROWS e.g. | product-specialist | sonnet | `anthropic/claude-sonnet-5-5` | up to opus for specs touching money or auth | — one row per agent; drop the column of a harness that is not generated; write "—" where a pin is already the top model}
 
 4. **Reject reports without evidence.** Implementer reports must include real gate output and
    end with their handoff line (`{ROLE} Complete → …`). Missing = not done.
@@ -200,6 +199,8 @@ for future model sessions with zero context. Structure:
   what each sees, data read/written, states.
 - `documentation/features/<feature>.md` — one per cross-page feature: what it does in plain
   English, the rules it enforces, which pages surface it, data touched, edge cases.
+- `documentation/specs/<feature>.md` — a product spec or technical design the main agent
+  asked to keep (created on first use).
 - `documentation/known-issues.md` — accepted minor issues, each with a ready-to-run fix
   prompt (written by the code-reviewer; anyone who fixes an entry deletes it).
 
@@ -251,7 +252,8 @@ in the report).
 - destructive git: force-push, `reset --hard`, `clean`, deleting branches, discarding
   uncommitted work you did not create
 - deleting files or data the task did not create; dropping tables or data
-- reading or editing secret files ({SECRET_FILES}); sending messages, or calling live or paid
+- editing secret files ({SECRET_FILES}), or printing, copying or committing their values
+  (the app loading them at runtime is fine); sending messages, or calling live or paid
   external services ({LIVE_TOOLS e.g. the Stripe CLI in live mode})
 
 **How an instruction works:**

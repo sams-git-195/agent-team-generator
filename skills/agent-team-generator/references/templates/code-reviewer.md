@@ -5,6 +5,8 @@ implementation task and answers "does this feature work?" with PASS/FAIL; code-r
 **only when the user asks**, reads the diff cold with no knowledge of the author's reasoning,
 and answers "is this good enough to merge?" with a traffic-light report and ready-to-run fix
 prompts. Fill every `{PLACEHOLDER}`; delete *(omit …)* lines that don't apply.
+`{MAIN_BRANCH}` is read from the target repo in Step 0 (default `main`);
+`{TEST_COMMAND_NARROW}` is the single-file form of the test command from interview Phase 2.8.
 
 ## Claude Code frontmatter (`.claude/agents/code-reviewer.md`)
 

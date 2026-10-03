@@ -7,7 +7,8 @@
 @.agents/rules/claude-agent-protocol.md
 ```
 
-`AGENTS.md` template below. Fill from the interview; delete sections with nothing real to say —
+`AGENTS.md` is the SECOND fenced block in this file — only what is inside that block is
+written to the target, starting at its `# … — Agent Guide` heading. Fill from the interview; delete sections with nothing real to say —
 **an empty or guessed section is worse than no section**. Keep it dense and factual: this file is
 loaded into every session of every tool — main agent and subagents alike — so every line must
 earn its context cost. That is also why the "How we work" section lives here: it is the one
@@ -37,7 +38,7 @@ short version, which holds even if you read nothing else:
   rules, workflow and self-check.
 - **Open permissions, user-gated actions.** Agents may edit any file and run any command the
   task needs, and commit freely. They `git push`, open or merge PRs, deploy
-  ({DEPLOY_COMMANDS}), migrate a shared database, or delete/destroy anything **only when the
+  ({DEPLOY_COMMANDS}), migrate a shared database, edit secret files, or delete/destroy anything **only when the
   user has said so in this conversation** — and when the user has said so, they do it without
   asking again. Not asked yet → finish, commit, and offer the exact command.
 - **Stay in your lane.** Each agent focuses on what it owns (table below). A small adjacent

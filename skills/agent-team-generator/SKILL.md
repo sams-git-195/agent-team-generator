@@ -62,7 +62,9 @@ Phase 5 (never-do list, permission tier, report style), or Phase 7.0 (separate b
 devs vs a single fullstack-developer) — they parameterise everything. After Phase 4, offer
 the **fast path** (interview.md: accept the recommended defaults for the remaining phases in
 one question). Record answers; anything the user defers becomes an explicit `⚠️ undecided`
-marker in the output, never a guess.
+marker in the output, never a guess. On a greenfield repo, settle interview Phase 8's gate
+list here, before Step 3, so the gate commands written into the protocol and agent files are
+final; the scaffolding itself still happens in Step 7.
 
 **Step 2 — Roster proposal (approval gate).** Propose the adapted roster per interview Phase 7:
 role list with one-line justification for each deviation from the core six
@@ -70,7 +72,8 @@ role list with one-line justification for each deviation from the core six
 code-reviewer), the lane map (globs per role, shared files that must be sequenced), the model
 matrix (CC baselines + escalation triggers from risk surfaces; OC `provider/model#variant`
 per agent), and — on greenfield — any **prescribed conventions** the interview didn't supply
-(e.g. a client-singleton path, a design-token file), labelled as proposals, not facts. **Get
+(the client-singleton path, the money module, schema/migration and test locations, the
+design-token file, who owns root manifests and CI files), labelled as proposals, not facts. **Get
 explicit approval before writing any file.**
 
 **Step 3 — Foundation files.** Generate in this order, filling every placeholder from the
@@ -82,8 +85,9 @@ interview:
 2. `AGENTS.md` from `agents-md-template.md` — including the "How we work" section, which is
    what a harness with no auto-loaded protocol relies on; then `CLAUDE.md` (`@AGENTS.md` +
    `@.agents/rules/claude-agent-protocol.md`) when Claude Code is a target. `{AGENT_DIR}` in
-   the protocol is the primary harness's agent directory (`.claude/agents` when Claude Code is
-   a target, else `.opencode/agents`, else `.agents/agents`).
+   the protocol is the harness's agent directory: `.claude/agents`, `.opencode/agents`, or
+   `.agents/agents`. With Both, write it as "your harness's agent directory (`.claude/agents`
+   or `.opencode/agents`)" so neither harness is sent to the other's files.
 
 **Step 4 — Agent files (per the Phase 0 harness choice).** For each core role, start from
 its pre-filled file in `references/templates/` and fill the placeholders — do not re-derive

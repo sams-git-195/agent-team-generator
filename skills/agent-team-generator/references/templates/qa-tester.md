@@ -83,7 +83,7 @@ added. You take no user-gated action (protocol §6).
 - Server units verify caller identity + authorisation; external input validated at the boundary.
 - No secrets client-side or in {CLIENT_ENV_PREFIX} vars; no unsanitised rendered content.
 
-**{RISK_SURFACE_SECTIONS — one short block of specific checks per interview risk surface}**
+{RISK_SURFACE_SECTIONS — one short block of specific checks per interview risk surface, each starting with its own bold lead-in}
 
 **Stack discipline** — {STACK_CHECKS e.g. framework/router version rules, config conventions}.
 **{I18N_A11Y_BLOCK}** — keys in all locale files (grep each); labels/aria/focus/colour rules.

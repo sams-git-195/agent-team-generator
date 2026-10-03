@@ -33,6 +33,7 @@ const stem = (f) => f.replace(/\.md$/, '');
 // ---------------------------------------------------------------- 1. required files
 const protocolPath = P('.agents', 'rules', 'claude-agent-protocol.md');
 check(exists(P('AGENTS.md')), 'AGENTS.md exists');
+if (exists(P('AGENTS.md'))) check(/^# /.test(read(P('AGENTS.md')).trimStart()), 'AGENTS.md starts with its heading (no template prose or CLAUDE.md snippet above it)');
 check(exists(protocolPath), '.agents/rules/claude-agent-protocol.md exists');
 check(exists(P('documentation', 'README.md')), 'documentation/README.md exists');
 
@@ -64,7 +65,7 @@ for (const d of [ccDir, ocDir, neutralDir]) {
 // Unfilled generator placeholders are ALL-CAPS tokens in braces. Fenced code blocks are
 // skipped (roles copy output templates from them); {ROLE} is the protocol's generic token;
 // lowercase {var} is i18n syntax.
-const PLACEHOLDER = /\{[A-Z][A-Z0-9_]+(?:[\s—–-][^}]*)?\}/g;
+const PLACEHOLDER = /\{[A-Z][A-Z0-9_]+(?:[\s,—–-][^}]*)?\}/g;
 const ALLOWED = new Set(['{ROLE}']);
 
 function findPlaceholders(text) {
@@ -115,7 +116,8 @@ function fmValue(fm, key) {
 const agentsMd = exists(P('AGENTS.md')) ? read(P('AGENTS.md')) : '';
 const rosterNames = new Set();
 {
-  const section = agentsMd.split(/^## Agent team/m)[1] || '';
+  // Only the Agent team section: later tables (roles, business rules) are not roster rows.
+  const section = (agentsMd.split(/^## Agent team/m)[1] || '').split(/^## /m)[0];
   for (const line of section.split('\n')) {
     const m = line.match(/^\|\s*([a-z][a-z0-9-]*)(?:\s*\([^)]*\))?\s*\|/);
     if (m) rosterNames.add(m[1]);
@@ -226,16 +228,29 @@ for (const a of [...mdFiles(ccDir).map((f) => path.join(ccDir, f)), ...mdFiles(o
 }
 
 // ---------------------------------------------------------------- 7. gate commands exist
+const gateTexts = [agentsMd, exists(protocolPath) ? read(protocolPath) : '',
+  ...[ccDir, ocDir, neutralDir].flatMap((d) => mdFiles(d).map((f) => read(path.join(d, f))))];
+const quoted = (re) => { const out = new Set(); for (const t of gateTexts) for (const m of t.matchAll(re)) out.add(m[1]); return [...out]; };
+const npmScripts = quoted(/npm run ([\w:.-]+)/g);
+const makeTargets = quoted(/`make ([\w.-]+)`/g);
+const marker = /verify\s+scripts\s+exist\s+after\s+first\s+scaffold/.test(agentsMd);
 if (exists(P('package.json'))) {
   let scripts = {};
   try { scripts = JSON.parse(read(P('package.json'))).scripts || {}; } catch (e) { scripts = {}; }
-  const texts = [agentsMd, exists(protocolPath) ? read(protocolPath) : '', ...ocFiles.map((a) => a.text)];
-  const referenced = new Set();
-  for (const t of texts) for (const m of t.matchAll(/npm run ([\w:.-]+)/g)) referenced.add(m[1]);
-  const missing = [...referenced].filter((s) => !scripts[s]);
+  const missing = npmScripts.filter((x) => !scripts[x]);
   check(missing.length === 0, `every "npm run <script>" quoted as a gate exists in package.json${missing.length ? ` (missing: ${missing.join(', ')})` : ''}`);
-} else if (!/verify\s+scripts\s+exist\s+after\s+first\s+scaffold/.test(agentsMd)) {
+  if (marker) warn('AGENTS.md still carries "verify scripts exist after first scaffold" although package.json exists — remove the marker');
+} else if (npmScripts.length && !marker) {
   warn('no package.json — gate commands could not be verified; AGENTS.md should carry "⚠️ verify scripts exist after first scaffold"');
+}
+if (makeTargets.length) {
+  if (exists(P('Makefile'))) {
+    const mk = read(P('Makefile'));
+    const missing = makeTargets.filter((t) => !new RegExp(`^${t.replace(/[.]/g, '\\.')}\\s*:`, 'm').test(mk));
+    check(missing.length === 0, `every \`make <target>\` quoted as a gate exists in the Makefile${missing.length ? ` (missing: ${missing.join(', ')})` : ''}`);
+  } else if (!marker) {
+    warn('no Makefile — `make` gates could not be verified; AGENTS.md should carry "⚠️ verify scripts exist after first scaffold"');
+  }
 }
 
 // ---------------------------------------------------------------- 8. docs seeded

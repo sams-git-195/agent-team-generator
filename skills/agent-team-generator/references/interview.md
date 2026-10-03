@@ -65,7 +65,8 @@ Ask as a grid; every answer parameterises ownership maps and gotchas.
    unprompted.
 7. Testing: runner, what coverage exists, whether component/E2E testing is available.
 8. Dev commands: dev / build / lint / typecheck / test — exact scripts (these become the
-   quality gates verbatim), **and the directory each runs from**. A monorepo (`web/` + `api/`)
+   quality gates verbatim), **the directory each runs from**, and how to run **one test
+   file** (the code-reviewer's and qa-tester's mutation check runs the narrowest test). A monorepo (`web/` + `api/`)
    needs root-level proxies (`package.json` workspace scripts, a `Makefile`) so one command
    per gate works from the root; propose them if absent.
 9. Mobile/native or other platforms in scope?
