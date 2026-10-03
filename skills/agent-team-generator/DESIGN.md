@@ -113,12 +113,55 @@ non-overlapping; the model matrix names only existing agents; docs folder seeded
 7. `color:` in OC frontmatter and the `"* | sh"` deny lines are flagged "verify
    against the installed OpenCode version" rather than asserted.
 
+## v4 (2026-10-03, requested by Sam)
+
+Supersedes Decision 1, v2.2–v2.4 and v3.2 where they conflict.
+
+1. **Open permissions, user-gated by instruction.** New recommended tier **Autonomous**
+   (allow all — replaces Sandbox as a named tier and Standard as the default). The guard is
+   behavioural: protocol §6 "Autonomy & User-Gated Actions" — commit freely; push, PRs,
+   deploys, shared-database migrations and destructive commands only on the user's
+   instruction, and then without re-asking. Stricter tiers remain as an optional mechanical
+   net. **Edit access is open for every agent in every tier**; ownership is a stated lane
+   ("Scope & focus"), not an `edit` deny map. Claude Code agents drop `tools:` and inherit
+   everything.
+2. **No project-manager agent.** The main session leads in every harness (OpenCode: the
+   built-in `build` agent). It prefers dispatching and may do small, quick, single-discipline
+   changes itself under the matching agent's file. The contract is protocol §1, with the
+   short form in `AGENTS.md` §How we work because OpenCode 2 does not load `instructions`.
+3. **Senior ladder + floor** in the engineering standard, the protocol, the playbook and every
+   builder: need → reuse → installed dependency → one line → minimum, never below error
+   handling, graceful user-facing errors, full UX, and the full ask. Tests must be able to
+   fail (change a value, see red).
+4. **Design bar** (`references/design-standard.md`) embedded in every UI role: direction
+   before pixels, tokens, designed states, whole pages, a slop list, and looking at
+   screenshots. Design skills (`frontend-design`, Impeccable, UI/UX Pro Max) recommended in
+   Phase 9.
+5. **OpenCode 2**: `.opencode/agents/`, filename as ID, `model: provider/model#variant`,
+   permissions as a `{action, resource, effect}` rule list written once in `opencode.json`
+   (`shell`/`subagent` replace `bash`/`task`), no top-level `temperature`, commands in
+   `.opencode/commands/`. v1 is documented as a mapping table only.
+6. **code-reviewer** core role: user-invoked, independent, reviews the diff and around it,
+   grades 🔴 Blocker / 🟠 Should fix / 🟡 Nit / 🔵 FYI / 🟣 Minor, runs a mutation check,
+   logs Minors to `documentation/known-issues.md`, and returns fix prompts.
+8. **One scale.** Self-QA, qa-tester and code-reviewer all grade on the five lights, defined
+   once in protocol §5; QA fails on any 🔴 or 🟠, and qa-tester may log 🟣 to known-issues too.
+9. **Tests are a gate on every change** — no "only when a risk surface is touched" tier.
+10. **Local secrets are readable and editable** by agents; the rule is that their values never
+    reach a commit, a log, a report or client-shipped code.
+11. **Shared root files** (root manifests, lockfiles, CI, tooling config) belong to the main
+    agent. Page-doc filenames follow a route → filename rule. The optional security review
+    has fixed slots in protocol §5 and the qa-tester checklist. `{RISK_SURFACES}` is always a
+    bracketed list after the words "risk surface".
+7. Verifier and smoke test reworked for all of the above; the builder-glob overlap check is
+   gone with the `edit` maps and is now a judgment check in SKILL.md Step 6.
+
 ## Testing plan for the skill itself
 
 Two layers:
 
 1. **Smoke test** (`npm test`): installer round-trip, template/reference cross-references, and
-   `verify-team.js` against a synthetic generated tree (one good, seven broken variants).
+   `verify-team.js` against a synthetic generated tree (good variants and deliberately broken ones).
 2. **Application-scenario test** (reference/technique skill): dispatch a subagent with only the
    skill files, an empty git-initialised temp directory, and `fixtures/sample-brief.md` as the
    canned interview. Run `scripts/verify-team.js` on the output, then review it against the

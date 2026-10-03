@@ -1,23 +1,27 @@
 # Documentation convention — templates for `documentation/`
 
 Plain-English living docs: written for humans and for future model sessions with zero context.
-The PM creates/updates them as part of Definition of Done (protocol §4); qa-tester verifies.
+Whoever makes a change updates them in the same piece of work, the main agent confirms it as
+part of Definition of Done (protocol §4), and qa-tester verifies.
 Descriptive, not implementation dumps — a reader should understand the product without opening
 the code. File paths may be named as anchors, but no code blocks longer than a signature.
 
-Seed on generation: `README.md` with the sections below (empty tables are fine on day one),
+Seed on generation: `known-issues.md` (template at the bottom — the code-reviewer's log),
+`README.md` with the sections below (empty tables are fine on day one),
 plus one page doc per route the interview named (Phase 1, question 5) — never invent pages the
 user didn't name. Add a `.gitkeep` to any directory left empty so git tracks it. A page doc
-seeded before its spec exists keeps every section, each filled with `⚠️ undecided — spec
-pending`; an index table with no rows yet gets one italic `*(none documented yet)*` row.
+seeded before its spec exists keeps every section and the header fields (Access, Purpose),
+each filled with `⚠️ undecided — spec pending`; its README one-liner is written from the
+interview if the user described the page, otherwise the same marker; its footer reads
+`*Last updated: <today> — seeded*`; an index table with no rows yet gets one italic `*(none documented yet)*` row.
 
 ## `documentation/README.md`
 
 ```markdown
 # {PROJECT_NAME} — Product Documentation
 
-Plain-English descriptions of every page and feature. Maintained by the project-manager;
-updated before any feature is marked Done. If code and these docs disagree, the code is right —
+Plain-English descriptions of every page and feature. Updated by whoever makes the change,
+before any feature is marked Done. Accepted minor issues: [known-issues.md](known-issues.md). If code and these docs disagree, the code is right —
 fix the doc and note what drifted.
 
 ## Pages
@@ -32,6 +36,13 @@ fix the doc and note what drifted.
 ```
 
 ## `documentation/pages/<page>.md`
+
+**Filename from the route**, so two people always pick the same name: drop the leading slash,
+turn every remaining `/` into `-`, and replace a parameter segment with what it identifies
+followed by `-detail`. `/` → `home.md` · `/invoices` → `invoices.md` · `/invoices/new` →
+`invoices-new.md` · `/invoices/:id` → `invoices-detail.md` · `/clients/:id/edit` →
+`clients-detail-edit.md`. One doc per route; a modal or tab without its own route is a
+section of its parent page's doc, not a file.
 
 ```markdown
 # {Page Name}
@@ -89,4 +100,30 @@ split", not SQL}
 | Date | Change |
 |---|---|
 | {DATE} | Created — {context} |
+```
+
+## `documentation/known-issues.md`
+
+The code-reviewer and qa-tester append a 🟣 Minor entry here the moment they find one, so small issues are
+never lost and never block a merge. Each entry carries a ready-to-run fix prompt. Seed the
+file with the header and no entries.
+
+```markdown
+# {PROJECT_NAME} — Known Issues
+
+Minor issues found in review and accepted for now. Each has a fix prompt: paste it to the
+owning agent to fix it. **When an entry is fixed, delete it** in the same commit — this file
+lists what is open, git history holds what was closed. Anything serious does not belong here;
+it blocks the merge instead.
+
+*(no open issues)*
+
+<!-- entry format:
+### KI-1 — short title
+🟣 Minor · found YYYY-MM-DD · `path/file.ext:line` · owner: agent-name
+**What:** the issue, one or two sentences
+**Impact:** who notices, how rarely · **Why not fixed now:** reason
+**Fix prompt:**
+> self-contained prompt for the owning agent: what to change, the test to add, the gates to run
+-->
 ```
