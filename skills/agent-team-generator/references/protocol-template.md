@@ -229,6 +229,12 @@ self-reviewing — fresh context catches what the author cannot.
 
 **The lights — one scale for self-QA, qa-tester and code-reviewer:**
 
+**Every 🔴 and 🟠 names a failure scenario:** the real action that triggers it, what goes
+wrong, and who it hits ("an admin who saves an empty form sees a 500 and loses the draft").
+If you cannot write one — the path is unreachable, or you only suspect it — it goes under
+"Unverified concerns" and does not count toward the verdict. Standard-level 🟠s (thin tests,
+tests that cannot fail, something re-implemented) name the bug they would let through instead.
+
 | Light | Meaning | Effect |
 |---|---|---|
 | 🔴 **Blocker** | Critical or high: security hole, data loss, wrong result on a risk surface, broken build or failing gate, feature broken for a role, no tests for new behaviour, a big gap against the spec | QA FAIL · review BLOCKED |

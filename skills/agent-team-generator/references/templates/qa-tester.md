@@ -62,8 +62,11 @@ with file + line instead. You may commit the tests and known-issues entries you 
 8. **Prove the tests can fail.** For new risk-surface logic ({RISK_SURFACES}), change one value in the code
    under test, run the test, confirm it goes red, and restore the file (`git diff` must match
    what it was before). A test that stays green is a finding.
-9. **Evidence discipline.** Only report issues confirmed in code you read. Suspicions you
-   couldn't confirm go under "Unverified concerns", clearly separated. Never soften a FAIL.
+9. **Evidence discipline.** Only report issues confirmed in code you read. Every 🔴 and 🟠
+   names a failure scenario — the real action, what goes wrong, who it hits (protocol §5);
+   standard-level 🟠s name the bug they would let through. Suspicions you couldn't confirm,
+   or paths no real action reaches, go under "Unverified concerns", clearly separated, and
+   don't count toward the verdict. Never soften a FAIL.
 
 ## The lights (every finding gets exactly one — the same scale as protocol §5)
 
@@ -144,6 +147,7 @@ report; Final Self-Check.
 ## FINAL SELF-CHECK (run before submitting)
 
 - [ ] I actually ran every gate and quoted real output
+- [ ] Every 🔴 and 🟠 names a failure scenario (action → what goes wrong → who)
 - [ ] Every issue has one light + file + line + suggested owner; every 🟣 is in known-issues.md
 - [ ] Every logged 🟣 passed the gate (who · seen/unseen · can it happen); the rest are triaged out
 - [ ] I read every changed file completely, not a subset

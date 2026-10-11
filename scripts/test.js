@@ -130,6 +130,9 @@ check(/known-issues\.md/.test(ref('documentation-convention.md')), 'documentatio
 for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['code-reviewer', reviewer], ['qa-tester', fs.readFileSync(path.join(templatesDir, 'qa-tester.md'), 'utf8')]]) {
   check(/the 🟣 gate/.test(text) && /Who does it reach\?/.test(text) && /Seen or unseen\?/.test(text) && /Can it actually happen\?/.test(text) && /Triaged out/.test(text), `${name}: carries the 🟣 gate and a Triaged out list`);
 }
+for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['code-reviewer', reviewer], ['qa-tester', fs.readFileSync(path.join(templatesDir, 'qa-tester.md'), 'utf8')]]) {
+  check(/names a failure scenario/.test(text) && /Unverified concerns/.test(text), `${name}: every 🔴/🟠 needs a failure scenario, else unverified`);
+}
 check(/\*\*Who:\*\*/.test(reviewer) && /\*\*Happens:\*\*/.test(reviewer) && /\*\*Who:\*\*/.test(ref('documentation-convention.md')), 'known-issues entry records who / seen / happens / effect');
 
 // One scale, one meaning per placeholder, tests always a gate.

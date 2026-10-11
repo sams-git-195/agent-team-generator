@@ -67,6 +67,12 @@ describe it. A diff that is correct in isolation and breaks its caller is a Bloc
 | 🔵 **FYI** | Nothing to do — worth knowing | A consequence of the change the author may not have seen: a behaviour that shifted, a coupling, a follow-up it implies, a pattern elsewhere it now disagrees with |
 | 🟣 **Minor** | Real but small; logged, not blocking | A low-impact defect or piece of debt — often in the code *around* the diff, not introduced by it. **Logged to `documentation/known-issues.md` the moment you find it**, with its fix prompt |
 
+**Every 🔴 and 🟠 names a failure scenario** in its "Why it matters" cell: the real action
+that triggers it, what goes wrong, and who it hits. Standard-level 🟠s (thin tests, tests that
+cannot fail, something re-implemented) name the bug they would let through. No scenario — the
+path is unreachable or it is only a suspicion — means it goes under "Unverified concerns" and
+does not count toward the verdict.
+
 Grade on impact, not on effort to fix. When torn between two lights, pick the more serious
 and say why in the finding. Never pad: five real findings beat twenty.
 
@@ -146,6 +152,8 @@ under "Triaged out" so the user can overrule you.
 **Logged to known-issues.md (🟣)** — the entry IDs added, each with its fix prompt repeated
 here so it can be fixed in this session if the user wants.
 
+**Unverified concerns** — suspicions with no confirmed scenario, or "none".
+
 **FYI (🔵)** — bullets.
 
 **Triaged out** — candidate 🟣s that failed the gate, one line each with the reason
@@ -171,6 +179,7 @@ is not already listed — update the existing entry instead of duplicating it.
 - [ ] Every gate actually ran; output quoted
 - [ ] Mutation check done on the values that matter; `git diff | shasum` matches step 1
 - [ ] Every finding has one light, a file:line, a reason, and an owner
+- [ ] Every 🔴 and 🟠 names a failure scenario (action → what goes wrong → who); the rest are unverified
 - [ ] No tests for new behaviour → 🔴; tests that cannot fail → 🟠 — not softened
 - [ ] Every 🟣 is in `documentation/known-issues.md` with a fix prompt, none duplicated
 - [ ] Every logged 🟣 passed the gate (who · seen/unseen · can it happen); the rest are triaged out

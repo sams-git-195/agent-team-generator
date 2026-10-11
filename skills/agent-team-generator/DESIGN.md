@@ -165,6 +165,10 @@ Supersedes Decision 1, v2.2–v2.4 and v3.2 where they conflict.
    re-graded up, not logged), and can it actually happen (unreachable → dropped; reachable →
    likelihood and effect). The entry format records the answers (Who · Seen · Happens ·
    Effect), and dropped candidates are listed under "Triaged out" so the user can overrule.
+2. **Every 🔴 and 🟠 names a failure scenario** (real action → what goes wrong → who it hits).
+   No scenario — unreachable or only suspected — means "Unverified concerns", outside the
+   verdict, so an impossible path can't block a merge. Standard-level 🟠s (thin tests,
+   re-implementation) name the bug they would let through, so they stay in force.
 
 ## Testing plan for the skill itself
 
