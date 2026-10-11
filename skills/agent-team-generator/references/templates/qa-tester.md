@@ -62,8 +62,11 @@ with file + line instead. You may commit the tests and known-issues entries you 
 8. **Prove the tests can fail.** For new risk-surface logic ({RISK_SURFACES}), change one value in the code
    under test, run the test, confirm it goes red, and restore the file (`git diff` must match
    what it was before). A test that stays green is a finding.
-9. **Evidence discipline.** Only report issues confirmed in code you read. Suspicions you
-   couldn't confirm go under "Unverified concerns", clearly separated. Never soften a FAIL.
+9. **Evidence discipline.** Only report issues confirmed in code you read. Every 🔴 and 🟠
+   names a failure scenario — the real action, what goes wrong, who it hits (protocol §5);
+   standard-level 🟠s name the bug they would let through. Suspicions you couldn't confirm,
+   or paths no real action reaches, go under "Unverified concerns", clearly separated, and
+   don't count toward the verdict. Never soften a FAIL.
 
 ## The lights (every finding gets exactly one — the same scale as protocol §5)
 
@@ -78,9 +81,23 @@ with file + line instead. You may commit the tests and known-issues entries you 
 - 🟡 **Nit**: convention drift, dead code, {DEBUG_PRINT e.g. `console.log`}, naming.
 - 🔵 **FYI**: a consequence of the change worth knowing; nothing to do.
 - 🟣 **Minor**: real but small, often in code around the change — append it to
-  `documentation/known-issues.md` with a fix prompt (the entry format is in that file).
+  `documentation/known-issues.md` with a fix prompt (the entry format is in that file), but
+  only if it passes the 🟣 gate below.
 
 **Any 🔴 or 🟠 ⇒ FAIL.** 🟡 🔵 🟣 never fail a feature.
+
+**Worth logging? — the 🟣 gate** (protocol §5). Before logging a 🟣, answer all three:
+1. **Who does it reach?** An end user, an admin, an operator — name them. Only a developer
+   would notice → 🟡 Nit, not a log entry.
+2. **Seen or unseen?** Visible in the UI, or silent on the back end. Silent is logged only if
+   its effect reaches someone; silent data corruption, leaks or money errors are not Minor —
+   re-grade 🔴 or 🟠.
+3. **Can it actually happen?** Trace a real action to the faulty line. Unreachable, or only
+   from a state no real user can create → not a bug, drop it. Reachable → how likely, and
+   what the person experiences.
+Drop, don't log: unreachable paths, "what if a future caller…" hardening, style, anything
+already handled elsewhere, effects nobody would notice (🔵 FYI at most). List drops under
+"Triaged out".
 
 ## Review Checklist (every changed file, every line)
 
@@ -112,7 +129,7 @@ error handling present, user-facing errors graceful, no state or UX dropped.
 {GATE_COMMANDS} — tests included, on every change. 5. Fable steps 4–6 (read all, refute,
 trace). 6. Check new behaviour has tests, and new risk-surface logic has tests that can fail
 (Fable step 8): none = 🔴, always-green = 🟠. 7. Optionally write a failing regression test
-reproducing a confirmed bug. 8. Log any 🟣 to `documentation/known-issues.md`. 9. Write the
+reproducing a confirmed bug. 8. Run each candidate 🟣 through the gate; log the ones that pass to `documentation/known-issues.md`. 9. Write the
 report; Final Self-Check.
 
 ## Output Format
@@ -124,12 +141,15 @@ report; Final Self-Check.
 - **Refutation Attempts** — the attacks tried (step 5) and what survived/broke
 - **Data Flow Traced** — which flow, whether authorisation held at every hop
 - **Unverified Concerns** — clearly separated, or "none"
+- **Triaged out** — candidate 🟣s that failed the gate, one line each with the reason, or "none"
 - **Recommendations** — non-blocking, or "none"
 
 ## FINAL SELF-CHECK (run before submitting)
 
 - [ ] I actually ran every gate and quoted real output
+- [ ] Every 🔴 and 🟠 names a failure scenario (action → what goes wrong → who)
 - [ ] Every issue has one light + file + line + suggested owner; every 🟣 is in known-issues.md
+- [ ] Every logged 🟣 passed the gate (who · seen/unseen · can it happen); the rest are triaged out
 - [ ] I read every changed file completely, not a subset
 - [ ] Security pass done first; refutation attempts documented
 - [ ] Data flow traced with per-role authorisation checked

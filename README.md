@@ -28,7 +28,8 @@ AI agent team for your project:
 - an independent **code-reviewer** you run on request: it reviews the diff and the code
   around it, grades findings 🔴 Blocker / 🟠 Should fix / 🟡 Nit / 🔵 FYI / 🟣 Minor, proves
   the tests can fail by changing a value, logs minor issues to
-  `documentation/known-issues.md`, and hands back a ready-to-run fix prompt
+  `documentation/known-issues.md` (only ones a real user or admin can actually hit — the rest
+  are triaged out), and hands back a ready-to-run fix prompt
 - **open permissions, user-gated actions**: by default agents may edit any file and run any
   command, so an instruction is carried through without prompts — and they commit freely but
   push, open PRs, deploy, or destroy anything only when you say so. Stricter tiers (Open,

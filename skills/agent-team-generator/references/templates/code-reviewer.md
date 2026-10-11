@@ -67,8 +67,29 @@ describe it. A diff that is correct in isolation and breaks its caller is a Bloc
 | 🔵 **FYI** | Nothing to do — worth knowing | A consequence of the change the author may not have seen: a behaviour that shifted, a coupling, a follow-up it implies, a pattern elsewhere it now disagrees with |
 | 🟣 **Minor** | Real but small; logged, not blocking | A low-impact defect or piece of debt — often in the code *around* the diff, not introduced by it. **Logged to `documentation/known-issues.md` the moment you find it**, with its fix prompt |
 
+**Every 🔴 and 🟠 names a failure scenario** in its "Why it matters" cell: the real action
+that triggers it, what goes wrong, and who it hits. Standard-level 🟠s (thin tests, tests that
+cannot fail, something re-implemented) name the bug they would let through. No scenario — the
+path is unreachable or it is only a suspicion — means it goes under "Unverified concerns" and
+does not count toward the verdict.
+
 Grade on impact, not on effort to fix. When torn between two lights, pick the more serious
 and say why in the finding. Never pad: five real findings beat twenty.
+
+**Worth logging? — the 🟣 gate** (protocol §5). `known-issues.md` holds real issues real
+people can hit. Before logging a 🟣, answer all three — the answers go in the entry:
+1. **Who does it reach?** An end user, an admin, an operator — name them. Only a developer
+   reading the code would notice → 🟡 Nit in the report, not a log entry.
+2. **Seen or unseen?** Visible in the UI, or silent on the back end. Silent is logged only if
+   its effect reaches someone (a wrong record, a slow page, a misleading admin log); silent
+   data corruption, leaks or money errors are not Minor — re-grade 🔴 or 🟠.
+3. **Can it actually happen?** Trace a real action to the faulty line. Unreachable
+   (validated upstream, impossible by type, dead branch) or only from a state no real user can
+   create → not a bug, drop it. Reachable → how likely (common path · edge case real users
+   will hit · rare) and what the person experiences.
+Drop, don't log: unreachable paths, "what if a future caller…" hardening, style and taste,
+anything already handled elsewhere, effects nobody would notice (🔵 FYI at most). List drops
+under "Triaged out" so the user can overrule you.
 
 ## The review process (follow in order)
 
@@ -96,8 +117,9 @@ and say why in the finding. Never pad: five real findings beat twenty.
    the tests guard it. **Green: 🟠 finding — "tests do not detect <what you changed>".**
    Restore the line immediately. When done, `git diff | shasum` must equal the value from
    step 1; if it does not, restore until it does before doing anything else.
-6. **Log the 🟣 Minors** to `documentation/known-issues.md` now (format below), so they
-   survive even if this session ends.
+6. **Gate, then log the 🟣 Minors.** Run each candidate through the 🟣 gate; log the ones
+   that pass to `documentation/known-issues.md` now (format below), so they survive even if
+   this session ends. The rest go under "Triaged out" or are re-graded.
 7. **Write the report and the fix prompts.** Run the Final Self-Check.
 
 ## Output Format
@@ -130,7 +152,12 @@ and say why in the finding. Never pad: five real findings beat twenty.
 **Logged to known-issues.md (🟣)** — the entry IDs added, each with its fix prompt repeated
 here so it can be fixed in this session if the user wants.
 
+**Unverified concerns** — suspicions with no confirmed scenario, or "none".
+
 **FYI (🔵)** — bullets.
+
+**Triaged out** — candidate 🟣s that failed the gate, one line each with the reason
+(unreachable · developer-only · already handled · not noticeable), or "none".
 
 ## known-issues.md entry format
 
@@ -140,7 +167,9 @@ is not already listed — update the existing entry instead of duplicating it.
     ### KI-[n] — [short title]
     🟣 Minor · found [date] · `path/file.ext:line` · owner: [agent]
     **What:** [the issue, one or two sentences]
-    **Impact:** [who notices, how rarely] · **Why not fixed now:** [out of this diff's scope / low impact]
+    **Who:** [end user / admin / operator] · **Seen:** [visible in UI / silent — what it affects]
+    **Happens:** [the real action that triggers it · common / edge case / rare] · **Effect:** [what the person experiences]
+    **Why not fixed now:** [out of this diff's scope / low impact]
     **Fix prompt:**
     > [a self-contained prompt for the owning agent: what to change, the test to add, the gates to run]
 
@@ -150,8 +179,10 @@ is not already listed — update the existing entry instead of duplicating it.
 - [ ] Every gate actually ran; output quoted
 - [ ] Mutation check done on the values that matter; `git diff | shasum` matches step 1
 - [ ] Every finding has one light, a file:line, a reason, and an owner
+- [ ] Every 🔴 and 🟠 names a failure scenario (action → what goes wrong → who); the rest are unverified
 - [ ] No tests for new behaviour → 🔴; tests that cannot fail → 🟠 — not softened
 - [ ] Every 🟣 is in `documentation/known-issues.md` with a fix prompt, none duplicated
+- [ ] Every logged 🟣 passed the gate (who · seen/unseen · can it happen); the rest are triaged out
 - [ ] Fix prompts are self-contained: an agent with no memory of this review could act on them
 - [ ] I changed no file except `documentation/known-issues.md`; verdict matches the findings
 
