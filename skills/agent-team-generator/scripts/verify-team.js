@@ -26,7 +26,8 @@ const check = (cond, label) => (cond ? ok(label) : fail(label));
 
 const P = (...p) => path.join(root, ...p);
 const exists = (p) => fs.existsSync(p);
-const read = (p) => fs.readFileSync(p, 'utf8');
+const read = (p) => fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
+const relOf = (p) => path.relative(root, p).split(path.sep).join('/');
 const mdFiles = (dir) => (exists(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.md')).sort() : []);
 const stem = (f) => f.replace(/\.md$/, '');
 
@@ -58,7 +59,7 @@ if (hasCC) {
 }
 if (hasOC) check(exists(ocConfigPath), 'opencode.json exists (permission tier for OpenCode 2)');
 for (const d of [ccDir, ocDir, neutralDir]) {
-  if (exists(d)) check(!exists(path.join(d, 'project-manager.md')), `no ${path.relative(root, d)}/project-manager.md (the main agent leads; there is no PM file)`);
+  if (exists(d)) check(!exists(path.join(d, 'project-manager.md')), `no ${relOf(d)}/project-manager.md (the main agent leads; there is no PM file)`);
 }
 
 // ---------------------------------------------------------------- 2. placeholders
@@ -99,7 +100,7 @@ const generated = [
 
 for (const f of generated) {
   const hits = findPlaceholders(read(f));
-  check(hits.length === 0, `${path.relative(root, f)}: no unfilled placeholders${hits.length ? ` (${hits.slice(0, 3).join('; ')}${hits.length > 3 ? '; …' : ''})` : ''}`);
+  check(hits.length === 0, `${relOf(f)}: no unfilled placeholders${hits.length ? ` (${hits.slice(0, 3).join('; ')}${hits.length > 3 ? '; …' : ''})` : ''}`);
 }
 
 // ---------------------------------------------------------------- 3. frontmatter helpers
@@ -141,7 +142,7 @@ if (hasCC && hasOC) check(same(cc, oc), 'CC roster == OC roster');
 // ---------------------------------------------------------------- 5. per-agent file shape
 function checkAgentFile(file, kind) {
   const text = read(file);
-  const rel = path.relative(root, file);
+  const rel = relOf(file);
   const fm = frontmatter(text);
   if (kind !== 'neutral') check(fm.length > 0, `${rel}: has frontmatter`);
   if (kind === 'cc') {
@@ -224,7 +225,7 @@ if (exists(protocolPath)) {
 }
 check(/^## How we work/m.test(agentsMd) && /user-gated/i.test(agentsMd), 'AGENTS.md has "How we work" with the user-gated rule');
 for (const a of [...mdFiles(ccDir).map((f) => path.join(ccDir, f)), ...mdFiles(ocDir).map((f) => path.join(ocDir, f)), ...mdFiles(neutralDir).map((f) => path.join(neutralDir, f))]) {
-  check(/user-gated/i.test(read(a)), `${path.relative(root, a)}: states the user-gated rule`);
+  check(/user-gated/i.test(read(a)), `${relOf(a)}: states the user-gated rule`);
 }
 
 // ---------------------------------------------------------------- 7. gate commands exist

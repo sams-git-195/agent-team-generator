@@ -58,7 +58,7 @@ check(EXPECTED.every((t) => templates.includes(t)), `core templates present (${t
 check(!templates.includes('project-manager.md'), 'no project-manager template (the main agent leads)');
 
 for (const file of templates) {
-  const text = fs.readFileSync(path.join(templatesDir, file), 'utf8');
+  const text = readText(path.join(templatesDir, file));
   check(!/PERMISSION_POLICY_BLOCK|^permissions?:/m.test(text), `${file}: carries no permission rules`);
   check(!/^tools:/m.test(text), `${file}: no Claude Code tools: line (agents inherit all tools)`);
   check(text.includes('`.opencode/agents/') && !text.includes('.opencode/agent/'), `${file}: targets .opencode/agents/ (OpenCode 2)`);
@@ -70,7 +70,9 @@ for (const file of templates) {
   check(/## Handoff/.test(text) && /→ main agent/.test(text) && !/project-manager/.test(text), `${file}: hands off to the main agent`);
 }
 
-const ref = (name) => fs.readFileSync(path.join(skillDir, 'references', name), 'utf8');
+// Normalise CRLF so the checks behave the same on a Windows checkout.
+function readText(p) { return fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n'); }
+const ref = (name) => readText(path.join(skillDir, 'references', name));
 const skeleton = ref('agent-skeleton.md');
 check(/OpenCode 2 frontmatter/.test(skeleton) && /Scope & focus/.test(skeleton), 'agent-skeleton describes OpenCode 2 frontmatter and Scope & focus');
 
@@ -103,14 +105,14 @@ check(/## The senior ladder/.test(standard) && /Does this need to exist at all\?
 const design = ref('design-standard.md');
 const designBlock = design.split('```markdown\n')[1].split('\n```')[0];
 for (const file of ['backend-developer.md', 'ui-ux-developer.md', 'fullstack-developer.md']) {
-  const text = fs.readFileSync(path.join(templatesDir, file), 'utf8');
+  const text = readText(path.join(templatesDir, file));
   check(text.includes('{LANGUAGE_HYGIENE_RULE'), `${file}: language hygiene is a placeholder`);
   check(!/\*\*Zero `any` types/.test(text), `${file}: no hard-coded TypeScript rule`);
   check(/Engineering Standard/.test(text), `${file}: points at the Engineering Standard`);
   check(/Senior ladder before any code/.test(text) && /error handling/.test(text), `${file}: carries the senior ladder with its floor`);
 }
 for (const file of ['ui-ux-developer.md', 'fullstack-developer.md']) {
-  const text = fs.readFileSync(path.join(templatesDir, file), 'utf8');
+  const text = readText(path.join(templatesDir, file));
   check(text.includes(designBlock), `${file}: embeds the Design bar verbatim from design-standard.md`);
 }
 const protocolTpl = ref('protocol-template.md');
@@ -119,7 +121,7 @@ check(/The senior ladder/.test(protocolTpl) && /## 1\. The Main Agent Leads/.tes
 check(/## 6\. Autonomy & User-Gated Actions/.test(protocolTpl) && /don't ask again/.test(protocolTpl), 'protocol template: §6 user-gated actions, no re-asking once instructed');
 check(!/project-manager|PM_STYLE/.test(protocolTpl.split('```markdown')[1]), 'protocol body has no project-manager persona');
 
-const reviewer = fs.readFileSync(path.join(templatesDir, 'code-reviewer.md'), 'utf8');
+const reviewer = readText(path.join(templatesDir, 'code-reviewer.md'));
 for (const light of ['🔴 **Blocker**', '🟠 **Should fix**', '🟡 **Nit**', '🔵 **FYI**', '🟣 **Minor**']) {
   check(reviewer.includes(light), `code-reviewer: defines ${light}`);
 }
@@ -127,22 +129,22 @@ check(/Use ONLY when the user asks for a code review/.test(reviewer), 'code-revi
 check(/Mutation check/.test(reviewer) && /shasum/.test(reviewer), 'code-reviewer: mutation check with a restore proof');
 check(/Fix prompt — required/.test(reviewer) && /known-issues\.md/.test(reviewer), 'code-reviewer: emits fix prompts and logs minors to known-issues.md');
 check(/known-issues\.md/.test(ref('documentation-convention.md')), 'documentation convention seeds known-issues.md');
-for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['code-reviewer', reviewer], ['qa-tester', fs.readFileSync(path.join(templatesDir, 'qa-tester.md'), 'utf8')]]) {
+for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['code-reviewer', reviewer], ['qa-tester', readText(path.join(templatesDir, 'qa-tester.md'))]]) {
   check(/the 🟣 gate/.test(text) && /Who does it reach\?/.test(text) && /Seen or unseen\?/.test(text) && /Can it actually happen\?/.test(text) && /Triaged out/.test(text), `${name}: carries the 🟣 gate and a Triaged out list`);
 }
-for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['code-reviewer', reviewer], ['qa-tester', fs.readFileSync(path.join(templatesDir, 'qa-tester.md'), 'utf8')]]) {
+for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['code-reviewer', reviewer], ['qa-tester', readText(path.join(templatesDir, 'qa-tester.md'))]]) {
   check(/names a failure scenario/.test(text) && /Unverified concerns/.test(text), `${name}: every 🔴/🟠 needs a failure scenario, else unverified`);
 }
 check(/\*\*Who:\*\*/.test(reviewer) && /\*\*Happens:\*\*/.test(reviewer) && /\*\*Who:\*\*/.test(ref('documentation-convention.md')), 'known-issues entry records who / seen / happens / effect');
 
 // One scale, one meaning per placeholder, tests always a gate.
-const qa = fs.readFileSync(path.join(templatesDir, 'qa-tester.md'), 'utf8');
+const qa = readText(path.join(templatesDir, 'qa-tester.md'));
 for (const light of ['🔴 **Blocker**', '🟠 **Should fix**', '🟡 **Nit**', '🔵 **FYI**', '🟣 **Minor**']) {
   check(qa.includes(light) && protocolTpl.includes(light), `lights shared: ${light} in qa-tester and protocol §5`);
 }
 check(!/\*\*(Critical|High|Medium|Low)\*\*:/.test(qa) && /any 🔴 or 🟠 ⇒ FAIL/.test(qa), 'qa-tester: no second severity scale; fails on 🔴 or 🟠');
 for (const file of templates) {
-  const text = fs.readFileSync(path.join(templatesDir, file), 'utf8');
+  const text = readText(path.join(templatesDir, file));
   const bare = [...text.matchAll(/.{0,12}\{RISK_SURFACES\}/g)].map((m) => m[0]).filter((x) => !/\(\{RISK_SURFACES\}$/.test(x));
   check(bare.length === 0, `${file}: {RISK_SURFACES} only appears as a bracketed list${bare.length ? ` (${bare.join(' | ')})` : ''}`);
   check(!/\{TEST_COMMAND\}[^\n]{0,20}\bif\b|CONDITIONAL_GATES/.test(text), `${file}: the test run is never conditional`);
@@ -155,7 +157,7 @@ check(/`\/invoices\/:id` → `invoices-detail\.md`/.test(ref('documentation-conv
 function agentsTplEarly() { return ref('agents-md-template.md'); }
 
 // --- 3. Skill/interview cross-references ------------------------------------------------
-const skillMd = fs.readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8');
+const skillMd = readText(path.join(skillDir, 'SKILL.md'));
 const interview = ref('interview.md');
 const agentsTpl = ref('agents-md-template.md');
 check(/Phase 0/.test(skillMd) && /## Phase 0 — Harness/.test(interview), 'harness question wired (SKILL.md <-> interview Phase 0)');
@@ -267,9 +269,9 @@ for (const [label, mutation, expected] of cases) {
 }
 
 // --- 4. Plugin/marketplace/package metadata agree ---------------------------------------
-const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-const plugin = JSON.parse(fs.readFileSync(path.join(root, '.claude-plugin', 'plugin.json'), 'utf8'));
-const marketplace = JSON.parse(fs.readFileSync(path.join(root, '.claude-plugin', 'marketplace.json'), 'utf8'));
+const pkg = JSON.parse(readText(path.join(root, 'package.json')));
+const plugin = JSON.parse(readText(path.join(root, '.claude-plugin', 'plugin.json')));
+const marketplace = JSON.parse(readText(path.join(root, '.claude-plugin', 'marketplace.json')));
 check(pkg.name === plugin.name && plugin.name === marketplace.plugins[0].name, 'package/plugin/marketplace names agree');
 check(pkg.version === plugin.version, `package and plugin versions agree (${pkg.version})`);
 check(pkg.files.includes('skills'), 'npm files list includes skills/');
