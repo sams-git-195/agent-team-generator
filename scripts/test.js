@@ -127,6 +127,10 @@ check(/Use ONLY when the user asks for a code review/.test(reviewer), 'code-revi
 check(/Mutation check/.test(reviewer) && /shasum/.test(reviewer), 'code-reviewer: mutation check with a restore proof');
 check(/Fix prompt — required/.test(reviewer) && /known-issues\.md/.test(reviewer), 'code-reviewer: emits fix prompts and logs minors to known-issues.md');
 check(/known-issues\.md/.test(ref('documentation-convention.md')), 'documentation convention seeds known-issues.md');
+for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['code-reviewer', reviewer], ['qa-tester', fs.readFileSync(path.join(templatesDir, 'qa-tester.md'), 'utf8')]]) {
+  check(/the 🟣 gate/.test(text) && /Who does it reach\?/.test(text) && /Seen or unseen\?/.test(text) && /Can it actually happen\?/.test(text) && /Triaged out/.test(text), `${name}: carries the 🟣 gate and a Triaged out list`);
+}
+check(/\*\*Who:\*\*/.test(reviewer) && /\*\*Happens:\*\*/.test(reviewer) && /\*\*Who:\*\*/.test(ref('documentation-convention.md')), 'known-issues entry records who / seen / happens / effect');
 
 // One scale, one meaning per placeholder, tests always a gate.
 const qa = fs.readFileSync(path.join(templatesDir, 'qa-tester.md'), 'utf8');

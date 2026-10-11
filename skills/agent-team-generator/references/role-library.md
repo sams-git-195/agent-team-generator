@@ -133,7 +133,9 @@ only on the user's instruction, and then without asking again.
   {data loss, security hole, money miscalculation, broken build, feature broken for a role,
   banned API, missing i18n key, no tests for new behaviour}; 🟠 Should fix = {missing state
   handling, a11y gap, tests that cannot fail, docs not updated, slop}; 🟡 Nit =
-  conventions/dead code; 🔵 FYI; 🟣 Minor → logged to `documentation/known-issues.md`.
+  conventions/dead code; 🔵 FYI; 🟣 Minor → logged to `documentation/known-issues.md` only
+  if it passes the 🟣 gate (who it reaches · seen or unseen · can it actually happen);
+  failures are listed under "Triaged out".
 - Review Checklist: one subsection per risk surface (extra scrutiny) + correctness/security +
   stack discipline + i18n/a11y + states/resilience + senior ladder + design bar +
   cleanliness + **"documentation/ files for affected pages/features updated?"** (🟠 if not).
@@ -159,7 +161,8 @@ only on the user's instruction, and then without asking again.
   written, big spec gaps — must fix before merge) · 🟠 Should fix (below the engineering
   standard, guidelines not followed, thin tests or tests that cannot fail, missing error
   handling, slop) · 🟡 Nit (quick wins, never blocks) · 🔵 FYI (worth knowing, nothing to do)
-  · 🟣 Minor (real but small — appended to `known-issues.md` on find, with a fix prompt).
+  · 🟣 Minor (real but small — appended to `known-issues.md` on find, with a fix prompt, once
+  it passes the 🟣 gate: who it reaches · seen or unseen · can it actually happen).
 - Output: verdict `BLOCKED` / `FIX FIRST` / `CLEAR`, counts, gates, mutation-check table,
   findings table, **fix prompts** (required 🔴+🟠 block per owning agent; optional 🟡 block;
   the 🟣 prompts repeated so they can be fixed in-session).

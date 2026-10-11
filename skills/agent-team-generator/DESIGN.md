@@ -156,6 +156,16 @@ Supersedes Decision 1, v2.2–v2.4 and v3.2 where they conflict.
 7. Verifier and smoke test reworked for all of the above; the builder-glob overlap check is
    gone with the `edit` maps and is now a judgment check in SKILL.md Step 6.
 
+## v0.4 (2026-10-11, requested by Sam)
+
+1. **The 🟣 gate.** `known-issues.md` was filling with issues nobody could hit. Before a 🟣
+   Minor is logged, qa-tester and code-reviewer answer three questions, defined once in
+   protocol §5 and repeated in both templates: who does it reach (end user, admin, operator —
+   developer-only is a 🟡 Nit), is it seen or unseen (silent data/security/money effects are
+   re-graded up, not logged), and can it actually happen (unreachable → dropped; reachable →
+   likelihood and effect). The entry format records the answers (Who · Seen · Happens ·
+   Effect), and dropped candidates are listed under "Triaged out" so the user can overrule.
+
 ## Testing plan for the skill itself
 
 Two layers:

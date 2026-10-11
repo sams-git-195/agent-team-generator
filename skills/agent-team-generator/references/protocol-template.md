@@ -235,7 +235,26 @@ self-reviewing — fresh context catches what the author cannot.
 | 🟠 **Should fix** | Below the engineering standard or the project's guidelines: missing state or error handling, ungraceful user-facing error, thin tests or tests that cannot fail, something re-implemented, a Design-bar slop item, docs not updated | QA FAIL · review FIX FIRST |
 | 🟡 **Nit** | A quick quality win: naming, a simpler expression, small duplication | never blocks |
 | 🔵 **FYI** | Worth knowing, nothing to do | never blocks |
-| 🟣 **Minor** | A real but small issue, often in code around the change | logged to `documentation/known-issues.md` with a fix prompt; never blocks |
+| 🟣 **Minor** | A real but small issue, often in code around the change | logged to `documentation/known-issues.md` with a fix prompt; never blocks — only if it passes the gate below |
+
+**Worth logging? — the 🟣 gate.** `known-issues.md` holds real issues that real people can
+hit, not everything that could be tidier. Before logging a 🟣, answer all three:
+
+1. **Who does it reach?** Name the person: an end user, an admin, an operator. If only a
+   developer reading the code would ever notice, it is a 🟡 Nit in the report, not a log entry.
+2. **Seen or unseen?** Visible in the UI (wrong text, broken layout, a state that looks wrong),
+   or silent on the back end. A silent issue is logged only if its effect reaches someone in
+   the end (a wrong record, a slow page, a misleading admin log). A silent issue that can
+   corrupt or leak data or miscount money is not Minor — re-grade it 🔴 or 🟠.
+3. **Can it actually happen?** Trace the path from a real action to the faulty line.
+   Unreachable (validated upstream, impossible by type, dead branch) or only reachable from a
+   state no real user can create → not a bug; drop it. Reachable → say how likely (common
+   path · edge case real users will hit · rare) and what the person experiences when it does.
+
+**Drop, don't log:** unreachable paths · "what if a future caller…" hardening · style and
+taste · anything already handled elsewhere · an effect no person would notice. If one of these
+is still worth mentioning, it is a 🔵 FYI. List what you dropped under "Triaged out" in your
+report (one line each, with the reason) so the user can overrule you.
 
 {SECURITY_REVIEW_PARAGRAPH — only if the user chose the security-review option in interview Phase 9, else delete this line: "**Security review.** Before a merge that touches a risk surface, run `/security-review` (Claude Code built-in; OpenCode: the generated `.opencode/commands/security-review.md`) and treat its findings on the same lights."}
 
