@@ -170,6 +170,24 @@ Supersedes Decision 1, v2.2–v2.4 and v3.2 where they conflict.
    verdict, so an impossible path can't block a merge. Standard-level 🟠s (thin tests,
    re-implementation) name the bug they would let through, so they stay in force.
 
+## v0.5 (2026-10-13, requested by Sam)
+
+1. **The Usability bar.** The Design bar said how a screen should look but almost nothing
+   about how it should work, so a hard-to-use screen could pass review. It now sits beside a
+   Usability bar from the standard references a senior product designer works to (Nielsen's
+   heuristics; Hick's, Fitts's and Jakob's laws; WCAG 2.2 2.4.11 and 2.5.7): count the steps
+   of the core flows (`{CORE_FLOWS}`, from interview Phase 3) and justify any added one, few
+   choices at a time, easy targets, familiar patterns, visible status, recognition over
+   recall, calm screens, one term per concept, trust before payment. A Do/Don't table makes
+   the common calls concrete. A breach is 🟠 for qa-tester and code-reviewer; the UI role
+   reports flow steps before → after.
+2. **Ten more slop-list items** — the interaction tells of generated UI: modals for
+   everything, full-page spinners, vague buttons, blaming errors, dead-end empty states,
+   disabled-with-no-reason, placeholder-as-label, unlabelled icons, everything emphasised,
+   dark patterns.
+
+Ported from SpeakAppi, where it was written first (PR #69).
+
 ## Testing plan for the skill itself
 
 Two layers:

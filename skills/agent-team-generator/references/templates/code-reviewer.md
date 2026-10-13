@@ -62,7 +62,7 @@ describe it. A diff that is correct in isolation and breaks its caller is a Bloc
 | Light | Meaning | Use it for |
 |---|---|---|
 | 🔴 **Blocker** | Must be fixed before this merges | Critical/high bugs · security holes ({SECURITY_EXAMPLES e.g. access-rule gap, exposed secret, missing auth check}) · data loss or corruption · {RISK_SURFACE_CRITICAL e.g. money miscalculation} · a failing gate or broken build · **no tests written** for new behaviour · a big gap against the spec or acceptance criteria · a caller broken by the change |
-| 🟠 **Should fix** | Fix now unless the user decides otherwise | Code below the Engineering Standard · project guidelines not followed (`AGENTS.md`, protocol, agent files) · tests too thin, or **tests that cannot fail** (mutation check) · missing or swallowed error handling · user-facing errors that are not graceful · a missing loading/empty/error state · something re-implemented that already exists here · a needless new dependency or speculative abstraction · a Design-bar slop item · docs not updated |
+| 🟠 **Should fix** | Fix now unless the user decides otherwise | Code below the Engineering Standard · project guidelines not followed (`AGENTS.md`, protocol, agent files) · tests too thin, or **tests that cannot fail** (mutation check) · missing or swallowed error handling · user-facing errors that are not graceful · a missing loading/empty/error state · something re-implemented that already exists here · a needless new dependency or speculative abstraction · a Design-bar slop item or a Usability-bar breach (an unjustified extra step in a core flow, a confirm on a reversible action, input lost on error) · docs not updated |
 | 🟡 **Nit** | Quick win, never blocks | Naming, a simpler expression, a clearer comment, small duplication, ordering |
 | 🔵 **FYI** | Nothing to do — worth knowing | A consequence of the change the author may not have seen: a behaviour that shifted, a coupling, a follow-up it implies, a pattern elsewhere it now disagrees with |
 | 🟣 **Minor** | Real but small; logged, not blocking | A low-impact defect or piece of debt — often in the code *around* the diff, not introduced by it. **Logged to `documentation/known-issues.md` the moment you find it**, with its fix prompt |
@@ -109,7 +109,7 @@ under "Triaged out" so the user can overrule you.
      error handling present, failures graceful for the user, no state or UX dropped.
    - *Tests* — do they exist, assert behaviour rather than mocks, and cover the edge cases?
    - *Guidelines* — `AGENTS.md` gotchas, {STACK_DISCIPLINE_RULE}, {LANGUAGE_HYGIENE_CHECK},
-     {I18N_CHECK}, the Design bar for UI changes, `documentation/` updated.
+     {I18N_CHECK}, the Design bar and the Usability bar for UI changes, `documentation/` updated.
 5. **Mutation check — prove the tests can fail.** Pick the one to three values that matter
    most in the changed logic: a boundary, a rate, a comparison operator, a role check. For
    each: change that one value, run the narrowest test that should cover it

@@ -238,7 +238,7 @@ tests that cannot fail, something re-implemented) name the bug they would let th
 | Light | Meaning | Effect |
 |---|---|---|
 | 🔴 **Blocker** | Critical or high: security hole, data loss, wrong result on a risk surface, broken build or failing gate, feature broken for a role, no tests for new behaviour, a big gap against the spec | QA FAIL · review BLOCKED |
-| 🟠 **Should fix** | Below the engineering standard or the project's guidelines: missing state or error handling, ungraceful user-facing error, thin tests or tests that cannot fail, something re-implemented, a Design-bar slop item, docs not updated | QA FAIL · review FIX FIRST |
+| 🟠 **Should fix** | Below the engineering standard or the project's guidelines: missing state or error handling, ungraceful user-facing error, thin tests or tests that cannot fail, something re-implemented, a Design-bar slop item, a Usability-bar breach (an unjustified extra step in a core flow, a confirm on a reversible action, input lost on error), docs not updated | QA FAIL · review FIX FIRST |
 | 🟡 **Nit** | A quick quality win: naming, a simpler expression, small duplication | never blocks |
 | 🔵 **FYI** | Worth knowing, nothing to do | never blocks |
 | 🟣 **Minor** | A real but small issue, often in code around the change | logged to `documentation/known-issues.md` with a fix prompt; never blocks — only if it passes the gate below |

@@ -138,8 +138,8 @@ docs seeding. Then the checks below that need judgment:
 - Model matrix names only roles that exist; every OC `model:` is `provider/model` with an
   optional `#variant`.
 - `{REPORT_STYLE}` resolved to the same value in protocol §7 and AGENTS.md.
-- UI roles carry the full Design bar, with `{DESIGN_TOKEN_SOURCE}` and `{BREAKPOINTS}`
-  filled; AGENTS.md §UI has a design direction or the `⚠️ undecided` marker.
+- UI roles carry the full Design bar and Usability bar, with `{DESIGN_TOKEN_SOURCE}`,
+  `{BREAKPOINTS}` and `{CORE_FLOWS}` filled; AGENTS.md §UI has a design direction or the `⚠️ undecided` marker.
 - Quality-gate commands quoted in protocol/agents exist in package.json (or equivalent). In a
   greenfield repo with no manifest yet, instead mark the gates in AGENTS.md with
   `⚠️ verify scripts exist after first scaffold` and say so in the handover.

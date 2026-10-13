@@ -145,10 +145,68 @@ placeholder images left in — real copy from the spec, or a clearly marked gap 
 - glassmorphism, glow, or animation with no job to do
 - cramped mobile: a desktop layout squeezed, not re-composed
 - copy that could sit on any product ("Streamline your workflow", "Get started today")
+- modals for everything: a confirm dialog on a reversible action, a modal opened from a modal
+- a full-page spinner while one widget loads — skeletons, scoped to what is loading
+- vague buttons ("Submit", "OK", "Click here") — a button says what it does ("Save draft",
+  "Send invoice")
+- errors that blame or speak developer ("Invalid input", "Error 500", "Something went wrong")
+- an empty state that is only an illustration and "No data" — no next step offered
+- a disabled button with no reason given — say what is missing, or validate on press
+- placeholder text standing in for a label
+- icon-only controls with no visible label or tooltip (universal close / search excepted)
+- everything emphasised: several primary buttons, badges and colour on every row
+- fake urgency or dark patterns (invented scarcity, pre-ticked opt-ins, confirm-shaming) — a
+  trust failure, not a growth tactic
 
 **Look at it.** Before handing off, open the page with browser tools at {BREAKPOINTS}, take
 screenshots, and judge them against the direction as a designer would. If you cannot view
 it, say "visually unverified" in the report — never claim a look you did not see.
+
+**Do / Don't**
+
+| Do | Don't |
+|---|---|
+| One primary action per screen, in the accent colour | Two equal-weight buttons competing |
+| Smart defaults — the user's timezone, locale, last choice | Make people type what the app already knows |
+| Undo after the fact ("Message deleted · Undo") for reversible actions | Confirm dialogs for reversible actions — keep them for money and deletion |
+| Inline validation on blur, the fix stated next to the field | Validate only on submit, every error listed at the top |
+| The final price, fees included, shown before the pay step | Reveal a fee at checkout |
+| Progressive disclosure — advanced options behind "More" | Every setting on one screen |
+| Optimistic UI for quick actions, rolled back on failure | Freeze the screen waiting on the server |
+| Keep the user's input after an error | Clear the form when a request fails |
+| The same action in the same place on every screen | Move the primary button around between pages |
+
+## Usability bar (a screen that is hard to use is a defect, not a preference)
+
+The Design bar is how it looks; this is how it works. Both are rules, both are checked.
+
+- **Count the steps.** A flow you build or change lists its steps in your report. The core
+  jobs have a budget — {CORE_FLOWS e.g. sign up → first value; search → checkout} — and a
+  change that adds a step to one says why.
+- **Few choices at a time (Hick's law).** Around 5–7 options in a menu or group; more go
+  behind search, filters or "More". At most one primary and one secondary action per view.
+- **Easy targets (Fitts's law).** Primary actions are large and, at the smallest breakpoint,
+  within thumb reach (bottom of the screen or the end of the form); destructive actions sit
+  apart from the primary one, never next to it with the same weight.
+- **Familiar patterns (Jakob's law).** Search, forms, calendars and checkout behave the way
+  people already know from the products they use daily. Novelty needs a reason written in
+  the spec.
+- **Visible system status.** Every action gives feedback within ~100 ms; anything slower than
+  ~1 s shows progress. The user always knows where they are — page title, active nav item,
+  step indicator in multi-step flows.
+- **Recognition over recall.** Show recent items, saved filters and previous choices; never
+  make the user remember something from another screen.
+- **Calm screens.** One clear purpose per screen; the squint test (one thing dominates);
+  whitespace before borders and boxes to group things. A dashboard answers "what do I do
+  next?" before it shows statistics.
+- **Words.** Plain language, sentence case, one term per concept everywhere (the glossary in
+  `AGENTS.md` §UI wins; none yet → match the surrounding screen and flag the gap). Dates,
+  times, numbers and money follow the user's locale.
+- **Trust before payment** *(omit if the product takes no payments)*. What the user is buying,
+  who from, and the cancellation or refund terms are visible before the pay step, and every
+  amount is shown with its breakdown (price, fees, total).
+- **WCAG 2.2 on top of the accessibility floor.** Focus is never hidden behind a sticky header
+  or a toast (2.4.11), and anything done by dragging has a single-pointer alternative (2.5.7).
 
 ## FINAL SELF-CHECK (run before handing off)
 
@@ -157,6 +215,7 @@ it, say "visually unverified" in the report — never claim a look you did not s
 - [ ] {I18N_CHECK e.g. Every new key present in all locale files — grepped, not assumed}
 - [ ] A11y floor met; responsive at {BREAKPOINTS} verified or honestly flagged
 - [ ] Design bar held: tokens only, every state designed, no slop-list item, screenshots looked at
+- [ ] Usability bar held: one primary action, steps counted (none added to a core flow without a reason), feedback within ~100 ms, no confirm on a reversible action, input kept on error
 - [ ] Senior ladder climbed — existing components reused; errors graceful; no UX dropped
 - [ ] Full `git diff` read; anything outside my lane is listed; no new deps unflagged; {LANGUAGE_HYGIENE_CHECK}
 - [ ] Committed scoped work; nothing user-gated done without the user's instruction

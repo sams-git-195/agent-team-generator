@@ -84,6 +84,10 @@ live DB · third-party integrations (name them) · PII/compliance · realtime/co
 The answers drive: the protocol's "think hardest" list, the model-escalation triggers, the
 qa-tester's extra-scrutiny checklist, and the risk-register template rows.
 
+**Core flows** (projects with a UI): "Which two or three jobs must be quickest for your users?"
+(e.g. sign up → first value; search → checkout). They fill `{CORE_FLOWS}` in the Usability
+bar, which holds each to a step budget. Not known yet → `⚠️ undecided — name the core flows`.
+
 ## Phase 4 — Business rules
 
 Free text: pricing/commission tables, cancellation/refund policies, expiry rules, limits,

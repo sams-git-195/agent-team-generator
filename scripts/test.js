@@ -115,6 +115,13 @@ for (const file of ['ui-ux-developer.md', 'fullstack-developer.md']) {
   const text = readText(path.join(templatesDir, file));
   check(text.includes(designBlock), `${file}: embeds the Design bar verbatim from design-standard.md`);
 }
+for (const s of ['## Usability bar', "Hick's law", "Fitts's law", "Jakob's law", '{CORE_FLOWS', "**Do / Don't**"]) {
+  check(designBlock.includes(s), `design-standard: the embedded block carries ${s}`);
+}
+check(ref('interview.md').includes('{CORE_FLOWS}'), 'interview: asks for the core flows that fill {CORE_FLOWS}');
+for (const file of ['ui-ux-developer.md', 'fullstack-developer.md']) {
+  check(readText(path.join(templatesDir, file)).includes('- [ ] Usability bar held'), `${file}: self-check covers the Usability bar`);
+}
 const protocolTpl = ref('protocol-template.md');
 check(/Engineering standard \(every language/.test(protocolTpl), 'protocol template embeds the engineering standard in §2');
 check(/The senior ladder/.test(protocolTpl) && /## 1\. The Main Agent Leads/.test(protocolTpl), 'protocol template: main agent leads, senior ladder embedded');
@@ -134,6 +141,9 @@ for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['cod
 }
 for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['code-reviewer', reviewer], ['qa-tester', readText(path.join(templatesDir, 'qa-tester.md'))]]) {
   check(/names a failure scenario/.test(text) && /Unverified concerns/.test(text), `${name}: every 🔴/🟠 needs a failure scenario, else unverified`);
+}
+for (const [name, text] of [['protocol §5', ref('protocol-template.md')], ['code-reviewer', reviewer], ['qa-tester', readText(path.join(templatesDir, 'qa-tester.md'))]]) {
+  check(text.includes('Usability-bar breach'), `${name}: a Usability-bar breach is graded 🟠`);
 }
 check(/\*\*Who:\*\*/.test(reviewer) && /\*\*Happens:\*\*/.test(reviewer) && /\*\*Who:\*\*/.test(ref('documentation-convention.md')), 'known-issues entry records who / seen / happens / effect');
 
