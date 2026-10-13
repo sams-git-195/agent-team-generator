@@ -22,7 +22,9 @@ AI agent team for your project:
   then the minimum that works — with a floor that never drops error handling, graceful
   user-facing errors, or user experience
 - a **Design bar** in every agent that builds UI — a design direction before any pixels,
-  tokens, designed states, whole pages, and a list of generated-looking patterns to redo —
+  tokens, designed states, whole pages, and a list of generated-looking patterns to redo — and
+  a **Usability bar** beside it (steps counted against the product's core flows, Hick's /
+  Fitts's / Jakob's laws, visible status, calm screens, WCAG 2.2), with a Do/Don't table —
   plus recommended design skills (`frontend-design`, [Impeccable](https://github.com/pbakaus/impeccable),
   [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill))
 - an independent **code-reviewer** you run on request: it reviews the diff and the code

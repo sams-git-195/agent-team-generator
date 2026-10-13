@@ -101,8 +101,10 @@ only on the user's instruction, and then without asking again.
   `index.html`, `public/**`, styling entrypoints, `src/lib/utils.ts`}. Neighbouring lane: data
   layer, contexts, types, money module (backend-developer's) — small adjacent edits allowed
   and reported.
-- Carries the **Design bar** (`design-standard.md`): direction before pixels, tokens not
-  values, every state designed, whole pages, the slop list, look at it in a browser.
+- Carries the **Design bar** and the **Usability bar** (`design-standard.md`): direction
+  before pixels, tokens not values, every state designed, whole pages, the slop list, the
+  Do/Don't table, look at it in a browser; then steps counted against the core flows, Hick's /
+  Fitts's / Jakob's laws, visible status, calm screens, one term per concept, WCAG 2.2.
 - Non-negotiables: stack discipline (exact framework/router versions and banned APIs) · every
   data-driven view handles loading / empty / error (with retry) / success · no hardcoded
   user-facing strings — keys in ALL locale files with the project's interpolation syntax ·

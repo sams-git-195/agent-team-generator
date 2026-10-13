@@ -77,7 +77,7 @@ with file + line instead. You may commit the tests and known-issues entries you 
   {I18N_HIGH e.g. key missing from a locale file} · no tests for new behaviour.
 - 🟠 **Should fix**: missing loading/empty/error state · ungraceful user-facing error · a11y
   gap · tests that are thin or cannot fail · something re-implemented that already exists ·
-  a Design-bar slop item · **`documentation/` not updated for a user-facing change**.
+  a Design-bar slop item or a Usability-bar breach · **`documentation/` not updated for a user-facing change**.
 - 🟡 **Nit**: convention drift, dead code, {DEBUG_PRINT e.g. `console.log`}, naming.
 - 🔵 **FYI**: a consequence of the change worth knowing; nothing to do.
 - 🟣 **Minor**: real but small, often in code around the change — append it to
@@ -118,6 +118,11 @@ arrays, nulls, long strings, rapid clicks, network failure, multi-role users.
 (grep for it); no new dependency a few lines would replace; and nothing cut below the floor:
 error handling present, user-facing errors graceful, no state or UX dropped.
 **Design bar** *(UI changes)* — tokens not raw values; every state designed; no slop-list item.
+**Usability bar** *(UI changes)* — walk the flow and count its steps: a step added to a core
+flow ({CORE_FLOWS}) without a stated reason is 🟠. One primary action per view; no confirm
+dialog on a reversible action; the user's input survives an error; feedback within ~100 ms and
+progress past ~1 s; the price breakdown visible before any pay step; focus never hidden behind
+a sticky header; drag interactions have a click alternative. Each is 🟠 when broken.
 **Cleanliness** — no debug/dead code; TODOs have context; no unflagged dependencies;
 {LANGUAGE_HYGIENE_CHECK e.g. zero `any`} (Engineering Standard, protocol §2).
 **Documentation** — `documentation/` pages/features updated for anything user-facing.
