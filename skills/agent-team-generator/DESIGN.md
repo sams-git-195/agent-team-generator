@@ -188,6 +188,13 @@ Supersedes Decision 1, v2.2–v2.4 and v3.2 where they conflict.
 
 Ported from SpeakAppi, where it was written first (PR #69).
 
+## v0.5.1 (2026-10-13)
+
+The qa-tester template's Design bar and Usability bar checks are marked *(omit … if the
+project has no UI)*, so an API-only or CLI project is not handed checks that cannot apply —
+or an unfilled `{CORE_FLOWS}`, which the verifier would fail. The price-breakdown clause is
+scoped to products that take payments, matching the Usability bar itself.
+
 ## Testing plan for the skill itself
 
 Two layers:

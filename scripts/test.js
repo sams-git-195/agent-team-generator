@@ -122,6 +122,7 @@ check(ref('interview.md').includes('{CORE_FLOWS}'), 'interview: asks for the cor
 for (const file of ['ui-ux-developer.md', 'fullstack-developer.md']) {
   check(readText(path.join(templatesDir, file)).includes('- [ ] Usability bar held'), `${file}: self-check covers the Usability bar`);
 }
+check(/omit the Design bar and Usability bar lines below if the project has no UI/.test(readText(path.join(templatesDir, 'qa-tester.md'))), 'qa-tester: UI checks are omitted for a project with no UI');
 const protocolTpl = ref('protocol-template.md');
 check(/Engineering standard \(every language/.test(protocolTpl), 'protocol template embeds the engineering standard in §2');
 check(/The senior ladder/.test(protocolTpl) && /## 1\. The Main Agent Leads/.test(protocolTpl), 'protocol template: main agent leads, senior ladder embedded');

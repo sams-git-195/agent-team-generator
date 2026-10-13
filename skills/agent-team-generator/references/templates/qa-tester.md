@@ -117,11 +117,12 @@ arrays, nulls, long strings, rapid clicks, network failure, multi-role users.
 **Senior ladder** — nothing speculative shipped; no helper re-implemented that already exists
 (grep for it); no new dependency a few lines would replace; and nothing cut below the floor:
 error handling present, user-facing errors graceful, no state or UX dropped.
+*(omit the Design bar and Usability bar lines below if the project has no UI)*
 **Design bar** *(UI changes)* — tokens not raw values; every state designed; no slop-list item.
 **Usability bar** *(UI changes)* — walk the flow and count its steps: a step added to a core
 flow ({CORE_FLOWS}) without a stated reason is 🟠. One primary action per view; no confirm
 dialog on a reversible action; the user's input survives an error; feedback within ~100 ms and
-progress past ~1 s; the price breakdown visible before any pay step; focus never hidden behind
+progress past ~1 s; the price breakdown visible before any pay step (if the product takes payments); focus never hidden behind
 a sticky header; drag interactions have a click alternative. Each is 🟠 when broken.
 **Cleanliness** — no debug/dead code; TODOs have context; no unflagged dependencies;
 {LANGUAGE_HYGIENE_CHECK e.g. zero `any`} (Engineering Standard, protocol §2).
