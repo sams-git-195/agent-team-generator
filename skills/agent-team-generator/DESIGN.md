@@ -222,7 +222,9 @@ scoped to products that take payments, matching the Usability bar itself.
 5. **Models.** Sonnet baseline for product-specialist and builders with a step-up rule in
    protocol §3 (risk surfaces, multi-module changes, design decisions, a failed first
    attempt; Claude Code: `model` on the dispatch); Opus for architect, qa-tester and
-   code-reviewer, never stepped down.
+   code-reviewer, never stepped down. OpenCode agent files carry no model pin: OpenCode 2
+   selects the model on the subagent call, so the per-agent pin question is gone
+   (`roles.<name>.oc_model` remains as an optional override).
 6. **Small tasks skip qa-tester.** Protocol §5: an S task off every risk surface relies on
    the builder's self-QA; M/L, risk surfaces and user-visible features go to qa-tester.
 7. **General skill.** `bin/cli.js` gains `--harness claude|opencode|codex|cursor|gemini|agents`

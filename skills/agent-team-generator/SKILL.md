@@ -63,7 +63,7 @@ Anything the user defers becomes `⚠️ undecided` in `team.json`, never a gues
 with one line each; the lane map (globs per role, shared files the main agent sequences; root
 manifests, lockfiles, CI and tooling config are the main agent's unless there is a
 devops-engineer); the model matrix (Claude Code baselines + step-up triggers from the risk
-surfaces; OpenCode `provider/model#variant` per agent, asked here); and on greenfield the
+surfaces; OpenCode selects the model on each dispatch, so no pins); and on greenfield the
 prescribed conventions (client singleton path, money module, schema and test locations,
 token file), labelled as proposals. **Get explicit approval before writing any file.**
 

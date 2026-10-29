@@ -51,7 +51,7 @@ never its facts. Markdown is fine everywhere; backtick real paths and commands.
 | `agents_md.data_section_name` · `data_rules` | *opt* the data-layer section ("DB & Firestore") and its lines; omit without a backend |
 | `protocol.sequencing_order` · `shared_early_items` · `shared_root_files` · `business_rule_examples` · `per_task_gates` | task sequencing; what comes first (i18n keys, types); the main agent's root files (manifests, lockfiles, CI, tooling config); two or three rules nobody may guess; per-task gates beyond the commands ("all four states handled") |
 | `roster` | role names in order; core: product-specialist, architect, backend-developer, ui-ux-developer (or fullstack-developer instead of both), qa-tester, code-reviewer. Never project-manager |
-| `roles.<name>.oc_model` | `provider/model-id#variant` — required when OpenCode is a target |
+| `roles.<name>.oc_model` | *opt* `provider/model-id#variant` — only to force a pin; by default OpenCode agent files carry no model and the subagent call selects it on every dispatch |
 | `roles.<name>.cc_model` · `escalate` | *opt* overrides of the template defaults (sonnet builders + product-specialist, opus judges; step-up phrase) |
 | `roles.<name>.focus` · `hands_off_to` | the roster-table cell (globs or responsibility); *opt* next role (template default) |
 | `roles.<name>.owned_paths` · `forbidden_paths` · `expensive_mistake` | builders: the lane globs; the neighbouring lane; a ❌/✅ code contrast in the stack's real syntax (array of lines, fenced) |

@@ -3,7 +3,7 @@
 The core roles are complete templates. A custom role (mobile, devops, data…) gets a body
 file at `.agents/roles/<name>.md` — no frontmatter; the renderer adds the Claude Code
 frontmatter (`name`, `description`, `model`) and the OpenCode 2 frontmatter (`description`,
-`mode: subagent`, `model: provider/model#variant`, `color`) from `roles.<name>` in
+`mode: subagent`, `color`; no model — OpenCode selects it on dispatch) from `roles.<name>` in
 `team.json`, and writes the body to every harness's agent directory. `{{tags}}` from
 `team-schema.md` and the partials (`{{> gated-builder}}`, `{{> grounding}}`,
 `{{> design-bar}}`) work in the body. No `tools:` line, no per-agent permissions, no

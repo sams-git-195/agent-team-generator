@@ -174,7 +174,7 @@ check(/Claude Code only/.test(interview) && /OpenCode\s+only/.test(interview) &&
 check(/AskUserQuestion\)/.test(interview) && /numbered list in chat/.test(interview), 'interview: harness-neutral questioning with a Claude Code fallback named');
 check(/risk surfaces and the\s+never-do list/.test(interview), 'interview: risk surfaces and never-do list always confirmed explicitly');
 check(!/permission tier|Autonomous|Guarded|Strict/.test(interview + skillMd), 'no permission tiers anywhere in the skill flow');
-check(/sonnet for product-specialist and builders, opus for architect, qa-tester and\s+code-reviewer/.test(interview), 'interview: sonnet builders / opus judges default matrix');
+check(/sonnet for\s+product-specialist and builders, opus for architect, qa-tester and code-reviewer/.test(interview) && /no per-agent pins are asked/.test(interview), 'interview: sonnet builders / opus judges default matrix, no OpenCode pins');
 check(/frontend-design/.test(ref('add-ons.md')) && /Security review/.test(ref('add-ons.md')), 'add-ons: design skills and the security-review option');
 check(/production-ready from the first commit/.test(ref('greenfield.md')) && /Every gate runs on every change/.test(ref('greenfield.md')), 'greenfield: strict gates, every gate on every change');
 check(fs.existsSync(path.join(skillDir, 'fixtures', 'sample-brief.md')) && fs.existsSync(path.join(skillDir, 'fixtures', 'team.json')), 'fixtures: sample-brief.md and team.json exist');
@@ -220,11 +220,12 @@ function runRender(team, extraFiles = {}) {
     const ocQa = r.file('.opencode/agents/qa-tester.md') || '';
     check(!r.file('.claude/agents/project-manager.md') && !r.file('.opencode/agents/project-manager.md'), 'rendered: no project-manager file');
     check(/fly deploy/.test(proto) && /alembic upgrade head/.test(proto) && /stripe` CLI in live mode/.test(proto), 'rendered protocol §6 names the deploy channels and live tools');
-    check(/\| backend-developer \| sonnet \|/.test(proto) && /\| qa-tester \| opus \|/.test(proto) && /up to opus for money/.test(proto), 'rendered protocol §3: sonnet builders with a step-up trigger, opus judges');
+    check(/\| backend-developer \| sonnet \| up to opus for money/.test(proto) && /\| qa-tester \| opus \|/.test(proto), 'rendered protocol §3: sonnet builders with a step-up trigger, opus judges');
     check(/no bare `except:`/.test(backend) && /zero `any`/.test(backend) && /money\.py/.test(backend) && /Never edit an applied migration/.test(backend), 'rendered backend-developer: merged TS + Python hygiene, money module, migration rule');
     check(/^1\. \*\*One database session/m.test(backend) && /^8\. \*\*Unclear data shape/m.test(backend), 'rendered backend-developer: numbered rules stay sequential');
     check(/## Design bar/.test(ui) && /## Usability bar/.test(ui) && /create invoice → send/.test(ui) && /Load the `frontend-design` skill/.test(ui) && /Trust before payment/.test(ui), 'rendered ui-ux-developer: Design + Usability bars with core flows, design skill, payments rule');
-    check(/^mode: subagent$/m.test(ocQa) && /^model: anthropic\/claude-opus-5-5#high$/m.test(ocQa) && !/^name:/m.test(ocQa), 'rendered OpenCode file: subagent, provider/model#variant, no name');
+    check(/^mode: subagent$/m.test(ocQa) && !/^model:/m.test(ocQa) && !/^name:/m.test(ocQa), 'rendered OpenCode file: subagent, no model pin (selected on dispatch), no name');
+    check(/select the model on the subagent call/.test(proto), 'rendered protocol §3: OpenCode selects the model on dispatch');
     check(/⚠️ undecided — the UI developer proposes a direction/.test(agents) && /Refund window \| ⚠️ undecided/.test(agents) && /Load the `frontend-design` skill/.test(agents), 'rendered AGENTS.md: undecided markers and the design-skill line');
     check(r.file('documentation/pages/invoices-new.md') !== null && /agent: qa-tester/.test(r.file('.opencode/commands/security-review.md') || ''), 'rendered docs page from route and the OpenCode security-review command');
     check(JSON.parse(r.file('opencode.json')).permissions.length === 1 && JSON.parse(r.file('.claude/settings.json')).permissions.allow.includes('Bash'), 'rendered permissions: allow-all in both harnesses');
@@ -242,8 +243,8 @@ function runRender(team, extraFiles = {}) {
   check(fs2.code === 1 && /fullstack-developer replaces/.test(fs2.out), 'render-team refuses fullstack-developer beside the two builders');
   const missing = runRender({ ...fixture, stack: { ...fixture.stack, client_rule: undefined } });
   check(missing.code === 1 && /missing field "stack\.client_rule"/.test(missing.out), 'render-team names a missing field');
-  const noOc = runRender({ ...fixture, roles: { ...fixture.roles, architect: { focus: 'x' } } });
-  check(noOc.code === 1 && /roles\.architect\.oc_model is required/.test(noOc.out), 'render-team requires OpenCode model pins when OpenCode is a target');
+  const pinned = runRender({ ...fixture, roles: { ...fixture.roles, architect: { ...fixture.roles.architect, oc_model: 'anthropic/claude-opus-5-5#high' } } });
+  check(pinned.code === 0 && /^model: anthropic\/claude-opus-5-5#high$/m.test(pinned.file('.opencode/agents/architect.md') || ''), 'render-team honours an explicit oc_model override');
 }
 
 // --- 3b. verify-team.js against a synthetic generated tree ------------------------------

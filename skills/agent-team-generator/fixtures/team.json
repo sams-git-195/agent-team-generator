@@ -10,10 +10,26 @@
     ],
     "targets": "",
     "pages": [
-      { "route": "/invoices", "name": "Invoices", "one_liner": "Mara's invoice list with status and totals" },
-      { "route": "/invoices/new", "name": "New invoice", "one_liner": "Create an invoice in two currencies" },
-      { "route": "/clients", "name": "Clients", "one_liner": "Mara's clients and their payment terms" },
-      { "route": "/settings", "name": "Settings", "one_liner": "Profile, currencies, payout details" }
+      {
+        "route": "/invoices",
+        "name": "Invoices",
+        "one_liner": "Mara's invoice list with status and totals"
+      },
+      {
+        "route": "/invoices/new",
+        "name": "New invoice",
+        "one_liner": "Create an invoice in two currencies"
+      },
+      {
+        "route": "/clients",
+        "name": "Clients",
+        "one_liner": "Mara's clients and their payment terms"
+      },
+      {
+        "route": "/settings",
+        "name": "Settings",
+        "one_liner": "Profile, currencies, payout details"
+      }
     ],
     "roles": "translator, agency, admin — plus logged-out visitors",
     "core_flows": "create invoice → send (Mara); open statement → pay 40 invoices (Tomás)",
@@ -22,12 +38,32 @@
   },
   "commands": {
     "list": [
-      { "cmd": "npm run dev", "note": "web dev server on :5173 (run from the root; proxies to `web/`)" },
-      { "cmd": "npm run build", "note": "web build to `web/dist`" },
-      { "cmd": "npm run lint / npm run typecheck / npm run test", "note": "web: ESLint, tsc, vitest (no tests yet — the first one lands with the first feature)" },
-      { "cmd": "make lint / make typecheck / make test", "note": "api: ruff, pyright, pytest (run from the root)" }
+      {
+        "cmd": "npm run dev",
+        "note": "web dev server on :5173 (run from the root; proxies to `web/`)"
+      },
+      {
+        "cmd": "npm run build",
+        "note": "web build to `web/dist`"
+      },
+      {
+        "cmd": "npm run lint / npm run typecheck / npm run test",
+        "note": "web: ESLint, tsc, vitest (no tests yet — the first one lands with the first feature)"
+      },
+      {
+        "cmd": "make lint / make typecheck / make test",
+        "note": "api: ruff, pyright, pytest (run from the root)"
+      }
     ],
-    "gates": ["npm run lint", "npm run typecheck", "npm run test", "npm run build", "make lint", "make typecheck", "make test"],
+    "gates": [
+      "npm run lint",
+      "npm run typecheck",
+      "npm run test",
+      "npm run build",
+      "make lint",
+      "make typecheck",
+      "make test"
+    ],
     "gates_note": "all seven must pass before any task is done; `make test` is the full pytest suite, every change",
     "build": "`npm run build`",
     "test_narrow": "`npm run test -- <file>` for web, `make test ARGS=<path>::<test>` for api"
@@ -75,7 +111,10 @@
     },
     "security_examples": "a service that skips the role check, a Stripe secret in `VITE_` vars or a log, a client-side mutation of invoice totals"
   },
-  "i18n": { "locale_files": "`web/src/i18n/en.json` and `es.json`", "interpolation": "`{{var}}`" },
+  "i18n": {
+    "locale_files": "`web/src/i18n/en.json` and `es.json`",
+    "interpolation": "`{{var}}`"
+  },
   "risk": {
     "surfaces": "money and currency math, auth and permissions, migrations on the live database, the Stripe integration",
     "paths": "`api/app/services/money.py`, `api/app/services/payments.py`, `api/app/auth/`, `api/alembic/versions/`",
@@ -105,7 +144,9 @@
     "palette": "⚠️ undecided",
     "fonts": "⚠️ undecided",
     "conventions": "No component library; class-merge helper `web/src/lib/cn.ts`; icons ⚠️ undecided",
-    "skills": ["frontend-design"]
+    "skills": [
+      "frontend-design"
+    ]
   },
   "agents_md": {
     "gotchas": [
@@ -147,12 +188,22 @@
     "business_rule_examples": "the fee floor, the refund window, who may see an agency's statement",
     "per_task_gates": "all four states handled; per-role access stated"
   },
-  "roster": ["product-specialist", "architect", "backend-developer", "ui-ux-developer", "qa-tester", "code-reviewer"],
+  "roster": [
+    "product-specialist",
+    "architect",
+    "backend-developer",
+    "ui-ux-developer",
+    "qa-tester",
+    "code-reviewer"
+  ],
   "roles": {
-    "product-specialist": { "oc_model": "anthropic/claude-sonnet-5-5", "focus": "Requirements, user flows, acceptance criteria; `documentation/specs/` on request" },
-    "architect": { "oc_model": "anthropic/claude-opus-5-5#high", "focus": "Technical design, data model, security and threat model; `documentation/specs/` on request" },
+    "product-specialist": {
+      "focus": "Requirements, user flows, acceptance criteria; `documentation/specs/` on request"
+    },
+    "architect": {
+      "focus": "Technical design, data model, security and threat model; `documentation/specs/` on request"
+    },
     "backend-developer": {
-      "oc_model": "anthropic/claude-sonnet-5-5",
       "focus": "`api/**`, `web/src/types/**`, `.env.example`; money module, Stripe, auth, migrations",
       "owned_paths": "`api/**` (models, services, routers, Alembic migrations, tests), `web/src/types/**`, `.env.example`",
       "forbidden_paths": "`web/src/**` except `types/` — components, pages, hooks, i18n, styling",
@@ -168,7 +219,6 @@
       ]
     },
     "ui-ux-developer": {
-      "oc_model": "anthropic/claude-sonnet-5-5",
       "focus": "`web/src/**` except `types/`: components, pages, hooks, i18n, styling, a11y; design direction proposal",
       "owned_paths": "`web/src/**` except `types/`, `web/index.html`, `web/public/**`, `web/src/styles/**`",
       "forbidden_paths": "`api/**` and `web/src/types/**` — the data layer and shared types",
@@ -185,7 +235,11 @@
         "```"
       ]
     },
-    "qa-tester": { "oc_model": "anthropic/claude-opus-5-5#high", "focus": "Verification after M/L tasks, risk-surface changes and user-visible features; regression tests; 🟣 entries" },
-    "code-reviewer": { "oc_model": "anthropic/claude-opus-5-5#high", "focus": "Independent review of a diff on the user's request; logs 🟣 to `documentation/known-issues.md`" }
+    "qa-tester": {
+      "focus": "Verification after M/L tasks, risk-surface changes and user-visible features; regression tests; 🟣 entries"
+    },
+    "code-reviewer": {
+      "focus": "Independent review of a diff on the user's request; logs 🟣 to `documentation/known-issues.md`"
+    }
   }
 }

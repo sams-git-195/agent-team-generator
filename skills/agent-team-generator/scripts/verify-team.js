@@ -168,7 +168,7 @@ if (hasOC) {
   for (const a of ocFiles) {
     check(fmValue(a.fm, 'mode') === 'subagent', `${a.rel}: mode: subagent`);
     const model = fmValue(a.fm, 'model');
-    check(model !== null && /^[\w.-]+\/[\w.:\/-]+(#[\w.-]+)?$/.test(model), `${a.rel}: model is provider/model with an optional #variant (${model || 'missing'})`);
+    if (model !== null) check(/^[\w.-]+\/[\w.:\/-]+(#[\w.-]+)?$/.test(model), `${a.rel}: model is provider/model with an optional #variant (${model})`);
     const v1 = ['permission', 'tools', 'temperature', 'name', 'maxSteps', 'options'].filter((k) => new RegExp(`^${k}:`, 'm').test(a.fm));
     check(v1.length === 0, `${a.rel}: no OpenCode 1 frontmatter keys${v1.length ? ` (found: ${v1.join(', ')})` : ''}`);
     check(!/^permissions:/m.test(a.fm), `${a.rel}: no per-agent permissions list (one policy, in opencode.json)`);

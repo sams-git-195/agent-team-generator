@@ -13,7 +13,7 @@ agent team for your project:
   changes
 - `AGENTS.md` + `CLAUDE.md` foundation files
 - specialist subagents for **Claude Code** (`.claude/agents/`), **OpenCode 2**
-  (`.opencode/agents/`, `provider/model#variant` pins) or **another harness**
+  (`.opencode/agents/`, model chosen on each dispatch) or **another harness**
   (`.agents/agents/` + a pointer file), each with a stated lane and per-project non-negotiables
 - a **Fable-level process protocol** (`.agents/rules/claude-agent-protocol.md`) so mid-level
   models follow frontier-model steps — the quality bar lives in the process files, not the

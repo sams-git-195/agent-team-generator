@@ -37,9 +37,7 @@ The project is fictional. Nothing here may be copied into a real project by the 
 
 Harness: both. Builder split: separate. Report style: Direct with technical summary.
 Security review: yes. Design skill: frontend-design (user level). Greenfield menu: strict
-gates for both rows, CI on PR + merge, env hygiene, version pinning only. OpenCode pins:
-product-specialist and builders `anthropic/claude-sonnet-5-5`, judges
-`anthropic/claude-opus-5-5#high`. Claude Code matrix: defaults. Roster: the core six.
+gates for both rows, CI on PR + merge, env hygiene, version pinning only. Model matrix: defaults. Roster: the core six.
 
 ## Expectations (after `render-team.js` reports a clean verify)
 
@@ -48,11 +46,11 @@ product-specialist and builders `anthropic/claude-sonnet-5-5`, judges
   direction marker and the frontend-design line; the main agent's row lists the root
   `package.json` and `Makefile`.
 - No project-manager file. Both agent sets, six roles each, `.opencode/agents/` (not
-  `agent/`), every OC file `mode: subagent` with a `provider/model` pin, no `name:`, no
+  `agent/`), every OC file `mode: subagent` with no `model:` pin (selected on dispatch), no `name:`, no
   `permissions:`, no `tools:` in any CC file. `opencode.json` is the single allow-all rule;
   `.claude/settings.json` allows `Bash`, `Edit`, `Write`, `WebFetch`, `WebSearch`.
 - Protocol §6 names the three gated commands and says to carry a gated action out without
-  re-asking; §3's matrix has sonnet builders with a step-up column and opus judges; §5 says an
+  re-asking; §3's matrix has sonnet builders with a step-up column and opus judges, and says OpenCode selects the model on each dispatch; §5 says an
   S task off a risk surface relies on self-QA.
 - backend-developer carries the Python + TypeScript hygiene rule, the money module and the
   Alembic rule; ui-ux-developer carries the full Design and Usability bars with the two core

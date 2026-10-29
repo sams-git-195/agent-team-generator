@@ -192,7 +192,6 @@ function loadRole(name) {
 }
 if (team.roster.includes('project-manager')) die('team.json: no project-manager role — the main agent leads');
 for (const name of team.roster) loadRole(name);
-if (hasOC) for (const name of team.roster) if (!roleMeta[name].oc_model) die(`team.json: roles.${name}.oc_model is required when OpenCode is a target (provider/model#variant)`);
 
 const builders = team.roster.filter((n) => roleMeta[n].kind === 'builder');
 const builderNames = builders.join(' / ') || 'developer';
@@ -215,7 +214,7 @@ const base = {
   design: { ...design, direction_or_marker: design.direction || '⚠️ undecided — the UI developer proposes a direction and gets it approved before the first screen; never invent a look screen by screen', skills: design.skills || [] },
   roster_rows: team.roster.map((n) => ({ name: n, focus: roleMeta[n].focus || `⚠️ undecided — fill roles.${n}.focus`, handoff: roleMeta[n].handoff })),
   persona_rows: team.roster.map((n) => ({ name: n, work_type: roleMeta[n].work_type })),
-  model_rows: team.roster.map((n) => ({ name: n, cc_model: roleMeta[n].cc_model, oc_model: roleMeta[n].oc_model || '—', escalate: roleMeta[n].escalate })), // escalate rendered below
+  model_rows: team.roster.map((n) => ({ name: n, cc_model: roleMeta[n].cc_model, escalate: roleMeta[n].escalate })), // escalate rendered below
   main_branch: team.main_branch || 'main',
   test_globs: '`**/*.test.*`, `**/*.spec.*`, `**/__tests__/**`',
   today: new Date().toISOString().slice(0, 10),
@@ -242,7 +241,7 @@ for (const name of team.roster) {
   const description = tryRender(() => renderTemplate(rm.description_tpl, ctx, `templates/${name}.md (description)`)).replace(/\s+/g, ' ').trim();
   if (!description) die(`role "${name}": no description (template frontmatter or roles.${name}.description)`);
   if (hasCC) put(`.claude/agents/${name}.md`, `---\nname: ${name}\ndescription: ${description}\nmodel: ${rm.cc_model}\n---\n\n${body}`);
-  if (hasOC) put(`.opencode/agents/${name}.md`, `---\ndescription: ${description}\nmode: subagent\nmodel: ${rm.oc_model}\ncolor: "${rm.color}"\n---\n\n${body}`);
+  if (hasOC) put(`.opencode/agents/${name}.md`, `---\ndescription: ${description}\nmode: subagent\n${rm.oc_model ? `model: ${rm.oc_model}\n` : ''}color: "${rm.color}"\n---\n\n${body}`);
   if (hasNeutral) put(`.agents/agents/${name}.md`, body);
 }
 

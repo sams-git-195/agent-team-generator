@@ -63,12 +63,11 @@ never-do list. Everything else accepts "looks right" as approval.
    UI/UX Pro Max · none. The team's own Design bar does not depend on any; one deepens it.
    Installed in Step 5 at the level the user picks.
 
-Then, as part of the Step 2 roster proposal: **OpenCode model pins per agent** (when OpenCode
-is a target; `provider/model-id#variant`, the variant being the provider's reasoning-effort
-level; omit `#variant` when the model has none; no `temperature`) and the Claude Code matrix
-(default: sonnet for product-specialist and builders, opus for architect, qa-tester and
-code-reviewer; builders step up to opus on the risk surfaces, multi-module changes or a design
-decision — confirm or adjust).
+Then, as part of the Step 2 roster proposal, the **model matrix**: sonnet for
+product-specialist and builders, opus for architect, qa-tester and code-reviewer; builders
+step up to opus on the risk surfaces, multi-module changes or a design decision — confirm or
+adjust. Claude Code pins the baseline in each agent file; OpenCode agent files carry no pin
+(the model is selected on every subagent dispatch), so no per-agent pins are asked.
 
 Do NOT ask about git/deploy behaviour or permissions: both are fixed (open permissions, the
 protocol §6 user-gated list). The never-do list decides only which commands §6 names.

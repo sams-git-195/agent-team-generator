@@ -150,16 +150,17 @@ tool with the agent's ID{{#has_neutral}}; {{other_harness.name}}: ⚠️ verify 
    produced, the exact files in scope, the acceptance criteria, what is ruled out. If the
    user has authorised a user-gated action for this task (§6), say so in their words;
    otherwise the subagent must not take it.
-3. **Model selection.** Each agent file pins a baseline. Builders run on the baseline for a
-   well-scoped task; **step up to the stronger model** (Claude Code: `model` on the dispatch;
-   OpenCode: ⚠️ verify whether the subagent call accepts an override, else raise the pin)
-   when the task touches {{risk.escalation}}, spans several files or disciplines, needs a
-   design decision, or a first attempt came back wrong. Judges never step down.
+3. **Model selection — chosen on every dispatch.** The baseline below is the tier for a
+   well-scoped task; **step up to the stronger model** when the task touches
+   {{risk.escalation}}, spans several files or disciplines, needs a design decision, or a
+   first attempt came back wrong. Judges never step down. Claude Code: the agent file pins
+   the baseline; pass `model` on the dispatch to step up. OpenCode: agent files carry no pin
+   — select the model on the subagent call every time (baseline tier, or the stronger one).
 
-   | Agent | Claude Code | OpenCode | Step up when |
-   |---|---|---|---|
+   | Agent | Baseline | Step up when |
+   |---|---|---|
 {{#model_rows}}
-   | {{name}} | {{cc_model}} | `{{oc_model}}` | {{escalate}} |
+   | {{name}} | {{cc_model}} | {{escalate}} |
 {{/model_rows}}
 
 4. **Reject reports without evidence.** Real gate output and the handoff line
