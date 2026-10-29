@@ -1,0 +1,245 @@
+{
+  "harness": "both",
+  "project": {
+    "name": "Ledgerly",
+    "pitch": "invoicing for freelance translators — invoices in two currencies, paid by card",
+    "stack": "React 18 + Vite + Tailwind v4 web app; Python 3.12 FastAPI + Postgres API; monorepo `web/` + `api/`",
+    "personas": [
+      "**Mara** (freelance translator, wants to invoice in 2 minutes)",
+      "**Tomás** (agency owner, pays 40 invoices a month, wants a single statement)"
+    ],
+    "targets": "",
+    "pages": [
+      {
+        "route": "/invoices",
+        "name": "Invoices",
+        "one_liner": "Mara's invoice list with status and totals"
+      },
+      {
+        "route": "/invoices/new",
+        "name": "New invoice",
+        "one_liner": "Create an invoice in two currencies"
+      },
+      {
+        "route": "/clients",
+        "name": "Clients",
+        "one_liner": "Mara's clients and their payment terms"
+      },
+      {
+        "route": "/settings",
+        "name": "Settings",
+        "one_liner": "Profile, currencies, payout details"
+      }
+    ],
+    "roles": "translator, agency, admin — plus logged-out visitors",
+    "core_flows": "create invoice → send (Mara); open statement → pay 40 invoices (Tomás)",
+    "has_ui": true,
+    "takes_payments": true
+  },
+  "commands": {
+    "list": [
+      {
+        "cmd": "npm run dev",
+        "note": "web dev server on :5173 (run from the root; proxies to `web/`)"
+      },
+      {
+        "cmd": "npm run build",
+        "note": "web build to `web/dist`"
+      },
+      {
+        "cmd": "npm run lint / npm run typecheck / npm run test",
+        "note": "web: ESLint, tsc, vitest (no tests yet — the first one lands with the first feature)"
+      },
+      {
+        "cmd": "make lint / make typecheck / make test",
+        "note": "api: ruff, pyright, pytest (run from the root)"
+      }
+    ],
+    "gates": [
+      "npm run lint",
+      "npm run typecheck",
+      "npm run test",
+      "npm run build",
+      "make lint",
+      "make typecheck",
+      "make test"
+    ],
+    "gates_note": "all seven must pass before any task is done; `make test` is the full pytest suite, every change",
+    "build": "`npm run build`",
+    "test_narrow": "`npm run test -- <file>` for web, `make test ARGS=<path>::<test>` for api"
+  },
+  "stack": {
+    "hygiene_rule": "TypeScript `strict: true`, zero `any` (`no-explicit-any` is an error), no non-null `!` without a comment; Python: full type hints on every public function, no bare `except:`, no mutable default arguments",
+    "hygiene_check": "zero `any`, no `console.log`; type hints on every public function, no bare `except:`, no `print` in `api/`",
+    "env_convention": "`.env` git-ignored, `.env.example` committed with every variable; `VITE_` vars ship to the browser and never hold a secret",
+    "debug_print": "`console.log` / `print`",
+    "unsafe_render_apis": "`dangerouslySetInnerHTML`, `innerHTML`, `eval`; `mark_safe`, `subprocess(..., shell=True)`",
+    "secret_files": "`.env`",
+    "client_env_prefix": "VITE_",
+    "secret_locations": "`.env` on this machine and Fly.io secrets in production",
+    "breakpoints": "375 / 768 / 1440 px",
+    "boundaries": "FastAPI request models, React forms, env, the Stripe webhook payload",
+    "discipline_rule": "React 18 + Vite SPA — no React-19 APIs, no server components, no `next/*`; routing library is ⚠️ undecided — do not assume one.",
+    "discipline_line": "React 18 APIs only; Tailwind v4 CSS-first; Python typed and ruff-clean",
+    "stack_checks": "React 18 + Vite only (no React-19 or Next APIs); Tailwind v4 CSS-first (no `tailwind.config`); FastAPI request models for every input; Alembic for every schema change",
+    "stack_violation": "a React-19 / Next API, a Stripe call outside `api/app/services/payments.py`, a schema change without an Alembic migration",
+    "styling_rule": "Tailwind v4 CSS-first — no config file; tokens in `web/src/styles/tokens.css`; dynamic classes through the class-merge helper.",
+    "client_rule": "One database session per request from `api/app/db/session.py` — never instantiate another engine or session.",
+    "server_unit_names": "FastAPI routes in `api/app/routers/` calling services in `api/app/services/`",
+    "access_control_unit": "table and router",
+    "access_control_rule": "Every new table design states which of translator / agency / admin can read and write which rows, enforced in the service layer.",
+    "access_control_check": "Per-role access stated for every new table and route",
+    "schema_units": "table, service function, request/response model",
+    "schema_locations": "`api/app/models/`, `api/alembic/versions/`, `web/src/types/`",
+    "impl_order": "Alembic migration → SQLAlchemy model → service → router + request/response models → `web/src/types/`",
+    "ui_impl_order": "i18n keys → hook → component → page wiring → route",
+    "error_shape": "a typed `HTTPException` with a stable error code the web app maps to a message",
+    "data_layer_summary": "the FastAPI API (`api/**`): Postgres schema and Alembic migrations, SQLAlchemy models, services incl. the money module and Stripe integration, routers, auth, and the shared types in `web/src/types/`",
+    "ui_territory_summary": "the React web app (`web/src/**` except `types/`): components, pages, hooks, i18n, styling and accessibility",
+    "data_principles": "Index what you filter; every schema change is an Alembic migration; `updated_at` on every table; money as integer minor units with the currency beside it.",
+    "data_change_shape": "Alembic migration, tables/columns/constraints, per-role access in the service layer, indexes with rationale",
+    "flow_shape": "migration → model → service → router → `web/src/types/` → hook → component",
+    "stack_edge_cases": "currency rounding and FX capture, webhook replay from Stripe, session expiry mid-form",
+    "early_items_step": "Add i18n keys to `web/src/i18n/en.json` and `es.json` and any shared types first so nothing downstream blocks.",
+    "migration": {
+      "rule": "Never edit an applied migration; at most one unapplied Alembic migration exists at a time; `alembic upgrade head` runs locally only — production is user-gated.",
+      "state_step": "Check `alembic current` and `api/alembic/versions/` before creating a migration."
+    },
+    "money": {
+      "rule": "Money is integer minor units in the invoice currency, never floats. All money arithmetic imports from `api/app/services/money.py` — never inlined. After touching it, run `make test` and quote the output.",
+      "module": "`api/app/services/money.py`"
+    },
+    "security_examples": "a service that skips the role check, a Stripe secret in `VITE_` vars or a log, a client-side mutation of invoice totals"
+  },
+  "i18n": {
+    "locale_files": "`web/src/i18n/en.json` and `es.json`",
+    "interpolation": "`{{var}}`"
+  },
+  "risk": {
+    "surfaces": "money and currency math, auth and permissions, migrations on the live database, the Stripe integration",
+    "paths": "`api/app/services/money.py`, `api/app/services/payments.py`, `api/app/auth/`, `api/alembic/versions/`",
+    "critical": "a fee or FX miscalculation, an invoice visible to the wrong client",
+    "escalation": "money math, auth, a migration, or Stripe",
+    "rule": "Money is integer minor units; every payment design shows the calculation explicitly and routes arithmetic through pure functions in `api/app/services/money.py`, naming which must be unit-tested.",
+    "impact_section": "Financial Impact",
+    "section": "Money & Testing",
+    "check": "All money arithmetic imported from `api/app/services/money.py` as integer minor units; every schema change is an Alembic migration",
+    "qa_sections": [
+      "**Money & currency** — amounts are integer minor units with a currency; the 2.5 % fee uses the 50-minor-unit floor and half-up rounding from `money.py`; FX captured at creation and never recomputed; a changed value in `money.py` turns a test red.",
+      "**Auth & permissions** — every router checks the session and the role; a translator never reads another translator's invoices; agency sees only invoices addressed to it.",
+      "**Migrations** — one unapplied Alembic migration at most; reversible `downgrade`; no data loss on existing rows.",
+      "**Stripe** — calls only in `api/app/services/payments.py`; webhook signature verified; replayed events idempotent by event id; test mode locally."
+    ]
+  },
+  "report_style": "Direct with technical summary",
+  "gated": {
+    "deploy_commands": "`fly deploy` · `alembic upgrade head` against production (`DATABASE_URL` pointing at Fly)",
+    "live_tools": "the `stripe` CLI in live mode"
+  },
+  "security_review": true,
+  "mcp_servers": [],
+  "design": {
+    "direction": "",
+    "token_source": "CSS variables in `web/src/styles/tokens.css` (⚠️ undecided — create with the approved direction)",
+    "palette": "⚠️ undecided",
+    "fonts": "⚠️ undecided",
+    "conventions": "No component library; class-merge helper `web/src/lib/cn.ts`; icons ⚠️ undecided",
+    "skills": [
+      "frontend-design"
+    ]
+  },
+  "agents_md": {
+    "gotchas": [
+      "- **Tailwind v4 is CSS-first** — there is no `tailwind.config.*`; tokens and theme live in `web/src/styles/tokens.css`.",
+      "- **Routing library is ⚠️ undecided** — do not import `react-router` or anything else until it is chosen and written here.",
+      "- **i18n keys go in both `en.json` and `es.json`** with `{{var}}` interpolation — a key in one file is a 🔴.",
+      "- **Stripe is called only from `api/app/services/payments.py`** — test mode locally; the live CLI is user-gated.",
+      "- **`alembic upgrade head` runs routinely against the local DB** — against production only on the user's word.",
+      "- **`.env` is readable and editable** by agents; its values never reach a commit, a log or a report; `.env.example` documents every variable."
+    ],
+    "architecture": [
+      "- Monorepo: `web/` (React 18 + Vite SPA) and `api/` (FastAPI); gates run from the root through the root `package.json` workspace scripts and the root `Makefile`.",
+      "- API: `api/app/routers/` → `api/app/services/` → SQLAlchemy models in `api/app/models/`; one session per request from `api/app/db/session.py`; Alembic migrations in `api/alembic/versions/`.",
+      "- Auth: session cookies; roles table with `translator`, `agency`, `admin`; the service layer enforces per-role access — the UI only hides.",
+      "- Payments: Stripe in `api/app/services/payments.py`; webhooks verified and idempotent by event id.",
+      "- Shared types for the web app in `web/src/types/` (owned by backend-developer)."
+    ],
+    "business_rules": [
+      "| Rule | Value |",
+      "|---|---|",
+      "| Platform fee | 2.5 % of invoice total, minimum 50 minor units of the invoice currency, rounded half-up |",
+      "| Amount storage | integer minor units in the invoice currency, currency stored beside the amount |",
+      "| FX rate | captured at invoice creation, never recomputed |",
+      "| Refund window | ⚠️ undecided — ask before implementing |",
+      "",
+      "Money module: `api/app/services/money.py` — pure functions, integer minor units, unit-tested; nothing inlines money arithmetic."
+    ],
+    "data_section_name": "DB & Postgres",
+    "data_rules": [
+      "- Every schema change is an Alembic migration; never edit an applied one; at most one unapplied at a time.",
+      "- Per-role access is enforced in the service layer on every query; least privilege by default.",
+      "- `alembic upgrade head` against production and `fly deploy` need the user's explicit go-ahead."
+    ]
+  },
+  "protocol": {
+    "sequencing_order": "migrations → models and services → routers → shared types → hooks → UI → QA",
+    "shared_early_items": "i18n keys, shared types",
+    "shared_root_files": "root `package.json` and lockfile, `Makefile`, `.github/workflows/**`, lint/format/tsconfig/ruff config",
+    "business_rule_examples": "the fee floor, the refund window, who may see an agency's statement",
+    "per_task_gates": "all four states handled; per-role access stated"
+  },
+  "roster": [
+    "product-specialist",
+    "architect",
+    "backend-developer",
+    "ui-ux-developer",
+    "qa-tester",
+    "code-reviewer"
+  ],
+  "roles": {
+    "product-specialist": {
+      "focus": "Requirements, user flows, acceptance criteria; `documentation/specs/` on request"
+    },
+    "architect": {
+      "focus": "Technical design, data model, security and threat model; `documentation/specs/` on request"
+    },
+    "backend-developer": {
+      "focus": "`api/**`, `web/src/types/**`, `.env.example`; money module, Stripe, auth, migrations",
+      "owned_paths": "`api/**` (models, services, routers, Alembic migrations, tests), `web/src/types/**`, `.env.example`",
+      "forbidden_paths": "`web/src/**` except `types/` — components, pages, hooks, i18n, styling",
+      "expensive_mistake": [
+        "```python",
+        "# ❌ float money, arithmetic inlined in a router",
+        "fee = round(total * 0.025, 2)",
+        "",
+        "# ✅ integer minor units through the money module, tested",
+        "from app.services.money import platform_fee",
+        "fee_minor = platform_fee(total_minor, currency)  # 2.5 %, floor 50, half-up",
+        "```"
+      ]
+    },
+    "ui-ux-developer": {
+      "focus": "`web/src/**` except `types/`: components, pages, hooks, i18n, styling, a11y; design direction proposal",
+      "owned_paths": "`web/src/**` except `types/`, `web/index.html`, `web/public/**`, `web/src/styles/**`",
+      "forbidden_paths": "`api/**` and `web/src/types/**` — the data layer and shared types",
+      "expensive_mistake": [
+        "```tsx",
+        "// ❌ a total computed in the component, hard-coded strings, no error state",
+        "const total = items.reduce((s, i) => s + i.price * 1.025, 0);",
+        "return <p>Total: {total.toFixed(2)}</p>;",
+        "",
+        "// ✅ amounts come from the API already computed; strings from i18n; all four states",
+        "if (query.isLoading) return <InvoiceSkeleton />;",
+        "if (query.error) return <ErrorState message={t('invoice.loadFailed')} onRetry={query.refetch} />;",
+        "return <Money minor={invoice.totalMinor} currency={invoice.currency} />;",
+        "```"
+      ]
+    },
+    "qa-tester": {
+      "focus": "Verification after M/L tasks, risk-surface changes and user-visible features; regression tests; 🟣 entries"
+    },
+    "code-reviewer": {
+      "focus": "Independent review of a diff on the user's request; logs 🟣 to `documentation/known-issues.md`"
+    }
+  }
+}

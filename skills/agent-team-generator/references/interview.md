@@ -1,280 +1,78 @@
-# Interview question bank
+# Interview — one intake message, a summary to correct, then the gates
 
-Run the interview in phases, one topic per message, using AskUserQuestion where options are
-enumerable and free text otherwise. Skip anything already answered by the user's opening message
-or discoverable from an existing repo (read first, then ask only the gaps). After the interview,
-propose the roster (SKILL.md Step 2 — the authoritative list of what the proposal contains)
-before generating anything.
+Ask with the harness's question tool when it has one (Claude Code: AskUserQuestion), else a
+numbered list in chat. Never ask what Step 0 already read from the repo; show it as a row to
+confirm instead.
 
-**Fast path (after Phase 4).** Phases 0–4 are facts only the user has; ask them. Then offer,
-in one AskUserQuestion, to **accept the recommended defaults** for the rest and list them:
-permission tier Autonomous (5.3) · report style Direct with technical summary (5.4) · Claude
-Code model matrix as in Phase 6.3 · separate backend + UI developers (7.0) · the full strict
-greenfield menu on an empty repo (8) · the `frontend-design` skill when the project has a
-UI, security review referenced (9). "Yes"
-skips those questions; anything else walks the phases. Two things are never defaulted: the
-Phase 5.2 never-do list (always ask) and OpenCode model pins when OpenCode was chosen in
-Phase 0 (no sensible default exists — ask Phase 6.1–6.2 even on the fast path).
+## 1. Intake (one message)
 
-## Phase 0 — Harness (always ask first, AskUserQuestion)
+Ask for a single paragraph, in the user's words, covering:
 
-> Which harness should the team be generated for?
-> - **Both Claude Code and OpenCode, kept in line** (recommended — `CLAUDE.md` points at
->   `AGENTS.md` + the protocol; both agent sets are generated and must be updated together)
-> - **Claude Code only**
-> - **OpenCode only**
-> - **Another harness** (name it — Codex, Gemini CLI, Cursor, Copilot, …)
+> What the product is and for whom (name, one-line pitch, the people who use it) · the stack
+> and hosting (frontend, backend/data, auth, payments, i18n, how it deploys) · what is
+> expensive to get wrong · any rules with numbers in them (fees, limits, windows) · anything
+> agents must never do without being told · the two or three jobs that must be quickest for
+> users. Say "undecided" for anything not settled yet.
 
-Auto-detect first: `.claude/` or `CLAUDE.md` present → Claude Code in use; `.opencode/` or `opencode.json` →
-OpenCode in use; both → propose Both. OpenCode output targets **OpenCode 2** (`.opencode/agents/`,
-`permissions` rule list, `provider/model#variant`); a legacy `.opencode/agent/` directory or a
-v1 `permission:` map found in Step 0 is reported to the user as "v1 layout — will be
-replaced by the v2 layout", never silently left beside the new files. Still ask — the answer decides which files are written
-(SKILL.md Step 4 table). "Another harness" gets harness-neutral persona files under
-`.agents/agents/` plus a pointer file where one is known (`agent-skeleton.md` §Other
-harnesses); subagent dispatch mechanics for that harness are marked `⚠️ verify`.
+On a re-run (`.agents/team.json` exists) ask instead: "Here is what the team file says
+(summary below) — what changed?"
 
-## Phase 1 — Product
+## 2. Summary table (the user corrects it)
 
-1. Project name and one-line pitch. What does it do, for whom?
-2. Domain / product type (marketplace, SaaS, internal tool, static site, mobile app…).
-3. User personas — 1–3 named personas with a one-line goal each (these go into AGENTS.md and the
-   product-specialist's Domain Reference).
-4. Success targets, if any (GMV, users, conversion — optional; include only if given).
-5. Initial pages/routes (3–5), if known — used to seed `documentation/pages/`. "Not decided yet"
-   is a fine answer; seed only the README in that case.
+Turn the paragraph plus the survey into one table — one row per `team.json` area — and label
+each row's source: **repo** (read from a file: name it) · **you** (from the paragraph) ·
+**default** (the skill's recommendation) · **⚠️ undecided**. Rows:
 
-## Phase 2 — Tech stack
+| Row | What goes in it |
+|---|---|
+| Product | name, pitch, personas, routes (seed `documentation/pages/`; "not decided" seeds only the README) |
+| Stack | frameworks + versions, routing library ("undecided" — never assume one), styling, component library, backend/data, where server logic lives, auth pattern, payments, i18n files + interpolation, mobile |
+| Commands | dev / build / lint / typecheck / test, the directory each runs from, the single-file test form. Monorepo → root-level proxies (workspace scripts, a `Makefile`) so one command per gate runs from the root; propose them if absent |
+| Hygiene | the stack hygiene row(s) from `engineering-standard.md`; secret file(s); client-shipped env prefix; breakpoints (web default 375/768/1440) |
+| Risk surfaces | the common set offered as a checklist — money/commission math · auth/permissions/RLS · timezones/scheduling · migrations on a live DB · third-party integrations (named) · PII/compliance · realtime/concurrency — plus free text. Money present ⇒ risk surface, automatically |
+| Core flows | the two or three jobs that must be quickest (fills the Usability bar's step budget) |
+| Business rules | every number as a table row; unknown → `⚠️ undecided — ask before implementing` |
+| House rules | verbatim; behavioural ones go to gotchas |
+| Never-do list | every deploy / DB-push / dangerous command, verbatim → protocol §6. Property-based dangers (a CLI's live mode) and environment-targeted ones (a migration whose target is `DATABASE_URL`) are named as prose there, since they cannot be a command prefix |
+| Design | direction (audience, tone, palette, fonts, reference sites) or `⚠️ undecided` + "the UI developer proposes a direction before the first screen"; token file; conventions |
 
-Ask as a grid; every answer parameterises ownership maps and gotchas.
+**Always confirm explicitly, even if the user says "looks right":** the risk surfaces and the
+never-do list. Everything else accepts "looks right" as approval.
 
-1. Frontend: framework + version (React 18? Vue? none?), build tool, **routing library** (or
-   "undecided" — never assume one from the route list), styling (Tailwind version matters: v4 =
-   CSS-first, no config file), component library, and — if decided — the
-   **design direction**: who it is for, the tone, brand palette + fonts, where design tokens
-   live, and any reference sites the user likes or dislikes (feeds AGENTS.md §UI and the UI
-   developer's Design bar; "undecided" gets a ⚠️ marker and the rule that the UI developer
-   proposes a direction for approval before the first screen — don't invent one).
-2. Backend/data: Supabase/Firebase/custom API/none; database; where server logic lives
-   (Edge Functions, API routes, none).
-3. Auth: provider and pattern (client-side hook? middleware? roles table?).
-4. Payments/money: Stripe/none/other. **If money exists, it is automatically a risk surface** and
-   the money-module convention applies (pure functions in one file, integer minor units, tests).
-5. i18n: locales and file locations, interpolation syntax — or "none".
-6. Hosting/deploy: platform + how deploys are triggered, and which commands agents must never run
-   unprompted.
-7. Testing: runner, what coverage exists, whether component/E2E testing is available.
-8. Dev commands: dev / build / lint / typecheck / test — exact scripts (these become the
-   quality gates verbatim), **the directory each runs from**, and how to run **one test
-   file** (the code-reviewer's and qa-tester's mutation check runs the narrowest test). A monorepo (`web/` + `api/`)
-   needs root-level proxies (`package.json` workspace scripts, a `Makefile`) so one command
-   per gate works from the root; propose them if absent.
-9. Mobile/native or other platforms in scope?
-10. Language(s) and hygiene: pick the row(s) of the stack hygiene table in
-    `engineering-standard.md` (TypeScript / Python / Go / Rust / other — "other" asks the five
-    questions in that row). Also: package managers in use (drive the install rows of the
-    permission policy), the local secret file(s) (`{SECRET_FILES}` — agents may read and update them, never expose or commit their values), and the
-    breakpoints or device classes to verify UI at (`{BREAKPOINTS}`; web default 375/768/1440).
+## 3. The gates (one question call, several questions)
 
-## Phase 3 — Risk surfaces
+1. **Harness** — Both Claude Code and OpenCode, kept in line (recommended; detected from
+   `.claude/` or `CLAUDE.md` vs `.opencode/` or `opencode.json`) · Claude Code only · OpenCode
+   only · Another (name it — Codex, Gemini CLI, Cursor, Copilot…; persona files go to
+   `.agents/agents/` with a pointer file where known; dispatch mechanics marked `⚠️ verify`).
+   A legacy `.opencode/agent/` directory or v1 `permission:` map is reported as "v1 layout —
+   will be replaced by the v2 layout".
+2. **Builder split** (projects with both a server/data layer and a UI) — separate
+   backend-developer + ui-ux-developer (recommended: parallel dispatch, tighter contracts) ·
+   a single fullstack-developer (simpler; backend and UI tasks queue behind one agent — say
+   so). No server/data layer → no question: drop backend-developer; ui-ux-developer may be
+   renamed `developer`.
+3. **Report style** — Technical (every file and decision; full gate output) · Direct with
+   technical summary (recommended: files touched with a one-line reason; gate names with
+   pass/fail, failures quoted) · Plain English (product-level, no file paths; "gates passed"
+   or the failure in words). The shape is fixed (protocol §7); this sets depth only.
+4. **Security review** — yes (recommended): protocol §5 references `/security-review` on
+   Claude Code and, with OpenCode, a generated `.opencode/commands/security-review.md` runs
+   under qa-tester.
+5. **Design skill** (projects with a UI) — `frontend-design` (recommended) · Impeccable ·
+   UI/UX Pro Max · none. The team's own Design bar does not depend on any; one deepens it.
+   Installed in Step 5 at the level the user picks.
 
-"What is expensive to get wrong in this project?" Offer the common set as multi-select, plus
-free text: money/commission math · auth/permissions/RLS · timezones/scheduling · migrations on a
-live DB · third-party integrations (name them) · PII/compliance · realtime/concurrency.
-The answers drive: the protocol's "think hardest" list, the model-escalation triggers, the
-qa-tester's extra-scrutiny checklist, and the risk-register template rows.
+Then, as part of the Step 2 roster proposal, the **model matrix**: sonnet for
+product-specialist and builders, opus for architect, qa-tester and code-reviewer; builders
+step up to opus on the risk surfaces, multi-module changes or a design decision — confirm or
+adjust. Claude Code pins the baseline in each agent file; OpenCode agent files carry no pin
+(the model is selected on every subagent dispatch), so no per-agent pins are asked.
 
-**Core flows** (projects with a UI): "Which two or three jobs must be quickest for your users?"
-(e.g. sign up → first value; search → checkout). They fill `{CORE_FLOWS}` in the Usability
-bar, which holds each to a step budget. Not known yet → `⚠️ undecided — name the core flows`.
+Do NOT ask about git/deploy behaviour or permissions: both are fixed (open permissions, the
+protocol §6 user-gated list). The never-do list decides only which commands §6 names.
 
-## Phase 4 — Business rules
+## 4. Greenfield (empty repo only)
 
-Free text: pricing/commission tables, cancellation/refund policies, expiry rules, limits,
-anything with a number in it. Encode them as tables in AGENTS.md §Business rules. Anything the
-user can't answer yet goes in AGENTS.md as an explicit `⚠️ undecided` marker, never a guess.
-
-## Phase 5 — House rules
-
-1. Specific rules and recommendations, verbatim (they go into AGENTS.md gotchas and, where
-   behavioural, into the protocol).
-2. Anything agents must NEVER do without being told — every deploy/DB-push/dangerous command
-   named here goes verbatim into the protocol §6 user-gated list, and into the `deny` sets
-   when the chosen tier has them. Items that are property-based (a CLI's live mode) or
-   environment-targeted (a migration whose target is `DATABASE_URL`) cannot be a deny prefix —
-   handle them per `permission-policy.md` §Property-based dangers.
-3. **Permission policy (AskUserQuestion — always ask).** Read `permission-policy.md` first.
-   Present its tier table (Autonomous / Open / Guarded / Standard / Strict / Custom) with the
-   one-line "recommend when" for each, and **recommend Autonomous**. Explain the two layers
-   in these terms: permissions are what the harness *lets* agents do — open by default, so an
-   instruction is carried through without prompts; the protocol is what agents *actually* do
-   — commit freely, but push, PR, deploy, migrate a shared database, or destroy anything only
-   when the user has said so. Say plainly that in Autonomous nothing is blocked mechanically,
-   and that in every other tier a `deny` means the user runs that command by hand.
-   For tiers other than Autonomous, then RECOMMEND the stack-specific additions listed in
-   `permission-policy.md` — only ones that exist in this stack.
-   The chosen tier is written once per harness (`opencode.json`, `.claude/settings.json`) and
-   applies to every agent and the main session. Edit access is open in every tier; lanes are
-   held by each agent's "Scope & focus" section.
-
-4. **Report style (AskUserQuestion — always ask).** How should the main agent report to the
-   user? The report *shape* is fixed (protocol §7: Outcome → What changed → Evidence → Open
-   questions → Next, structured, nothing before the outcome); the preset sets only the depth
-   of the middle two parts:
-   - **Technical** — every file and decision, trade-offs stated; full gate output quoted.
-     For an engineer who will review the diff.
-   - **Direct with technical summary** (recommended default) — files touched with a one-line
-     reason each; gate names with pass/fail, failures quoted. For an engineer who trusts
-     the process.
-   - **Plain English** — product-level description, no file paths in prose; "gates passed" or
-     the failure in words. For a founder or non-engineer.
-   The answer becomes `{REPORT_STYLE}` in protocol §7 and one line in AGENTS.md.
-
-Do NOT ask about the git/deploy behaviour — it is fixed (protocol template §6): commit
-freely; push, PRs, deploys, shared-database migrations and destructive commands only on the
-user's instruction, and without re-asking once given. The Phase 5.3 tier decides only how
-much of that is *also* enforced mechanically.
-
-## Phase 6 — Models
-
-1. Which OpenCode provider/models are available for this project?
-2. Ask the model **per agent** (not per tier): one pin for each subagent role, in OpenCode 2's
-   form `provider/model-id#variant` — the variant is the reasoning-effort level the provider
-   exposes for that model (e.g. `#high`); ask for it together with the model and omit it when
-   the model has none. No `temperature` by default (v2 moved it to `request.body`, and
-   several current models reject it) — add a `request:` block only if the user asks.
-   The main agent is never pinned: it is OpenCode's `build` agent on whatever model the user
-   selects.
-3. Claude Code side: default matrix is sonnet for product-specialist, opus for
-   architect/developers/qa-tester/code-reviewer, with escalation triggers from Phase 3 (see
-   protocol template §3). Confirm or adjust.
-
-## Phase 7 — Roster confirmation
-
-**7.0 — Builder split (always ask first, AskUserQuestion).** If the project has both a
-server/data layer and a UI, ask before proposing the roster:
-
-> Do you want separate **backend-developer + ui-ux-developer** agents (recommended — they can
-> be dispatched in parallel and each carries a tighter contract), or a single
-> **fullstack-developer** (simpler roster, but backend and UI tasks queue behind one agent)?
-
-Separate devs is the recommended default. A fullstack choice uses
-`templates/fullstack-developer.md` INSTEAD of the two builder templates — union of ownership,
-both rule sets kept. Projects with no server/data layer skip this question (see adaptations
-below). Then:
-
-Propose the adapted roster with a one-line justification per change from the core six
-(product-specialist, architect, backend-developer, ui-ux-developer, qa-tester,
-code-reviewer). The main agent leads and is not a roster file. Typical adaptations:
-
-- No backend/data layer → drop backend-developer; ui-ux-developer becomes `developer`.
-- User chose a single dev in 7.0 → `fullstack-developer` from its template (note: loses the
-  parallel-dispatch benefit; say so).
-- Expo/React Native in scope → add `mobile-developer` with its own ownership paths.
-- Heavy infra/CI work → add `devops-engineer`.
-- Data pipelines/analytics → add `data-engineer`.
-
-Present the lane map (which role works in which globs, what's shared and must be
-sequenced — lanes are focus, not mechanical denies) together with the model matrix from Phase 6 — SKILL.md Step 2 defines the full
-proposal contents — and get explicit approval before writing files.
-
-## Phase 8 — Initialisation recommendations (greenfield only)
-
-When the target repo has no code yet, recommend — and scaffold only after approval. The bar is
-**production-ready from the first commit**: strict configs are near-free on day one and
-near-impossible to retrofit, so present strict as the default and loosening as the deviation
-that needs a reason.
-
-1. **Quality-gates setup (strict by default)** — take this stack's row from the stack hygiene
-   table in `engineering-standard.md` (`{GREENFIELD_GATES}`): typechecker, linter, formatter
-   check, and test runner, each as its own script. The rules that hold for every stack:
-   - The typechecker runs in its strictest mode (TypeScript: `strict: true` plus
-     `noUncheckedIndexedAccess`, `noUnusedLocals`/`noUnusedParameters`; Python: `mypy --strict`
-     or pyright strict; Rust: `clippy -D warnings`; Go: `vet` + `staticcheck`).
-   - The linter bans the language's escape hatch mechanically (matching the agents'
-     `{LANGUAGE_HYGIENE_RULE}`) and runs with a **zero-tolerance policy** — no "warnings are
-     fine" tier; a gate either passes clean or fails (`--max-warnings 0` or equivalent).
-   - A formatter with a check script named `format:check` (or `format-check` where `:` is
-     not allowed) so style never reaches review.
-   - Lockfiles: CI installs locked (`npm ci`, `uv sync --locked`, …), so the hand-over must
-     tell the user to run the first install and commit the lockfile before CI can pass.
-   - Test-runner wiring **with one real passing test committed** — an empty test setup lets
-     every later "tests pass" claim be vacuously true; the agents' evidence discipline needs a
-     gate that can actually fail.
-2. **CI workflow — on PR AND on merge**: trigger on `pull_request` and on `push` to the main
-   branch (the merge run catches semantic conflicts between PRs that were each green alone).
-   Every gate is a separate step — typecheck, lint, format check, tests, build — so one run
-   reports every failure. Shape the jobs so they can be marked required status checks, and
-   recommend enabling branch protection (required checks + no force-push) once the repo is on
-   GitHub — that's a repo setting the user must click, not a file; put it in the hand-over
-   summary as a reminder.
-3. **Env hygiene**: the stack's `{ENV_CONVENTION}` — an example env file documenting every
-   variable, the real one git-ignored, and the no-secrets-in-client-shipped-vars rule wired
-   into AGENTS.md gotchas.
-4. **Further production hardening (optional menu items, recommend but don't push)**:
-   - Toolchain version pinning (`.nvmrc` + `engines`, `.python-version`, `rust-toolchain.toml`,
-     `go.mod` toolchain line) with the same version in CI.
-   - Automated dependency updates: Dependabot config (or Renovate) with grouped minor updates.
-   - Coverage floor on risk surfaces only: a coverage threshold scoped to the risk-surface
-     modules from Phase 3 (e.g. the money module), not a blanket repo-wide percentage —
-     blanket floors breed junk tests; targeted floors protect what's expensive to break.
-   - A pre-push git hook running the gates locally (husky or a plain `.git/hooks` script) —
-     optional because CI is the real gate; the hook just shortens the feedback loop.
-
-**Every gate runs on every change** — typecheck, lint, format check, tests, build. There is
-no "tests only when money was touched" tier: `{GATE_COMMANDS}` in every generated file is
-the full list, tests included. A risk surface adds scrutiny (failing test first, a mutation
-check), never the decision to run the suite.
-
-This phase may ADD gates the Phase 2.8 list lacked (typically the format check); every added
-gate is quoted in the agent files and protocol like the others. Whatever is scaffolded here
-must match the gate commands quoted in the generated agent files verbatim — the agents' quality gates and the CI steps are the same commands, so nothing passes
-locally that fails in CI. Present these as a short menu with what each creates; the user picks.
-Skip the phase entirely on repos that already have code.
-
-## Phase 9 — Optional skill add-ons (all repos)
-
-Offer the recommended third-party skills below (AskUserQuestion, multi-select). For each one
-the user wants, ask a follow-up: **project level** (this repo only) or **user level** (all
-their projects)? Run the matching install command only after they choose; verify the skill
-directory exists afterwards and report the path. If an install command fails, report the
-error verbatim and move on — never block generation on an add-on.
-
-| Add-on | What it does | Project-level install | User-level install |
-|---|---|---|---|
-| **frontend-design** (Anthropic official — **recommended for any project with a UI**) | A design process before any UI code: purpose, audience, type and colour direction, composition, motion. The direct counter to generic-looking output | — (plugin installs are per user) | Claude Code: `/plugin marketplace add anthropics/claude-code` then `/plugin install frontend-design@claude-code-plugins` |
-| **Impeccable** ([repo](https://github.com/pbakaus/impeccable)) | Extends frontend-design with reference files for typography, colour and contrast, spatial design, motion, interaction, responsive, and UX writing, plus audit/polish commands | follow the repo's install instructions for the harness in use — verify before running | same |
-| **UI/UX Pro Max** ([repo](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)) | Design intelligence: generates design systems, UI styles, palettes, stack-specific code | `npm install -g ui-ux-pro-max-cli` then `uipro init --ai claude` (run in the project root) | `npm install -g ui-ux-pro-max-cli` then `uipro init --ai claude --global` |
-| **Animation Principles** ([repo](https://github.com/dylantarre/animation-principles)) | Motion/animation guidance organised by skill level | `npx skillfish add dylantarre/animation-principles 04-by-skill-level --project` | `npx skillfish add dylantarre/animation-principles 04-by-skill-level --global` |
-| **Web-app testing** (Anthropic official, [repo](https://github.com/anthropics/skills)) | Playwright-driven browser testing — feeds qa-tester's "verify by running" and the UI developer's screenshot check | `npx skillfish add anthropics/skills webapp-testing --project` | `npx skillfish add anthropics/skills webapp-testing --global` — or natively: `/plugin marketplace add anthropics/skills` in Claude Code |
-| **Superpowers** ([repo](https://github.com/obra/superpowers)) | Full development methodology: TDD, systematic debugging, planning, brainstorming skills | — (plugin manager installs are per user) | Claude Code: `/plugin install superpowers@claude-plugins-official`. OpenCode is also supported — see the repo's per-agent install instructions |
-
-**Design skills (say this when offering them):** the generated UI developer already carries
-a Design bar, so the team does not depend on any of these. A design skill deepens it. One is
-enough — recommend `frontend-design` first, Impeccable for a design-led product. For each one
-installed, add a line to the Design bar in the UI role's agent file ("Load the `<skill>`
-skill before any UI work") and a line to AGENTS.md §UI.
-
-**Superpowers caveat (present it honestly):** it is a complete process methodology and overlaps
-with this team's Fable protocol. Offer it as optional and say the agent protocol wins where the
-two conflict; a note to that effect goes in AGENTS.md gotchas if installed.
-
-**Security review** (offer alongside the add-ons, but it is generated, not installed):
-- Claude Code ships `/security-review` built in — no install; recommend it as a pre-merge step.
-  A "yes" fills the two slots that exist for it: `{SECURITY_REVIEW_PARAGRAPH}` in protocol §5
-  and `{SECURITY_REVIEW_LINE}` in the qa-tester Security checklist. A "no" deletes both.
-- OpenCode has no built-in equivalent. If the user wants parity, generate
-  `.opencode/commands/security-review.md`: an OpenCode command whose body is a security-review
-  prompt tuned to THIS project — the interview's risk surfaces, per-role access model, secret
-  locations, and money/PII rules — instructing a review of the current diff for injection,
-  authn/authz gaps, secret exposure, unsafe rendering, and risk-surface-specific issues, with
-  findings reported file:line on the five lights (protocol §5) and NO code edits. Frontmatter: `description` plus
-  `agent: qa-tester` so it runs under qa-tester's report-don't-fix rules.
-
-Notes: `npm install -g` is machine-wide either way (it's the CLI, not the skill) — say so when
-asking. The design add-ons only matter on projects with a UI; if the project has no
-frontend, skip them. After the menu, ask one free-text
-follow-up: "any other skills/plugins you already use that I should install?" — install at the
-user's chosen level using the same tools (skillfish / plugin marketplace), never guessing at a
-source. Record what was installed (and at which level) in the hand-over summary. This table is
-meant to grow — add rows as new add-ons prove useful.
+Read `greenfield.md` and offer its menu in the same question call as the gates, or right
+after. The gate commands it settles go into `commands.gates` before rendering.
