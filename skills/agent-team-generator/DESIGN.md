@@ -195,12 +195,50 @@ project has no UI)*, so an API-only or CLI project is not handed checks that can
 or an unfilled `{CORE_FLOWS}`, which the verifier would fail. The price-breakdown clause is
 scoped to products that take payments, matching the Usability bar itself.
 
+## v0.6 (2026-10-29, requested by Sam)
+
+1. **One file, rendered.** The model writes `.agents/team.json` (`references/team-schema.md`;
+   `fixtures/team.json` is the worked example) and `scripts/render-team.js` renders every
+   generated file from `references/templates/` with a dependency-free mustache-style engine
+   (`{{key}}`, `{{#section}}`, `{{^inverted}}`, `{{> partial}}`, renumbered lists). No
+   hand-filled placeholders; a verifier FAIL is fixed in `team.json` and re-rendered; a re-run
+   of the skill starts from the existing `team.json`. The render ends by running the verifier.
+2. **One-message intake.** Phases 0–7 collapse into one paragraph from the user, a summary
+   table with a source label per row that the user corrects, and one question call for the
+   enumerable gates (harness, builder split, report style, security review, design skill).
+   Risk surfaces and the never-do list are always confirmed explicitly. Greenfield and add-on
+   menus live in `greenfield.md` and `add-ons.md`, read only when they apply.
+3. **Permission tiers removed.** Allow-all is the only mode, written to `.claude/settings.json`
+   and `opencode.json`; protocol §6 is the guard. `permission-policy.md`, the tier question,
+   the CC/OC parity and ordering checks and their tests are gone.
+4. **Token cuts.** Skill side: the Design and Usability bars are one partial (were three
+   verbatim copies); the user-gated paragraph and grounding rules are partials; the twelve
+   engineering rules and the ladder live only in `templates/protocol.md` §2
+   (`engineering-standard.md` keeps the hygiene table); template preambles and OpenCode
+   frontmatter boilerplate moved into the renderer. Generated side: the lights, the 🟣 gate
+   and the known-issues entry format are defined once (protocol §5, `known-issues.md`) and
+   referenced from qa-tester and code-reviewer; gate commands are quoted in full where they
+   are run and as "the gates" elsewhere. `fable-playbook.md` is kept as background reading.
+5. **Models.** Sonnet baseline for product-specialist and builders with a step-up rule in
+   protocol §3 (risk surfaces, multi-module changes, design decisions, a failed first
+   attempt; Claude Code: `model` on the dispatch); Opus for architect, qa-tester and
+   code-reviewer, never stepped down.
+6. **Small tasks skip qa-tester.** Protocol §5: an S task off every risk surface relies on
+   the builder's self-QA; M/L, risk surfaces and user-visible features go to qa-tester.
+7. **General skill.** `bin/cli.js` gains `--harness claude|opencode|codex|cursor|gemini|agents`
+   presets (paths verified against each harness's docs) and `--to <dir>`; the skill text names
+   the harness's question and subagent mechanisms generically with Claude Code as the example;
+   README and package metadata describe an agent skill, not a Claude-only one.
+8. **Smoke test** renders the fixture end to end into a temp project, runs the verifier, and
+   spot-checks the output; it also checks that `team-schema.md` documents every template tag.
+
 ## Testing plan for the skill itself
 
 Two layers:
 
-1. **Smoke test** (`npm test`): installer round-trip, template/reference cross-references, and
-   `verify-team.js` against a synthetic generated tree (good variants and deliberately broken ones).
+1. **Smoke test** (`npm test`): installer round-trip, template/reference cross-references, a
+   full render of `fixtures/team.json` with the verifier, and `verify-team.js` against a
+   synthetic generated tree (good variants and deliberately broken ones).
 2. **Application-scenario test** (reference/technique skill): dispatch a subagent with only the
    skill files, an empty git-initialised temp directory, and `fixtures/sample-brief.md` as the
    canned interview. Run `scripts/verify-team.js` on the output, then review it against the

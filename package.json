@@ -1,7 +1,7 @@
 {
   "name": "agent-team-generator",
-  "version": "0.5.1",
-  "description": "Claude Code skill that scaffolds a disciplined AI agent team for a project: interview, AGENTS.md, CLAUDE.md, specialist subagents for Claude Code and OpenCode, an agent protocol, and a plain-English documentation system.",
+  "version": "0.6.0",
+  "description": "Agent skill (SKILL.md format \u2014 Claude Code, OpenCode, Codex, Cursor, Gemini CLI) that scaffolds a disciplined AI agent team for a project: one-message interview, team.json rendered into AGENTS.md, CLAUDE.md, specialist subagents, an agent protocol, and a plain-English documentation system.",
   "bin": {
     "agent-team-generator": "bin/cli.js"
   },
@@ -25,7 +25,11 @@
     "subagents",
     "opencode",
     "scaffold",
-    "agent-team"
+    "agent-team",
+    "codex",
+    "cursor",
+    "gemini-cli",
+    "agent-skills"
   ],
   "author": "Sam Heard <samheard95@gmail.com>",
   "license": "MIT",
