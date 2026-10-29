@@ -12,7 +12,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write # create the GitHub release for the tag
       id-token: write # required: lets the runner mint the OIDC token npm verifies
     steps:
       - uses: actions/checkout@v4
@@ -56,3 +56,15 @@ jobs:
       # attached automatically.
       - if: steps.check.outputs.published == 'false'
         run: npm publish
+
+      # The GitHub release mirrors the npm publish: notes generated from the merged PRs
+      # since the previous tag. A rerun on a tag that already has a release is a no-op.
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists - skipping."
+          else
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes --latest
+          fi

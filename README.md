@@ -122,8 +122,9 @@ then:
 npm version patch && git push --follow-tags
 ```
 
-The tag triggers `release.yml`, which checks the tag matches `package.json`, runs the tests, and
-publishes with provenance.
+The tag triggers `release.yml`, which checks the tag matches `package.json`, runs the tests,
+publishes with provenance, and creates the GitHub release with notes generated from the merged
+PRs since the previous tag.
 
 **One-time setup on npmjs.com** (after the first manual publish): package → Settings → Trusted
 Publisher → GitHub Actions, with organization/user `sams-git-195`, repository
