@@ -1,6 +1,6 @@
 {
   "name": "agent-team-generator",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Agent skill (SKILL.md format \u2014 Claude Code, OpenCode, Codex, Cursor, Gemini CLI) that scaffolds a disciplined AI agent team for a project: one-message interview, team.json rendered into AGENTS.md, CLAUDE.md, specialist subagents, an agent protocol, and a plain-English documentation system.",
   "bin": {
     "agent-team-generator": "bin/cli.js"

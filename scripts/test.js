@@ -88,7 +88,7 @@ check(ROLE_TEMPLATES.every((t) => templates.includes(t)), `core role templates p
 check(!templates.includes('project-manager.md'), 'no project-manager template (the main agent leads)');
 for (const f of ['protocol.md', 'agents-md.md', 'docs-readme.md', 'docs-page.md', 'docs-known-issues.md', 'security-review-command.md']) check(templates.includes(f), `template ${f} present`);
 for (const p of ['design-bar', 'gated-builder', 'grounding']) check(fs.existsSync(path.join(templatesDir, 'partials', `${p}.md`)), `partial ${p} present`);
-for (const gone of ['permission-policy.md', 'design-standard.md']) check(!fs.existsSync(path.join(skillDir, 'references', gone)), `references/${gone} removed (tiers gone; the Design bar is a partial)`);
+for (const gone of ['permission-policy.md', 'design-standard.md', 'protocol-template.md', 'agents-md-template.md', 'documentation-convention.md']) check(!fs.existsSync(path.join(skillDir, 'references', gone)), `references/${gone} removed (superseded by templates/ and partials/)`);
 check(fs.existsSync(path.join(skillDir, 'references', 'fable-playbook.md')), 'fable-playbook.md kept as background');
 
 for (const file of ROLE_TEMPLATES) {
