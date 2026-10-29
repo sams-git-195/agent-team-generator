@@ -234,6 +234,12 @@ scoped to products that take payments, matching the Usability bar itself.
 8. **Smoke test** renders the fixture end to end into a temp project, runs the verifier, and
    spot-checks the output; it also checks that `team-schema.md` documents every template tag.
 
+## v0.6.1 (2026-10-29)
+
+Removed the superseded `protocol-template.md`, `agents-md-template.md` and
+`documentation-convention.md` from `references/` (their content lives in `templates/`); the
+smoke test now fails if they come back.
+
 ## Testing plan for the skill itself
 
 Two layers:
