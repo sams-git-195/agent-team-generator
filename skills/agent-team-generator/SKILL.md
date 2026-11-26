@@ -59,8 +59,8 @@ security review, design skill) and, on an empty repo, the greenfield menu (`gree
 Anything the user defers becomes `⚠️ undecided` in `team.json`, never a guess.
 
 **Step 2 — Roster proposal (approval gate).** Propose the roster: deviations from the core six
-(product-specialist, architect, backend-developer, ui-ux-developer, qa-tester, code-reviewer)
-with one line each; the lane map (globs per role, shared files the main agent sequences; root
+(product-specialist, architect, backend-developer, ui-ux-developer, qa-tester, code-reviewer;
+browser-tester joins them when the project has a UI) with one line each; the lane map (globs per role, shared files the main agent sequences; root
 manifests, lockfiles, CI and tooling config are the main agent's unless there is a
 devops-engineer); the model matrix (Claude Code baselines + step-up triggers from the risk
 surfaces; OpenCode selects the model on each dispatch, so no pins); and on greenfield the

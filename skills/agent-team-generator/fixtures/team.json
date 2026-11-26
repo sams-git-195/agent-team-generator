@@ -194,6 +194,7 @@
     "backend-developer",
     "ui-ux-developer",
     "qa-tester",
+    "browser-tester",
     "code-reviewer"
   ],
   "roles": {
@@ -237,6 +238,9 @@
     },
     "qa-tester": {
       "focus": "Verification after M/L tasks, risk-surface changes and user-visible features; regression tests; 🟣 entries"
+    },
+    "browser-tester": {
+      "focus": "Second QA step for changes the user sees: walks the flow in a browser per role, with screenshots"
     },
     "code-reviewer": {
       "focus": "Independent review of a diff on the user's request; logs 🟣 to `documentation/known-issues.md`"

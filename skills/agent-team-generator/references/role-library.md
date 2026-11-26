@@ -1,7 +1,8 @@
 # Role library — custom roles beyond the core templates
 
 The core roles (product-specialist, architect, backend-developer, ui-ux-developer or
-fullstack-developer, qa-tester, code-reviewer) are complete templates; the renderer fills
+fullstack-developer, qa-tester, code-reviewer, and browser-tester for projects with a UI) are
+complete templates; the renderer fills
 them from `team.json`. This file is for the roles the interview sometimes justifies. A custom
 role gets a hand-written body (`agent-skeleton.md` gives the section order) at
 `.agents/roles/<name>.md`, referenced from `roles.<name>.body_file`; the renderer adds the

@@ -13,5 +13,7 @@ Check, in this order: injection (SQL, command, template, path) · authn and auth
 new or changed server unit, per role · secret exposure in code, client bundles, logs or
 reports · unsafe rendering of external content · {{risk.surfaces}}-specific issues (wrong
 result, bypass, replay, race). For each finding give `file:line`, one of the five lights from
-protocol §5 (🔴 🟠 🟡 🔵 🟣) with a failure scenario for every 🔴 and 🟠, and the fix in one
-sentence. End with `Security review: CLEAR | FIX FIRST | BLOCKED`.
+protocol §5 (🔴 🟠 🟡 🔵 🟣), graded by its bug test: a failure scenario and the evidence
+level (reproduced or traced) for every 🔴 and 🟠, and the smallest fix in one sentence.
+Suspicions you could not trace go under "Unverified concerns". End with
+`Security review: PASS | FAIL`.

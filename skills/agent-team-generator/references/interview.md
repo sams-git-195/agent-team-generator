@@ -65,7 +65,9 @@ never-do list. Everything else accepts "looks right" as approval.
 
 Then, as part of the Step 2 roster proposal, the **model matrix**: sonnet for
 product-specialist and builders, opus for architect, qa-tester and code-reviewer; builders
-step up to opus on the risk surfaces, multi-module changes or a design decision — confirm or
+step up to opus on the risk surfaces, multi-module changes or a design decision; judges step
+up to the strongest model available for a high-stakes risk-surface change or a second QA
+round; browser-tester (UI projects) runs on sonnet or another small visual model — confirm or
 adjust. Claude Code pins the baseline in each agent file; OpenCode agent files carry no pin
 (the model is selected on every subagent dispatch), so no per-agent pins are asked.
 

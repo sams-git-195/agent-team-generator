@@ -4,8 +4,8 @@ Minor issues found in review and accepted for now. Each has a fix prompt: paste 
 owning agent to fix it. **When an entry is fixed, delete it** in the same commit — this file
 lists what is open; git history holds what was closed. Anything serious does not belong here;
 it blocks the merge instead. Anything nobody can hit does not belong here either: an entry is
-added only if it passes the 🟣 gate (protocol §5: who it reaches, seen or unseen, can it
-actually happen). Check an issue is not already listed before adding it; number on from the
+added only if it passes the bug test (protocol §5: expected behaviour has a source, who it
+reaches, seen or unseen, can it actually happen). Check an issue is not already listed before adding it; number on from the
 last ID.
 
 *(no open issues)*

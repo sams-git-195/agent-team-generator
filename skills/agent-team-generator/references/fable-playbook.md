@@ -3,8 +3,10 @@
 This file is the behavioural core of the generated setup. It describes the *process* a
 Fable-class model follows on every task, so that a mid-level model following these steps
 mechanically produces near-frontier results. Embed it (adapted, not referenced) into the
-generated `.agents/rules/claude-agent-protocol.md` §"Operate at Fable Level", and echo the
-per-role subsets into each agent's NON-NEGOTIABLES and FINAL SELF-CHECK.
+generated `.agents/rules/claude-agent-protocol.md` §2 "Operate at Fable level". That
+rendered protocol is what agents read: Claude Code loads it through `CLAUDE.md`, OpenCode
+through `instructions` in `opencode.json`, other harnesses through their pointer file. This
+file is background for whoever maintains the templates; review grading lives in protocol §5.
 
 The bar does not scale down with the model — the process compensates.
 
