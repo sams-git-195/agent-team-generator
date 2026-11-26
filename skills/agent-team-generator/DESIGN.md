@@ -240,6 +240,42 @@ Removed the superseded `protocol-template.md`, `agents-md-template.md` and
 `documentation-convention.md` from `references/` (their content lives in `templates/`); the
 smoke test now fails if they come back.
 
+## v1.0.0 (2026-11-26, requested by Sam)
+
+Reviews were reporting too many "bugs" and the fixes were over-engineering the code. Cause:
+🟠 meant "anything below the standard" and failed QA, ties were graded upward, and only 🟣
+had to prove a real person could hit it.
+
+1. **One bug test for every light** (protocol §5), replacing the 🟣 gate: expected behaviour
+   has a source · who it reaches · seen or unseen · can it actually happen.
+2. **Evidence levels replace confidence.** Reproduced, traced or suspected. 🔴 needs
+   reproduced (traced for security and concurrency), 🟠 needs traced, suspected is outside
+   the verdict.
+3. **Two verdicts everywhere**, FAIL / PASS (review was BLOCKED/FIX FIRST/CLEAR). 🔴
+   (critical) and 🟠 (high or medium impact) both fail; 🟣 is low impact and is logged.
+4. **Standards breaches are 🟡** unless they pass the bug test. Two exceptions still raise a
+   🟠: risk-surface logic with no test or a test that cannot fail, and docs not updated for
+   a user-facing change. Missing tests off a risk surface dropped from 🔴 to 🟡.
+5. **Anti-inflation rules.** 🔴/🟠 must be introduced by the change; torn between two
+   lights → the lower (except irreversible effects); an ungradable finding is unverified,
+   never 🔴; zero findings is valid; each finding names the smallest fix.
+6. **Late finds.** Re-QA reviews the fix diff and its callers. A finding in code unchanged
+   since the last round only blocks at 🔴.
+7. **Acceptance check.** qa-tester marks each acceptance criterion met or not met with
+   evidence; an unmet one is a finding.
+8. **Loop limit and rebuttals.** Round 2 fails → stronger models. Round 4 fails → stop and
+   ask the user. A builder can rebut a finding with evidence; the main agent rules and
+   reports anything overturned.
+9. **browser-tester**, a core role for UI projects: the second QA step, on a small visual
+   model. It walks the changed flow in a real browser per role and condition, with
+   screenshots. qa-tester still reads the code and runs the gates.
+10. **Parallel builders run narrow tests only**; the main agent runs the full gates once the
+    batch lands.
+11. **Judges step up** to the strongest model available on high-stakes risk-surface work or
+    a second QA round. The user's own model routing wins where it exists.
+12. **OpenCode loads the protocol for every agent**: `opencode.json` now lists it under
+    `instructions` (Claude Code already imported it from `CLAUDE.md`).
+
 ## Testing plan for the skill itself
 
 Two layers:

@@ -82,7 +82,7 @@ const ref = (name) => readText(path.join(skillDir, 'references', name));
 const tpl = (name) => readText(path.join(templatesDir, name));
 const partial = (name) => readText(path.join(templatesDir, 'partials', `${name}.md`));
 
-const ROLE_TEMPLATES = ['architect.md', 'backend-developer.md', 'code-reviewer.md', 'fullstack-developer.md', 'product-specialist.md', 'qa-tester.md', 'ui-ux-developer.md'];
+const ROLE_TEMPLATES = ['architect.md', 'backend-developer.md', 'browser-tester.md', 'code-reviewer.md', 'fullstack-developer.md', 'product-specialist.md', 'qa-tester.md', 'ui-ux-developer.md'];
 const templates = fs.readdirSync(templatesDir).filter((f) => f.endsWith('.md'));
 check(ROLE_TEMPLATES.every((t) => templates.includes(t)), `core role templates present (${ROLE_TEMPLATES.join(', ')})`);
 check(!templates.includes('project-manager.md'), 'no project-manager template (the main agent leads)');
@@ -126,7 +126,24 @@ const protocolTpl = tpl('protocol.md');
 check(/## 1\. The main agent leads/.test(protocolTpl) && /## 6\. Autonomy & user-gated actions/.test(protocolTpl) && /don't ask again/.test(protocolTpl), 'protocol: main agent leads; §6 user-gated, no re-asking');
 check(/The senior ladder/.test(protocolTpl) && /The floor/.test(protocolTpl) && /Engineering standard \(every language/.test(protocolTpl) && /Red flags/.test(protocolTpl), 'protocol §2: senior ladder, floor, engineering standard, red flags');
 for (const light of ['🔴 **Blocker**', '🟠 **Should fix**', '🟡 **Nit**', '🔵 **FYI**', '🟣 **Minor**']) check(protocolTpl.includes(light), `protocol §5 defines ${light}`);
-check(/The 🟣 gate/.test(protocolTpl) && /Who does it reach\?/.test(protocolTpl) && /Seen or unseen\?/.test(protocolTpl) && /Can it actually happen\?/.test(protocolTpl) && /Triaged out/.test(protocolTpl), 'protocol §5: the 🟣 gate and Triaged out');
+check(/What counts as a bug/.test(protocolTpl) && /Expected behaviour has a source/.test(protocolTpl) && /Who does it reach\?/.test(protocolTpl) && /Seen or unseen\?/.test(protocolTpl) && /Can it actually happen\?/.test(protocolTpl) && /Triaged out/.test(protocolTpl), 'protocol §5: one bug test for every light, and Triaged out');
+check(!/The 🟣 gate/.test(protocolTpl), 'protocol §5: the bug test is not limited to 🟣');
+check(/\*\*Reproduced:\*\*/.test(protocolTpl) && /\*\*Traced:\*\*/.test(protocolTpl) && /\*\*Suspected:\*\*/.test(protocolTpl) && /Confidence is not a grade/.test(protocolTpl), 'protocol §5: evidence levels replace confidence');
+check(/\*\*FAIL:\*\* at least one 🔴 or 🟠/.test(protocolTpl) && /\*\*PASS:\*\* only 🟡 🔵 🟣/.test(protocolTpl) && !/WARN/.test(protocolTpl), 'protocol §5: FAIL on 🔴 or 🟠, PASS otherwise, no third verdict');
+check(/\| 🔴 \*\*Blocker\*\* \| Critical\./.test(protocolTpl) && /\| 🟠 \*\*Should fix\*\* \| High or medium impact\./.test(protocolTpl) && /\| 🟣 \*\*Minor\*\* \| Low impact\./.test(protocolTpl), 'protocol §5: each bug light names its impact band');
+check(/\| 🔴 \*\*Blocker\*\* \|[^\n]*\| FAIL \|/.test(protocolTpl) && /\| 🟠 \*\*Should fix\*\* \|[^\n]*\| FAIL \|/.test(protocolTpl), 'protocol §5: the lights table agrees with the verdicts');
+check(/Torn between two lights → the lower one/.test(protocolTpl) && /never defaults to 🔴/.test(protocolTpl) && /Zero findings is a valid report/.test(protocolTpl) && /The fix fits the bug/.test(protocolTpl), 'protocol §5: grading rules lean away from inflation');
+check(/Introduced by this change/.test(protocolTpl) && /\*\*Late finds\.\*\*/.test(protocolTpl) && /A late 🔴 still blocks/.test(protocolTpl), 'protocol §5: 🔴/🟠 are introduced by the change; late finds only block at 🔴');
+check(/Tests and docs/.test(protocolTpl) && /A failing gate[^\n]*is 🔴/.test(protocolTpl) && /test\s+that cannot fail[^.]*is 🟠/.test(protocolTpl) && /off a risk surface with no test is 🟡/.test(protocolTpl) && /a 🔴 fix ships with a test that fails without it/.test(protocolTpl), 'protocol §5: where tests sit on the scale');
+check(/Acceptance comes first/.test(protocolTpl) && /\*\*Round 2 fails\*\*/.test(protocolTpl) && /\*\*Round 4 fails\*\* → stop/.test(protocolTpl) && /Never start a fifth round/.test(protocolTpl) && /\*\*Rebuttals\.\*\*/.test(protocolTpl), 'protocol §5: acceptance check, four-round limit, rebuttals');
+check(/You run the full gates once the batch has landed/.test(protocolTpl) && /step \*\*up\*\* to the strongest\s+model you have/.test(protocolTpl), 'protocol: main agent gates a parallel batch; judges step up');
+check(/\{\{#has_browser_tester\}\}[\s\S]*Browser test — the second QA step[\s\S]*\{\{\/has_browser_tester\}\}/.test(protocolTpl), 'protocol §5: browser test is the second QA step, only with a browser-tester');
+{
+  const bt = tpl('browser-tester.md');
+  check(/^cc_model: sonnet$/m.test(bt) && /^kind: reporter$/m.test(bt) && /Use it, don't read it/.test(bt) && /screenshot/i.test(bt) && /\{\{project\.roles\}\}/.test(bt) && /^Browser PASS → main agent/m.test(bt) && /^Browser FAIL → main agent/m.test(bt), 'browser-tester: small visual model, reporter, walks roles with screenshots, PASS/FAIL');
+}
+check(/\*\*Acceptance\*\* — \| Criterion \| Met\? \|/.test(tpl('qa-tester.md')), 'qa-tester: reports each acceptance criterion');
+check(!/no tests for new behaviour/.test(protocolTpl) && !/the more serious/.test(protocolTpl), 'protocol §5: no blanket 🔴 for missing tests, no tie-break upward');
 check(/names a\s+failure scenario/.test(protocolTpl) && /Unverified concerns/.test(protocolTpl) && /Usability-bar breach/.test(protocolTpl), 'protocol §5: failure scenarios, unverified concerns, Usability-bar breach is 🟠');
 check(/the test suite runs on every change/.test(protocolTpl), 'protocol §5: tests are a gate on every change');
 check(/Self-QA is the gate for an \*\*S\*\* task off every risk surface/.test(protocolTpl), 'protocol §5: small tasks off a risk surface rely on self-QA; qa-tester for M/L and risk surfaces');
@@ -137,13 +154,20 @@ check(!/→ project-manager|PM_STYLE|permission tier/i.test(protocolTpl), 'proto
 
 const qa = tpl('qa-tester.md');
 check(/protocol §5/.test(qa) && !/\*\*(Critical|High|Medium|Low)\*\*:/.test(qa) && /Any 🔴 or 🟠 ⇒ FAIL/.test(qa), 'qa-tester: grades on protocol §5, no second scale, fails on 🔴 or 🟠');
+check(/^QA PASS → main agent/m.test(qa) && /^QA FAIL → main agent/m.test(qa) && !/WARN/.test(qa), 'qa-tester: two handoff lines');
+check(/bug test/.test(qa) && /reproduced/.test(qa) && /traced/.test(qa) && /late find/.test(qa) && /Smallest fix/.test(qa), 'qa-tester: bug test, evidence, late finds, smallest fix');
+check(!/none = 🔴/.test(qa) && !/🟣 gate/.test(qa), 'qa-tester: missing tests are not a blanket 🔴; no separate 🟣 gate');
 check(/\{\{#project\.has_ui\}\}[\s\S]*Design bar[\s\S]*Usability bar[\s\S]*\{\{\/project\.has_ui\}\}/.test(qa), 'qa-tester: Design/Usability checks only when the project has a UI');
 check(/Prove the tests can fail/.test(qa) && /Triaged out/.test(qa) && /Unverified concerns/.test(qa), 'qa-tester: mutation proof, triaged out, unverified concerns');
 const reviewer = tpl('code-reviewer.md');
 check(/Use ONLY when the user asks for a code review/.test(reviewer), 'code-reviewer: runs only on the user\'s request');
 check(/Mutation check/.test(reviewer) && /shasum/.test(reviewer), 'code-reviewer: mutation check with a restore proof');
+check(/`FAIL` \(any 🔴 or 🟠\)/.test(reviewer) && /`PASS` \(only 🟡 🔵 🟣/.test(reviewer) && !/FIX FIRST|BLOCKED|CLEAR|WARN/.test(reviewer), 'code-reviewer: same two verdicts as QA');
+check(/bug test/.test(reviewer) && /Reproduce each 🔴/.test(reviewer) && /late find/.test(reviewer) && /Smallest fix/.test(reviewer) && /the lower\s+one/.test(reviewer), 'code-reviewer: bug test, proof for 🔴, late finds, smallest fix, tie-break down');
+check(!/no tests for\s+new behaviour/i.test(reviewer) && !/the more serious/.test(reviewer) && !/anything\s+below the standard/.test(reviewer), 'code-reviewer: 🟠 is not a standards bucket');
+check(/Security review: PASS \| FAIL/.test(tpl('security-review-command.md')), 'security review uses the same verdicts');
 check(/Fix prompt — required/.test(reviewer) && /known-issues\.md/.test(reviewer) && /protocol §5/.test(reviewer), 'code-reviewer: fix prompts, logs minors, grades on protocol §5');
-check(/\*\*Who:\*\*/.test(tpl('docs-known-issues.md')) && /\*\*Happens:\*\*/.test(tpl('docs-known-issues.md')) && /🟣 gate/.test(tpl('docs-known-issues.md')), 'known-issues seed records who / seen / happens / effect and names the gate');
+check(/\*\*Who:\*\*/.test(tpl('docs-known-issues.md')) && /\*\*Happens:\*\*/.test(tpl('docs-known-issues.md')) && /bug test \(protocol §5/.test(tpl('docs-known-issues.md')), 'known-issues seed records who / seen / happens / effect and names the bug test');
 check(/## How we work/.test(tpl('agents-md.md')) && /The main agent leads/.test(tpl('agents-md.md')) && /Senior ladder/.test(tpl('agents-md.md')) && /user-gated/i.test(tpl('agents-md.md')), 'AGENTS.md template: How we work (main agent, user-gated, senior ladder)');
 
 const standard = ref('engineering-standard.md');
@@ -228,6 +252,8 @@ function runRender(team, extraFiles = {}) {
     check(/select the model on the subagent call/.test(proto), 'rendered protocol §3: OpenCode selects the model on dispatch');
     check(/⚠️ undecided — the UI developer proposes a direction/.test(agents) && /Refund window \| ⚠️ undecided/.test(agents) && /Load the `frontend-design` skill/.test(agents), 'rendered AGENTS.md: undecided markers and the design-skill line');
     check(r.file('documentation/pages/invoices-new.md') !== null && /agent: qa-tester/.test(r.file('.opencode/commands/security-review.md') || ''), 'rendered docs page from route and the OpenCode security-review command');
+    check((JSON.parse(r.file('opencode.json')).instructions || []).includes('.agents/rules/claude-agent-protocol.md') && /@\.agents\/rules\/claude-agent-protocol\.md/.test(r.file('CLAUDE.md') || ''), 'rendered: the protocol is loaded for every agent in both harnesses');
+    check(/^model: sonnet$/m.test(r.file('.claude/agents/browser-tester.md') || '') && r.file('.opencode/agents/browser-tester.md') !== null && /Browser test — the second QA step/.test(r.file('.agents/rules/claude-agent-protocol.md') || '') && /\| browser-tester \| sonnet \|/.test(r.file('.agents/rules/claude-agent-protocol.md') || ''), 'rendered: browser-tester on sonnet, named in protocol §3 and §5');
     check(JSON.parse(r.file('opencode.json')).permissions.length === 1 && JSON.parse(r.file('.claude/settings.json')).permissions.allow.includes('Bash'), 'rendered permissions: allow-all in both harnesses');
     check(r.file('.agents/verify-team.js') !== null, 'rendered: verifier copied into .agents/');
   }
@@ -237,6 +263,10 @@ function runRender(team, extraFiles = {}) {
   check(claudeOnly.code === 0 && claudeOnly.file('CLAUDE.md') !== null && claudeOnly.file('.opencode/agents/qa-tester.md') === null && claudeOnly.file('opencode.json') === null, 'render-team: harness claude writes no OpenCode files');
   const other = runRender({ ...fixture, harness: 'other', other_harness: { name: 'Gemini CLI' } });
   check(other.code === 0 && other.file('GEMINI.md') !== null && other.file('.agents/agents/architect.md') !== null && other.file('.claude/settings.json') === null && !/^---/.test(other.file('.agents/agents/architect.md')), 'render-team: another harness gets body-only files and a pointer file');
+  {
+    const noBt = runRender({ ...fixture, roster: fixture.roster.filter((n) => n !== 'browser-tester') });
+    check(noBt.code === 0 && noBt.file('.claude/agents/browser-tester.md') === null && !/browser-tester|Browser PASS/.test(noBt.file('.agents/rules/claude-agent-protocol.md') || 'browser-tester'), 'render-team: without browser-tester the protocol does not mention it');
+  }
   const pm = runRender({ ...fixture, roster: [...fixture.roster, 'project-manager'] });
   check(pm.code === 1 && /no project-manager/.test(pm.out), 'render-team refuses a project-manager role');
   const fs2 = runRender({ ...fixture, roster: [...fixture.roster, 'fullstack-developer'], roles: { ...fixture.roles, 'fullstack-developer': { oc_model: 'x/y', focus: 'x', owned_paths: 'x', forbidden_paths: 'x', expensive_mistake: 'x' } } });

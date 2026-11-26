@@ -38,13 +38,17 @@ As lead you always:
   ({{protocol.sequencing_order}}); shared prerequisites ({{protocol.shared_early_items}}) first.
 - **Keep parallel work apart.** Two agents never edit one file at once; sequence shared files
   explicitly. The shared root files ({{protocol.shared_root_files}}) are yours: edit them or
-  assign the edit to one builder per task.
+  assign the edit to one builder per task. Builders working in parallel run only the narrow
+  tests for their own files, because the full gates would fail on each other's half-done
+  work. **You run the full gates once the batch has landed**, before QA, and send any failure
+  to the owner of the file it names.
 - **Relay questions.** Subagents cannot reach the user — surface their "Questions for the
   user" verbatim before anyone proceeds on a guess.
 - **Track with evidence.** Status comes from reports, diffs and command output, never
   assumption. A report with no gate output or no handoff line is rejected.
 - **Run the QA loop (§5).** On QA FAIL: group findings by owner, fix tasks at the top of the
-  plan, re-dispatch, re-QA. Done = QA PASS.
+  plan, re-dispatch, re-QA. You rule on rebuttals. Four rounds is the limit: then stop and
+  bring it to the user. Done = QA PASS{{#has_browser_tester}}, and Browser PASS for a change the user will see{{/has_browser_tester}}.
 - **Hold the documentation contract (§4) and the user-gated list (§6)** for the whole team.
 - **Never silently absorb a requirement change** — say which done and pending tasks it
   invalidates. **Ambiguous scope → ask, don't plan.**
@@ -153,7 +157,10 @@ tool with the agent's ID{{#has_neutral}}; {{other_harness.name}}: ⚠️ verify 
 3. **Model selection — chosen on every dispatch.** The baseline below is the tier for a
    well-scoped task; **step up to the stronger model** when the task touches
    {{risk.escalation}}, spans several files or disciplines, needs a design decision, or a
-   first attempt came back wrong. Judges never step down. Claude Code: the agent file pins
+   first attempt came back wrong. Judges never step down, and step **up** to the strongest
+   model you have (Fable on Anthropic; the top tier of whichever provider is in use) for a
+   high-stakes change on a risk surface or a task that has already failed QA once. Where the
+   user's own instructions set model routing, those win. Claude Code: the agent file pins
    the baseline; pass `model` on the dispatch to step up. OpenCode: agent files carry no pin
    — select the model on the subagent call every time (baseline tier, or the stronger one).
 
@@ -192,36 +199,122 @@ L task, anything on a risk surface, or a feature the user will see goes
 to qa-tester as well — fresh context catches what the author cannot. qa-tester's FAIL
 outranks the author's PASS.
 
-**The lights — one scale for self-QA, qa-tester and code-reviewer.** Every 🔴 and 🟠 names a
-failure scenario: the real action, what goes wrong, who it hits ("an admin who saves an empty
-form sees a 500 and loses the draft"). No scenario — unreachable, or only suspected — means
-"Unverified concerns", outside the verdict. Standard-level 🟠s (thin tests, tests that cannot
-fail, something re-implemented) name the bug they would let through.
+**What counts as a bug — one test for self-QA, qa-tester and code-reviewer.** A finding is a
+bug only if all four hold. Anything else is a 🟡 Nit, a 🔵 FYI, or dropped.
 
-| Light | Meaning | Effect |
-|---|---|---|
-| 🔴 **Blocker** | Security hole · data loss · wrong result on a risk surface · broken build or failing gate · feature broken for a role · no tests for new behaviour · a big gap against the spec · a caller broken by the change | QA FAIL · review BLOCKED |
-| 🟠 **Should fix** | Below the standard or the guidelines: missing state or error handling · ungraceful user-facing error · thin tests or tests that cannot fail · something re-implemented · a needless dependency or speculative abstraction · a Design-bar slop item · a Usability-bar breach (unjustified extra step in a core flow, confirm on a reversible action, input lost on error) · docs not updated | QA FAIL · review FIX FIRST |
-| 🟡 **Nit** | A quick quality win: naming, a simpler expression, small duplication | never blocks |
-| 🔵 **FYI** | Worth knowing, nothing to do | never blocks |
-| 🟣 **Minor** | A real but small issue, often in code around the change | logged to `documentation/known-issues.md` with a fix prompt — only if it passes the gate below; never blocks |
-
-**The 🟣 gate — worth logging?** `known-issues.md` holds issues real people can hit. Before
-logging a 🟣, answer all three and record the answers in the entry:
-
-1. **Who does it reach?** An end user, an admin, an operator — name them. Only a developer
-   reading the code would notice → 🟡 Nit in the report, not a log entry.
-2. **Seen or unseen?** Visible in the UI, or silent. Silent is logged only if its effect
-   reaches someone (a wrong record, a slow page, a misleading admin log). Silent corruption,
-   leaks or money errors are not Minor — re-grade 🔴 or 🟠.
-3. **Can it actually happen?** Trace a real action to the faulty line. Unreachable (validated
+1. **Expected behaviour has a source.** The spec, a business rule in `AGENTS.md`, a documented
+   contract, or how the code behaved before this change. "I would have built it differently"
+   is not a source.
+2. **Who does it reach?** An end user, an admin, an operator, another system: name them. Only
+   a developer reading the code would notice → 🟡 Nit.
+3. **Seen or unseen?** Visible, or silent. Silent counts only if its effect reaches someone (a
+   wrong record, a slow page, a misleading admin log).
+4. **Can it actually happen?** Trace a real action to the faulty line. Unreachable (validated
    upstream, impossible by type, dead branch) or only from a state no real user can create →
-   not a bug, drop it. Reachable → how likely (common · edge case · rare) and what the person
-   experiences.
+   not a bug.
 
-**Drop, don't log:** unreachable paths · "what if a future caller…" hardening · style ·
-already handled elsewhere · an effect nobody would notice (🔵 FYI at most). List drops under
-"Triaged out" so the user can overrule you.
+**Not a bug, do not grade it as one:** unreachable paths · "what if a future caller…"
+hardening · style or structure · something already handled elsewhere · an effect nobody would
+notice · a missing feature the spec never asked for.
+
+**Evidence decides whether a bug counts.** Say which level each finding reached:
+
+- **Reproduced:** you made it happen. A failing test, a command and its output, a request and
+  its response.
+- **Traced:** you did not run it, but you can walk it from the real action to the faulty line,
+  naming each file and line on the way.
+- **Suspected:** anything less. It goes under "Unverified concerns", outside the verdict, with
+  what would confirm it.
+
+Confidence is not a grade. Never write "probably" on a 🔴 or 🟠: either the evidence is there
+or the finding is unverified.
+
+**The lights.** Every 🔴, 🟠 and 🟣 names a failure scenario: the real action, what goes
+wrong, who it hits ("an admin who saves an empty form sees a 500 and loses the draft"), and
+the smallest fix that removes it.
+
+| Light | Meaning | Evidence | Verdict |
+|---|---|---|---|
+| 🔴 **Blocker** | Critical. A bug this change introduced that you would roll back or hotfix: data loss or corruption · a security hole · a money error · a wrong result on a risk surface · a core flow or a whole role broken with no workaround · a caller broken by the change. Also a broken build or failing gate. | Reproduced. Traced is enough only for security and concurrency bugs that cannot be reproduced locally. | FAIL |
+| 🟠 **Should fix** | High or medium impact. A bug this change introduced that hurts a real person or the system but is not critical: wrong behaviour or a wrong result on a path a real user reaches · a feature that fails for some users or inputs · an error the user cannot recover from gracefully · a state they land in that was not built · input lost on error. Plus the two standards in "Tests and docs" below. | Traced or reproduced. | FAIL |
+| 🟣 **Minor** | Low impact. A real bug with a small effect: cosmetic, a rare edge case, an easy workaround. In the change or in code around it. | Traced or reproduced. | none — logged to `documentation/known-issues.md` with a fix prompt |
+| 🟡 **Nit** | The shipped code behaves the same with or without the fix: naming, structure, duplication, convention drift, something re-implemented, a speculative abstraction, a needless dependency, a Design-bar slop item, thin tests off a risk surface. | none needed | none |
+| 🔵 **FYI** | True and worth knowing, but not a defect of this change: a pre-existing bug in code the change did not touch, a risk to watch, context for the user. A serious pre-existing bug goes first in the list so the user can decide. | none needed | none |
+
+A Usability-bar breach (an unjustified extra step in a core flow, a confirm on a reversible
+action) is a 🟠 only when it passes the bug test; otherwise 🟡.
+
+**Grading rules.**
+- **Introduced by this change.** 🔴 and 🟠 are for bugs the diff created or exposed. The same
+  bug already on {{main_branch}} is 🟣 if small, 🔵 if not.
+- **Torn between two lights → the lower one.** The exception is anything irreversible (data
+  loss, security, money): grade it up and say why.
+- **No light, no verdict.** A finding you cannot place goes under "Unverified concerns". It
+  never defaults to 🔴.
+- **Zero findings is a valid report.** Never pad to look thorough: five real findings beat
+  twenty.
+- **The fix fits the bug.** Name the smallest change that removes the scenario. A finding
+  whose fix is a new abstraction, a new dependency or a refactor is usually a 🟡 dressed up.
+
+**Blocker or Should fix?** Both fail. 🔴 is the one you would stop a release for: it cannot be
+undone, or there is no way round it. 🟠 is every other bug of real weight. 🟣 starts where
+most people would never meet it or would shrug it off.
+
+**Tests and docs — the only non-bug findings that move a verdict.**
+- A failing gate (build, tests, lint, types) is 🔴. Quote the output.
+- New or changed logic on a risk surface ({{risk.surfaces}}) with **no test**, or with a test
+  that cannot fail (change one value, the test stays green), is 🟠. Name the bug it would let
+  through.
+- A user-facing change with `documentation/` not updated is 🟠 (the §4 contract).
+- New behaviour off a risk surface with no test is 🟡. Say so once, not per file.
+- Do not ask for tests of unreachable branches, framework behaviour, trivial pass-throughs, or
+  a test that only asserts its own mocks.
+- **Fixes:** a 🔴 fix ships with a test that fails without it. A 🟠 fix gets a test when it is
+  on a risk surface or a test file for that code already exists. A 🟡 or 🟣 fix needs no new
+  test.
+
+**Verdicts — the same two for self-QA, qa-tester, code-reviewer and the security review.**
+- **FAIL:** at least one 🔴 or 🟠. Do not merge. Fix each one, or rebut it with evidence (the
+  source of the expected behaviour, or the step where the trace breaks).
+- **PASS:** only 🟡 🔵 🟣, or nothing.
+
+**Acceptance comes first.** A review is not only a bug hunt. qa-tester marks every acceptance
+criterion of the task met or not met, with the evidence (a test, a command, a trace). A
+criterion that is not met is a finding, 🔴 or 🟠 by its impact. A feature with no bugs and a
+missing criterion does not pass.
+
+**The QA loop.** FAIL → fix tasks to the owning agents, then re-QA. A re-QA round reviews
+**the fix diff and its callers**, not the whole feature again.
+
+- **Round 2 fails** → re-dispatch the fix on the stronger model, and put the judge on the
+  strongest one (§3).
+- **Round 4 fails** → stop. Report to the user: what still fails, what was tried each round,
+  and your recommendation. Never start a fifth round on your own.
+
+**Rebuttals.** The owning agent may answer a finding with evidence instead of a fix: the
+source that says the behaviour is intended, or the step where the reviewer's trace breaks.
+The main agent rules on it. Upheld → the finding is struck and listed in the report to the
+user as "overturned", with the reason. Not upheld → it is fixed. "I disagree" with no
+evidence is not a rebuttal.
+{{#has_browser_tester}}
+
+**Browser test — the second QA step for anything the user will see.** After qa-tester
+passes, dispatch `browser-tester` on a smaller visual model. It opens the running app and
+walks the changed flow as each role, under the conditions a real user meets, with
+screenshots. Its findings are graded on the same lights and its FAIL counts as a QA round.
+qa-tester reads code and runs gates; browser-tester uses the product. Neither replaces the
+other.
+{{/has_browser_tester}}
+
+**Late finds.** A finding in code that has not changed since the previous round is the
+reviewer's miss, not the fixer's. Mark it "late find". A late 🔴 still blocks. Anything else
+is listed, does not move the verdict, and is logged or fixed at the user's choice. This is
+what stops a review from never ending.
+
+**Logging 🟣s.** `known-issues.md` holds issues real people can hit. An entry records the
+bug-test answers (who · seen or unseen · how it happens · effect). Silent corruption, leaks or
+money errors are never Minor: re-grade 🔴 or 🟠. Candidates that fail the bug test are listed
+under "Triaged out", one line each with the reason, so the user can overrule you.
 
 {{#security_review}}
 **Security review.** Before a merge that touches a risk surface, run `/security-review`

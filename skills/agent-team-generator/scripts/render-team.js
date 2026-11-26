@@ -210,6 +210,7 @@ const base = {
   what_changed_depth: styles[team.report_style].what, evidence_depth: styles[team.report_style].evidence,
   risk: { ...team.risk, question: riskQuestion },
   builders, builder_names: builderNames,
+  has_browser_tester: team.roster.includes('browser-tester'),
   builder_1: builders[0] || 'developer', builder_2: builders[1] || builders[0] || 'developer',
   design: { ...design, direction_or_marker: design.direction || '⚠️ undecided — the UI developer proposes a direction and gets it approved before the first screen; never invent a look screen by screen', skills: design.skills || [] },
   roster_rows: team.roster.map((n) => ({ name: n, focus: roleMeta[n].focus || `⚠️ undecided — fill roles.${n}.focus`, handoff: roleMeta[n].handoff })),
@@ -222,6 +223,7 @@ const base = {
 const tryRender = (fn) => { try { return fn(); } catch (e) { die(e.message); } };
 for (const row of base.model_rows) row.escalate = tryRender(() => renderTemplate(row.escalate, base, `templates/${row.name}.md (escalate)`));
 if (!base.project.has_ui && uiRoles.length) die('team.json: project.has_ui is false but the roster has a UI role');
+if (!base.project.has_ui && base.has_browser_tester) die('team.json: project.has_ui is false but the roster has browser-tester');
 
 // ----------------------------------------------------------------- outputs
 const outputs = {};
@@ -232,7 +234,7 @@ put('.agents/rules/claude-agent-protocol.md', renderFile('protocol.md', base));
 put('AGENTS.md', renderFile('agents-md.md', base));
 if (hasCC) put('CLAUDE.md', '@AGENTS.md\n@.agents/rules/claude-agent-protocol.md\n');
 if (hasCC) put('.claude/settings.json', JSON.stringify({ permissions: { allow: ['Bash', 'Edit', 'Write', 'NotebookEdit', 'WebFetch', 'WebSearch', ...(team.mcp_servers || []).map((s) => `mcp__${s}`)] } }, null, 2) + '\n');
-if (hasOC) put('opencode.json', JSON.stringify({ $schema: 'https://opencode.ai/config.json', permissions: [{ action: '*', resource: '*', effect: 'allow' }] }, null, 2) + '\n');
+if (hasOC) put('opencode.json', JSON.stringify({ $schema: 'https://opencode.ai/config.json', instructions: ['.agents/rules/claude-agent-protocol.md'], permissions: [{ action: '*', resource: '*', effect: 'allow' }] }, null, 2) + '\n');
 
 for (const name of team.roster) {
   const rm = roleMeta[name];

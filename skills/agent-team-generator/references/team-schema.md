@@ -50,7 +50,7 @@ never its facts. Markdown is fine everywhere; backtick real paths and commands.
 | `agents_md.gotchas` · `architecture` · `business_rules` | arrays of markdown lines — the three sections written by hand: bold the trap then why; concrete paths for every claim; tables for anything with a number, `⚠️ undecided — ask before implementing` for unknowns |
 | `agents_md.data_section_name` · `data_rules` | *opt* the data-layer section ("DB & Firestore") and its lines; omit without a backend |
 | `protocol.sequencing_order` · `shared_early_items` · `shared_root_files` · `business_rule_examples` · `per_task_gates` | task sequencing; what comes first (i18n keys, types); the main agent's root files (manifests, lockfiles, CI, tooling config); two or three rules nobody may guess; per-task gates beyond the commands ("all four states handled") |
-| `roster` | role names in order; core: product-specialist, architect, backend-developer, ui-ux-developer (or fullstack-developer instead of both), qa-tester, code-reviewer. Never project-manager |
+| `roster` | role names in order; core: product-specialist, architect, backend-developer, ui-ux-developer (or fullstack-developer instead of both), qa-tester, code-reviewer; plus browser-tester when `project.has_ui`. Never project-manager |
 | `roles.<name>.oc_model` | *opt* `provider/model-id#variant` — only to force a pin; by default OpenCode agent files carry no model and the subagent call selects it on every dispatch |
 | `roles.<name>.cc_model` · `escalate` | *opt* overrides of the template defaults (sonnet builders + product-specialist, opus judges; step-up phrase) |
 | `roles.<name>.focus` · `hands_off_to` | the roster-table cell (globs or responsibility); *opt* next role (template default) |
@@ -62,4 +62,4 @@ never its facts. Markdown is fine everywhere; backtick real paths and commands.
 `agent_dirs`, `permission_files`, `what_changed_depth`, `evidence_depth`, `risk.question`,
 `i18n.rule`, `i18n.check`, `builders`, `builder_names`, `builder_1`, `builder_2`,
 `design.direction_or_marker`, `roster_rows`, `persona_rows`, `model_rows`, `test_globs`,
-`today`, `has_cc`, `has_oc`, `has_neutral`, `has_both`, `is_ui`, `role`.
+`today`, `has_browser_tester`, `has_cc`, `has_oc`, `has_neutral`, `has_both`, `is_ui`, `role`.

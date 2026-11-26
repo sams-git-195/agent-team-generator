@@ -33,6 +33,13 @@ agent team for your project:
   the tests can fail by changing a value, logs minor issues to
   `documentation/known-issues.md` (only ones a real user or admin can actually hit), and hands
   back a ready-to-run fix prompt
+- a **browser-tester** for projects with a UI: after QA passes, a smaller visual model walks
+  the changed flow in a real browser as each role and reports with screenshots
+- a QA loop that ends: acceptance criteria checked one by one, builders can rebut a finding
+  with evidence, and after four failed rounds the team stops and asks you
+- **one definition of a bug** for self-QA, qa-tester and code-reviewer: expected behaviour
+  has a source, a real person is reached, and the path is reproduced or traced. A 🔴
+  or 🟠 fails a review; standards and style are nits and never do
 - **open permissions, user-gated actions**: agents may edit any file and run any command, so
   an instruction is carried through without prompts — and they commit freely but push, open
   PRs, deploy, migrate a shared database or destroy anything only when you say so, then
