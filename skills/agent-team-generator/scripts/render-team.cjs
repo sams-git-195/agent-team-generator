@@ -1,13 +1,22 @@
 #!/usr/bin/env node
 /**
- * render-team.js — renders a generated agent team from `team.json` and the skill's templates.
+ * render-team.cjs — renders a generated agent team from `team.json` and the skill's templates.
  *
- *   node <skill-dir>/scripts/render-team.js [path/to/team.json] [--no-verify] [--dry-run]
+ *   node <skill-dir>/scripts/render-team.cjs [path/to/team.json] [--no-verify] [--dry-run]
  *
- * Run from the target project's root (default team.json: .agents/team.json). Writes AGENTS.md,
- * CLAUDE.md, the protocol, every agent file for the chosen harness(es), the allow-all
- * permission files, the documentation/ seed, the optional OpenCode security-review command,
- * and copies verify-team.js into .agents/; then runs the verifier. Plain Node, no dependencies.
+ * Run from the target project's root (default team.json: .agents/team.json). Writes CLAUDE.md,
+ * the protocol, every agent file for the chosen harness(es), the allow-all permission files
+ * (merged into what is there), copies verify-team.cjs into .agents/ and runs it. Plain Node, no
+ * dependencies; .cjs so it runs inside a `"type": "module"` project too.
+ *
+ * Safe to re-run on a project that has grown its own files:
+ *   - AGENTS.md is written whole only when missing. Afterwards only the block between
+ *     <!-- team:start --> and <!-- team:end --> is replaced; with no markers the file is left
+ *     alone and the render goes to .agents/AGENTS.generated.md for the user to merge.
+ *   - documentation/ and the OpenCode security-review command are seeded only when missing.
+ *   - Any path in team.json `keep` that exists is never written.
+ *   - A file whose content would not change is not rewritten.
+ *   - .agents/.rendered.json lists what this skill owns, so the verifier checks only those.
  *
  * Template syntax (references/templates/*.md): {{key}} value (arrays of strings join with
  * newlines; a missing key is an error) · {{#key}}…{{/key}} render when truthy (arrays iterate,
@@ -231,10 +240,40 @@ const put = (rel, content) => { outputs[rel] = content; };
 const renderFile = (tplFile, ctx) => tryRender(() => squeeze(renumber(renderTemplate(read(path.join(templatesDir, tplFile)), ctx, tplFile))));
 
 put('.agents/rules/claude-agent-protocol.md', renderFile('protocol.md', base));
-put('AGENTS.md', renderFile('agents-md.md', base));
+const agentsFull = renderFile('agents-md.md', base);
+const TEAM_BLOCK = /<!-- team:start[^>]*-->[\s\S]*?<!-- team:end -->/;
+const notes = [];
+{
+  const abs = path.join(root, 'AGENTS.md');
+  if (!exists(abs)) put('AGENTS.md', agentsFull);
+  else {
+    const current = read(abs);
+    const block = agentsFull.match(TEAM_BLOCK)[0];
+    if (TEAM_BLOCK.test(current)) put('AGENTS.md', current.replace(TEAM_BLOCK, () => block));
+    else {
+      put('.agents/AGENTS.generated.md', agentsFull);
+      notes.push('AGENTS.md has no <!-- team:start --> … <!-- team:end --> block, so it was left as it is. The full render is in .agents/AGENTS.generated.md: copy its team block (markers included) into AGENTS.md in place of your How we work and Agent team sections, then re-run.');
+    }
+  }
+}
 if (hasCC) put('CLAUDE.md', '@AGENTS.md\n@.agents/rules/claude-agent-protocol.md\n');
-if (hasCC) put('.claude/settings.json', JSON.stringify({ permissions: { allow: ['Bash', 'Edit', 'Write', 'NotebookEdit', 'WebFetch', 'WebSearch', ...(team.mcp_servers || []).map((s) => `mcp__${s}`)] } }, null, 2) + '\n');
-if (hasOC) put('opencode.json', JSON.stringify({ $schema: 'https://opencode.ai/config.json', instructions: ['.agents/rules/claude-agent-protocol.md'], permissions: [{ action: '*', resource: '*', effect: 'allow' }] }, null, 2) + '\n');
+// Settings files are merged: the project's other keys (hooks, env, mcp, extra allow entries,
+// extra instructions, later permission rules) survive a re-render.
+const readJson = (rel) => { const abs = path.join(root, rel); if (!exists(abs)) return null; try { return JSON.parse(read(abs)); } catch (e) { die(`${rel} is not valid JSON (${e.message}); fix it or move it aside, then re-run`); } };
+const union = (a, b) => [...new Set([...(a || []), ...b])];
+const ALLOW_ALL = { action: '*', resource: '*', effect: 'allow' };
+const isAllowAll = (r) => r && r.action === '*' && r.resource === '*' && r.effect === 'allow';
+const putJson = (rel, value) => put(rel, JSON.stringify(value, null, 2) + '\n');
+if (hasCC) {
+  const cur = readJson('.claude/settings.json') || {};
+  const allow = union(cur.permissions && cur.permissions.allow, ['Bash', 'Edit', 'Write', 'NotebookEdit', 'WebFetch', 'WebSearch', ...(team.mcp_servers || []).map((s) => `mcp__${s}`)]);
+  putJson('.claude/settings.json', { ...cur, permissions: { ...(cur.permissions || {}), allow } });
+}
+if (hasOC) {
+  const cur = readJson('opencode.json') || {};
+  const rest = Array.isArray(cur.permissions) ? cur.permissions.filter((r) => !isAllowAll(r)) : [];
+  putJson('opencode.json', { $schema: 'https://opencode.ai/config.json', ...cur, instructions: union(cur.instructions, ['.agents/rules/claude-agent-protocol.md']), permissions: [ALLOW_ALL, ...rest] });
+}
 
 for (const name of team.roster) {
   const rm = roleMeta[name];
@@ -260,7 +299,12 @@ if (hasNeutral) {
   if (p) put(p[0], p[1]);
 }
 
-if (team.security_review && hasOC) put('.opencode/commands/security-review.md', renderFile('security-review-command.md', base));
+// Seeded files: written when missing, never overwritten (projects tune them).
+const seeded = new Set();
+const seededKept = [];
+const seedOnly = (rel, content) => { seeded.add(rel); if (!exists(path.join(root, rel))) put(rel, content); else seededKept.push(rel); };
+const emptyOrMissing = (rel) => { const abs = path.join(root, rel); return !exists(abs) || fs.readdirSync(abs).length === 0; };
+if (team.security_review && hasOC) seedOnly('.opencode/commands/security-review.md', renderFile('security-review-command.md', base));
 
 // documentation/ seed — never overwrite docs the project already has.
 const pages = (team.project.pages || []).map((p) => ({ ...p, file: routeToFile(p.route) }));
@@ -269,29 +313,62 @@ function routeToFile(route) {
   if (!parts.length) return 'home';
   return parts.map((seg) => (seg.startsWith(':') || /^\[.*\]$/.test(seg) ? 'detail' : seg)).join('-');
 }
-const seedOnly = (rel, content) => { if (!exists(path.join(root, rel))) put(rel, content); };
 seedOnly('documentation/README.md', renderFile('docs-readme.md', { ...base, pages }));
 seedOnly('documentation/known-issues.md', renderFile('docs-known-issues.md', base));
 for (const p of pages) seedOnly(`documentation/pages/${p.file}.md`, renderFile('docs-page.md', { ...base, ...p }));
-if (!pages.length) seedOnly('documentation/pages/.gitkeep', '');
-seedOnly('documentation/features/.gitkeep', '');
+for (const d of ['pages', 'features']) {
+  seeded.add(`documentation/${d}/.gitkeep`);
+  if ((d === 'features' || !pages.length) && emptyOrMissing(`documentation/${d}`)) put(`documentation/${d}/.gitkeep`, '');
+}
 
 // verifier travels with the project
-put('.agents/verify-team.js', read(path.join(skillDir, 'scripts', 'verify-team.js')));
+put('.agents/verify-team.cjs', read(path.join(skillDir, 'scripts', 'verify-team.cjs')));
 
 // ----------------------------------------------------------------- write
-const written = [];
+const keep = new Set((team.keep || []).map((k) => k.replace(/^\.\//, '')));
+const leftover = Object.keys(outputs).filter((rel) => /\.md$/.test(rel) && /\{\{[#^/>]/.test(outputs[rel]));
+if (leftover.length) die(`unrendered template sections left in: ${leftover.join(', ')}`);
+const written = []; const unchanged = []; const kept = [];
 for (const [rel, content] of Object.entries(outputs)) {
   const abs = path.join(root, rel);
+  if (keep.has(rel) && exists(abs)) { kept.push(rel); continue; }
+  if (exists(abs) && read(abs) === content) { unchanged.push(rel); continue; }
   if (!dryRun) { fs.mkdirSync(path.dirname(abs), { recursive: true }); fs.writeFileSync(abs, content); }
   written.push(rel);
 }
-console.log(`${dryRun ? 'would write' : 'wrote'} ${written.length} files:\n  ${written.sort().join('\n  ')}`);
-const leftover = written.filter((rel) => /\.md$/.test(rel) && /\{\{[#^/>]/.test(outputs[rel]));
-if (leftover.length) die(`unrendered template sections left in: ${leftover.join(', ')}`);
+// What the skill regenerates on every run: the verifier checks these for placeholders, nothing
+// else. Seeded files belong to the project once written, so they are not listed.
+const owned = Object.keys(outputs).filter((rel) => !kept.includes(rel) && !seeded.has(rel) && rel !== '.agents/verify-team.cjs').sort();
+const manifestRel = '.agents/.rendered.json';
+// A role dropped from the roster: remove the agent files the previous render wrote for it.
+{
+  let previous = [];
+  try { previous = JSON.parse(read(path.join(root, manifestRel))).files || []; } catch (e) { previous = []; }
+  const AGENT_DIR = /^(\.claude\/agents|\.opencode\/agents|\.agents\/agents)\/[^/]+\.md$/;
+  for (const rel of previous) {
+    if (!AGENT_DIR.test(rel) || rel in outputs || keep.has(rel) || !exists(path.join(root, rel))) continue;
+    if (!dryRun) fs.unlinkSync(path.join(root, rel));
+    notes.push(`removed ${rel} (no longer in the roster)`);
+  }
+}
+const manifest = JSON.stringify({ note: 'Written by render-team.cjs. Files this skill rendered; verify-team.cjs checks only these.', files: owned }, null, 2) + '\n';
+const manifestAbs = path.join(root, manifestRel);
+if (!exists(manifestAbs) || read(manifestAbs) !== manifest) { if (!dryRun) fs.writeFileSync(manifestAbs, manifest); written.push(manifestRel); }
+// The verifier used to ship as .agents/verify-team.js, which breaks in an ESM project.
+const legacyVerifier = path.join(root, '.agents', 'verify-team.js');
+if (exists(legacyVerifier) && /verify-team\.js — mechanical checks for a generated agent team/.test(read(legacyVerifier))) {
+  if (!dryRun) fs.unlinkSync(legacyVerifier);
+  notes.push('removed the old .agents/verify-team.js (replaced by .agents/verify-team.cjs)');
+}
+const list = (label, items) => { if (items.length) console.log(`${label} ${items.length}:\n  ${items.sort().join('\n  ')}`); };
+list(dryRun ? 'would write' : 'wrote', written);
+list('unchanged', unchanged);
+list('kept (team.json keep)', kept);
+list('kept (seeded once, already there)', seededKept);
+for (const n of notes) console.log(`\nnote: ${n}`);
 
 if (!dryRun && !flags.has('--no-verify')) {
-  console.log('\nrunning .agents/verify-team.js …\n');
-  const r = spawnSync(process.execPath, [path.join(root, '.agents', 'verify-team.js'), root], { stdio: 'inherit' });
+  console.log('\nrunning .agents/verify-team.cjs …\n');
+  const r = spawnSync(process.execPath, [path.join(root, '.agents', 'verify-team.cjs'), root], { stdio: 'inherit' });
   process.exit(r.status === null ? 1 : r.status);
 }

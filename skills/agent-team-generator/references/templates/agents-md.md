@@ -7,6 +7,7 @@
 - Targets: {{project.targets}}
 {{/project.targets}}
 
+<!-- team:start — rewritten by render-team.cjs on every run; edit .agents/team.json instead -->
 ## How we work
 **Full process: `.agents/rules/claude-agent-protocol.md` — read it before your first task.**
 {{#has_cc}}(Claude Code loads it through `CLAUDE.md`; every other harness reads it explicitly.) {{/has_cc}}The short version, which holds even if you read nothing else:
@@ -58,6 +59,7 @@ Persona files live in `.agents/agents/*.md` (harness-neutral). Adopt the matchin
 before any task; dispatch mechanics for {{other_harness.name}}: ⚠️ verify.
 {{/has_neutral}}
 {{/has_both}}
+<!-- team:end -->
 
 ## Dev commands
 {{#commands.list}}
