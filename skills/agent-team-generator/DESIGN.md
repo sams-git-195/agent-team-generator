@@ -53,7 +53,7 @@ agent-team-generator/
     permission-policy.md            the five permission tiers (OC blocks + CC settings.json)
     engineering-standard.md         twelve code rules + the stack hygiene table
     templates/<role>.md             pre-filled per-role files (v2)
-  scripts/verify-team.js            mechanical checks, copied into the target's .agents/
+  scripts/verify-team.cjs           mechanical checks, copied into the target's .agents/
   fixtures/sample-brief.md          canned interview for the application-scenario test
 ```
 
@@ -276,14 +276,37 @@ had to prove a real person could hit it.
 12. **OpenCode loads the protocol for every agent**: `opencode.json` now lists it under
     `instructions` (Claude Code already imported it from `CLAUDE.md`).
 
+## v1.1.0 (2026-11-26, bugs found by Sam re-running on a real project)
+
+1. **ESM projects.** The scripts are now `render-team.cjs` and `verify-team.cjs`, so Node runs
+   them as CommonJS inside a `"type": "module"` project. An old `.agents/verify-team.js` the
+   skill wrote is removed on the next render; a file of the same name that is not ours is not.
+2. **Placeholder check on rendered files only.** The renderer writes `.agents/.rendered.json`
+   (the files it regenerates every run) and the verifier checks only those. Without the
+   manifest it checks the generated set minus `documentation/` apart from the seeded README
+   and known-issues. In a file with a team block, only the block is checked.
+3. **AGENTS.md team block.** How we work, the team table and the harness paragraph sit
+   between `<!-- team:start -->` and `<!-- team:end -->`. A re-render replaces only that
+   block. An `AGENTS.md` with no block is not touched; the render goes to
+   `.agents/AGENTS.generated.md` with a note.
+4. **`keep` in team.json**: paths never overwritten once they exist. The OpenCode
+   security-review command is now seeded once, like the docs.
+5. **Quiet re-runs.** `.gitkeep` only into an empty or missing docs folder; a file whose
+   content would not change is not rewritten; the output lists wrote / unchanged / kept.
+6. **Settings merged, not replaced** (found while fixing 5): `.claude/settings.json` keeps its
+   other keys and extra allow entries; `opencode.json` keeps `mcp`, other keys and later
+   permission rules, with the allow-all rule first and the protocol in `instructions`.
+7. **Dropped roles are cleaned up** (found while testing 3): agent files the previous render
+   wrote for a role no longer in the roster are removed, unless listed in `keep`.
+
 ## Testing plan for the skill itself
 
 Two layers:
 
 1. **Smoke test** (`npm test`): installer round-trip, template/reference cross-references, a
-   full render of `fixtures/team.json` with the verifier, and `verify-team.js` against a
+   full render of `fixtures/team.json` with the verifier, and `verify-team.cjs` against a
    synthetic generated tree (good variants and deliberately broken ones).
 2. **Application-scenario test** (reference/technique skill): dispatch a subagent with only the
    skill files, an empty git-initialised temp directory, and `fixtures/sample-brief.md` as the
-   canned interview. Run `scripts/verify-team.js` on the output, then review it against the
+   canned interview. Run `scripts/verify-team.cjs` on the output, then review it against the
    fixture's Expectations list. Fix gaps found, re-test if changes are substantive.

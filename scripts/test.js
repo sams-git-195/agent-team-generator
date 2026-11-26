@@ -75,7 +75,7 @@ try {
 }
 
 // --- 2. Template integrity ------------------------------------------------------------
-// Templates are rendered by scripts/render-team.js from team.json: {{tags}}, partials, no
+// Templates are rendered by scripts/render-team.cjs from team.json: {{tags}}, partials, no
 // hand-filled {PLACEHOLDERS}. Permissions are allow-all in both harnesses; protocol §6 guards.
 function readText(p) { return fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n'); }
 const ref = (name) => readText(path.join(skillDir, 'references', name));
@@ -190,7 +190,7 @@ for (const stack of ['TypeScript / JS', 'Python', 'Go', 'Rust', 'Other']) check(
 // --- 3. Skill/interview cross-references ------------------------------------------------
 const skillMd = readText(path.join(skillDir, 'SKILL.md'));
 const interview = ref('interview.md');
-check(/render-team\.js/.test(skillMd) && /team-schema\.md/.test(skillMd) && /team\.json/.test(skillMd), 'SKILL.md: team.json → render-team.js workflow');
+check(/render-team\.cjs/.test(skillMd) && /team-schema\.md/.test(skillMd) && /team\.json/.test(skillMd), 'SKILL.md: team.json → render-team.cjs workflow');
 check(/Step 0/.test(skillMd) && /team\.json`\s+exists, this is a re-run/.test(skillMd), 'SKILL.md: survey step detects a re-run');
 check(/## 1\. Intake/.test(interview) && /## 2\. Summary table/.test(interview) && /## 3\. The gates/.test(interview), 'interview: one-message intake, summary table, gates');
 for (const gate of ['Harness', 'Builder split', 'Report style', 'Security review', 'Design skill']) check(new RegExp(`\\*\\*${gate}\\*\\*`).test(interview), `interview gate: ${gate}`);
@@ -203,10 +203,10 @@ check(/frontend-design/.test(ref('add-ons.md')) && /Security review/.test(ref('a
 check(/production-ready from the first commit/.test(ref('greenfield.md')) && /Every gate runs on every change/.test(ref('greenfield.md')), 'greenfield: strict gates, every gate on every change');
 check(fs.existsSync(path.join(skillDir, 'fixtures', 'sample-brief.md')) && fs.existsSync(path.join(skillDir, 'fixtures', 'team.json')), 'fixtures: sample-brief.md and team.json exist');
 
-// --- 3a. render-team.js end to end on the fixture ---------------------------------------
-const render = path.join(skillDir, 'scripts', 'render-team.js');
-const verify = path.join(skillDir, 'scripts', 'verify-team.js');
-check(fs.existsSync(render) && fs.existsSync(verify), 'scripts/render-team.js and verify-team.js exist');
+// --- 3a. render-team.cjs end to end on the fixture ---------------------------------------
+const render = path.join(skillDir, 'scripts', 'render-team.cjs');
+const verify = path.join(skillDir, 'scripts', 'verify-team.cjs');
+check(fs.existsSync(render) && fs.existsSync(verify), 'scripts/render-team.cjs and verify-team.cjs exist');
 const fixture = JSON.parse(readText(path.join(skillDir, 'fixtures', 'team.json')));
 
 function writeTree(dir, files) {
@@ -255,7 +255,10 @@ function runRender(team, extraFiles = {}) {
     check((JSON.parse(r.file('opencode.json')).instructions || []).includes('.agents/rules/claude-agent-protocol.md') && /@\.agents\/rules\/claude-agent-protocol\.md/.test(r.file('CLAUDE.md') || ''), 'rendered: the protocol is loaded for every agent in both harnesses');
     check(/^model: sonnet$/m.test(r.file('.claude/agents/browser-tester.md') || '') && r.file('.opencode/agents/browser-tester.md') !== null && /Browser test — the second QA step/.test(r.file('.agents/rules/claude-agent-protocol.md') || '') && /\| browser-tester \| sonnet \|/.test(r.file('.agents/rules/claude-agent-protocol.md') || ''), 'rendered: browser-tester on sonnet, named in protocol §3 and §5');
     check(JSON.parse(r.file('opencode.json')).permissions.length === 1 && JSON.parse(r.file('.claude/settings.json')).permissions.allow.includes('Bash'), 'rendered permissions: allow-all in both harnesses');
-    check(r.file('.agents/verify-team.js') !== null, 'rendered: verifier copied into .agents/');
+    check(r.file('.agents/verify-team.cjs') !== null && r.file('.agents/verify-team.js') === null, 'rendered: verifier copied into .agents/ as .cjs');
+    check(/<!-- team:start[^>]*-->\n## How we work[\s\S]*## Agent team[\s\S]*<!-- team:end -->\n\n## Dev commands/.test(agents), 'rendered AGENTS.md: How we work and the team table sit inside the team block');
+    const manifest = JSON.parse(r.file('.agents/.rendered.json') || '{}').files || [];
+    check(manifest.includes('AGENTS.md') && manifest.includes('.claude/agents/qa-tester.md') && !manifest.includes('documentation/README.md') && !manifest.includes('.agents/verify-team.cjs'), 'rendered: .agents/.rendered.json lists the regenerated files, not the seeded docs');
   }
 }
 {
@@ -277,7 +280,84 @@ function runRender(team, extraFiles = {}) {
   check(pinned.code === 0 && /^model: anthropic\/claude-opus-5-5#high$/m.test(pinned.file('.opencode/agents/architect.md') || ''), 'render-team honours an explicit oc_model override');
 }
 
-// --- 3b. verify-team.js against a synthetic generated tree ------------------------------
+// --- 3a'. re-running on a project that has grown its own files ---------------------------
+// Renders once, lets the "project" change things, renders again in the same directory.
+function rerender(team, { before = {}, between = () => {}, teamAfter = team, pkgType } = {}) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'atg-rerun-'));
+  const run = () => { try { return { code: 0, out: execFileSync(process.execPath, [render], { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }) }; } catch (e) { return { code: e.status, out: String(e.stdout) + String(e.stderr) }; } };
+  try {
+    const scaffold = pkgType ? { ...SCAFFOLD, 'package.json': JSON.stringify({ ...JSON.parse(SCAFFOLD['package.json']), type: pkgType }) } : SCAFFOLD;
+    writeTree(dir, { ...scaffold, ...before, '.agents/team.json': JSON.stringify(team) });
+    const first = run();
+    between(dir);
+    writeTree(dir, { '.agents/team.json': JSON.stringify(teamAfter) });
+    const second = run();
+    const snapshot = {};
+    (function walk(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else snapshot[path.relative(dir, p).split(path.sep).join('/')] = readText(p); } })(dir);
+    const file = (rel) => (rel in snapshot ? snapshot[rel] : null);
+    return { first, second, file };
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+}
+const edit = (dir, rel, fn) => fs.writeFileSync(path.join(dir, rel), fn(readText(path.join(dir, rel))));
+{
+  // 1. An ESM project: render and verify both run.
+  const r = rerender(fixture, { pkgType: 'module' });
+  check(r.first.code === 0 && /verify-team: all checks passed/.test(r.first.out), `render + verify run in a "type": "module" project${r.first.code ? `\n${r.first.out.slice(-600)}` : ''}`);
+}
+{
+  // 2. Hand-written specs with braces do not fail the verifier.
+  const r = rerender(fixture, { between: (dir) => writeTree(dir, { 'documentation/specs/tz.md': '# TZ\n\nZones: {UTC, America/Los_Angeles}\nURL: {SUPABASE_URL}\n', 'documentation/pages/extra.md': 'Tap target {TOUCH_TARGET}\n' }) });
+  check(r.second.code === 0 && /verify-team: all checks passed/.test(r.second.out), `verifier ignores braces in hand-written docs and specs${r.second.code ? `\n${r.second.out.split('\n').filter((l) => /FAIL/.test(l)).join('\n')}` : ''}`);
+}
+{
+  // 3. AGENTS.md: only the team block is rewritten; the rest survives a roster change.
+  const r = rerender(fixture, {
+    between: (dir) => edit(dir, 'AGENTS.md', (t) => t.replace('## Critical gotchas\n', '## Critical gotchas\n- **§7.3 hand-written gotcha** survives.\n') + '\n## 12. Our own section\nKeep me. {LEDGER_ID}\n'),
+    teamAfter: { ...fixture, roster: fixture.roster.filter((n) => n !== 'browser-tester') },
+  });
+  const a = r.file('AGENTS.md') || '';
+  check(r.second.code === 0 && /§7\.3 hand-written gotcha/.test(a) && /## 12\. Our own section\nKeep me/.test(a) && !/\| browser-tester \|/.test(a) && /\| qa-tester \|/.test(a), `re-render rewrites only the AGENTS.md team block${r.second.code ? `\n${r.second.out.slice(-600)}` : ''}`);
+  check(r.file('.claude/agents/browser-tester.md') === null && r.file('.opencode/agents/browser-tester.md') === null && r.file('.claude/agents/qa-tester.md') !== null, 're-render removes the agent files of a role dropped from the roster');
+}
+{
+  // 3b. A hand-maintained AGENTS.md with no markers is left alone.
+  const own = '# Mine — Agent Guide\n\n## How we work\nOurs.\n\n## Agent team\n| Agent | Focus | Hands off to |\n|---|---|---|\n| qa-tester | x | main agent |\n';
+  const r = rerender(fixture, { between: (dir) => writeTree(dir, { 'AGENTS.md': own }) });
+  check(r.file('AGENTS.md') === own && /team:start/.test(r.file('.agents/AGENTS.generated.md') || '') && /left as it is/.test(r.second.out), 're-render leaves an AGENTS.md without markers alone and writes .agents/AGENTS.generated.md');
+}
+{
+  // 4. A tuned security-review command and a `keep` path are not overwritten.
+  const tuned = '---\ndescription: tuned\nagent: qa-tester\n---\nOur RLS, impersonation and ledger checks.\n';
+  const r = rerender(fixture, {
+    between: (dir) => { writeTree(dir, { '.opencode/commands/security-review.md': tuned }); edit(dir, '.claude/agents/architect.md', (t) => t + '\nLocal tweak.\n'); },
+    teamAfter: { ...fixture, keep: ['.claude/agents/architect.md'] },
+  });
+  check(r.file('.opencode/commands/security-review.md') === tuned, 're-render keeps a tuned security-review command');
+  check(/Local tweak\./.test(r.file('.claude/agents/architect.md') || '') && /kept \(team\.json keep\)/.test(r.second.out) && !(JSON.parse(r.file('.agents/.rendered.json')).files.includes('.claude/agents/architect.md')), 're-render honours team.json keep and drops kept files from the manifest');
+}
+{
+  // 5. No .gitkeep beside real docs; settings merged, and an unchanged re-run rewrites nothing.
+  const noPages = { ...fixture, project: { ...fixture.project, pages: [] } };
+  const r = rerender(noPages, {
+    before: { 'documentation/pages/home.md': '# Home\n', '.claude/settings.json': JSON.stringify({ permissions: { allow: ['Bash', 'Edit', 'Write', 'NotebookEdit', 'WebFetch', 'WebSearch', 'mcp__linear'] }, hooks: { Stop: [] } }), 'opencode.json': JSON.stringify({ mcp: { servers: { x: { type: 'local', command: ['x'] } } }, permissions: [{ action: '*', resource: '*', effect: 'allow' }, { action: 'shell', resource: 'rm -rf *', effect: 'ask' }] }) },
+  });
+  check(r.file('documentation/pages/.gitkeep') === null && r.file('documentation/features/.gitkeep') !== null, '.gitkeep is seeded only into an empty docs folder');
+  const cc = JSON.parse(r.file('.claude/settings.json'));
+  const oc = JSON.parse(r.file('opencode.json'));
+  check(cc.hooks && cc.permissions.allow.includes('mcp__linear') && cc.permissions.allow.includes('Bash'), 'settings.json merged: hooks and extra allow entries kept');
+  check(oc.mcp && oc.mcp.servers.x && oc.permissions.length === 2 && oc.permissions[0].action === '*' && oc.permissions[1].resource === 'rm -rf *' && oc.instructions.includes('.agents/rules/claude-agent-protocol.md'), 'opencode.json merged: mcp and later rules kept, allow-all first, protocol in instructions');
+  check(/^unchanged \d+:/m.test(r.second.out) && !/^wrote \d+:/m.test(r.second.out), `an unchanged re-run rewrites no file${/^wrote/m.test(r.second.out) ? `\n${r.second.out.split('unchanged')[0]}` : ''}`);
+}
+{
+  // 6. The old .agents/verify-team.js left by an earlier version is removed; someone else's file is not.
+  const old = '#!/usr/bin/env node\n/**\n * verify-team.js — mechanical checks for a generated agent team.\n */\n';
+  const r = rerender(fixture, { before: { '.agents/verify-team.js': old } });
+  check(r.file('.agents/verify-team.js') === null && r.file('.agents/verify-team.cjs') !== null, 'the old .agents/verify-team.js is replaced by .cjs');
+  const mine = rerender(fixture, { before: { '.agents/verify-team.js': 'console.log("ours")\n' } });
+  check(mine.file('.agents/verify-team.js') === 'console.log("ours")\n', 'a different .agents/verify-team.js is left alone');
+}
+
+// --- 3b. verify-team.cjs against a synthetic generated tree ------------------------------
 const BODY = (name) => `# ${name}\n\n## Scope & focus\nYour lane: x. User-gated actions (protocol §6): only on the user's instruction.\n\n## Handoff\nDone → main agent\n`;
 const ocAgent = (name, extra = '') => `---\ndescription: x\nmode: subagent\nmodel: anthropic/claude-opus-5-5#high\n${extra}---\n${BODY(name)}`;
 const ccAgent = (name, extra = '') => `---\nname: ${name}\ndescription: x\nmodel: opus\n${extra}---\n${BODY(name)}`;

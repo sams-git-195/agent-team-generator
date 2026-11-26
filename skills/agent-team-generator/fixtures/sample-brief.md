@@ -39,7 +39,7 @@ Harness: both. Builder split: separate. Report style: Direct with technical summ
 Security review: yes. Design skill: frontend-design (user level). Greenfield menu: strict
 gates for both rows, CI on PR + merge, env hygiene, version pinning only. Model matrix: defaults. Roster: the core six.
 
-## Expectations (after `render-team.js` reports a clean verify)
+## Expectations (after `render-team.cjs` reports a clean verify)
 
 - `AGENTS.md`: the 2.5 % / 50-unit table and a `⚠️ undecided` refund row; How we work names
   `fly deploy` and `alembic upgrade head` against production; §UI carries the undecided

@@ -8,7 +8,7 @@ agent team for your project:
   the repo for the rest, shows you a summary table to correct, and asks only the real choices
   (harness, separate **backend + UI developers** or a single **full-stack developer**, how the
   main agent reports to you, security review, a design skill)
-- **one file, rendered**: your answers go into `.agents/team.json` and `render-team.js` writes
+- **one file, rendered**: your answers go into `.agents/team.json` and `render-team.cjs` writes
   everything from the templates — no hand-filled placeholders, re-render when the roster
   changes
 - `AGENTS.md` + `CLAUDE.md` foundation files
@@ -47,7 +47,7 @@ agent team for your project:
 - **Sonnet builders, Opus judges**: builders run on the cheaper model for well-scoped tasks
   and step up on risk surfaces, multi-module changes or design decisions; architect, QA and
   reviewer always run on the strong model
-- a **mechanical verifier** (`.agents/verify-team.js`) left in your repo
+- a **mechanical verifier** (`.agents/verify-team.cjs`) left in your repo
 - a plain-English `documentation/` system maintained as part of Definition of Done
 - optional third-party **skill add-ons** and a security-review command for OpenCode parity
   with Claude Code's built-in `/security-review`
@@ -101,7 +101,14 @@ Open your harness in the project you want an agent team for and run `/agent-team
 paragraph, shows a summary to correct, proposes a roster for approval, writes
 `.agents/team.json`, renders every file and runs the verifier. Unknowns become explicit
 `⚠️ undecided` markers — never guesses. To change the team later, edit `.agents/team.json`
-and run `node <skill-dir>/scripts/render-team.js .agents/team.json` again.
+and run `node <skill-dir>/scripts/render-team.cjs .agents/team.json` again.
+
+Re-running is safe on a project that has grown its own files. In `AGENTS.md` only the block
+between `<!-- team:start -->` and `<!-- team:end -->` is rewritten; an `AGENTS.md` without
+that block is left alone and the render goes to `.agents/AGENTS.generated.md` for you to
+merge. Docs and the security-review command are seeded once and never overwritten, the
+settings files are merged rather than replaced, a file that would not change is not
+rewritten, and any path listed in `team.json` `keep` is never touched.
 
 ## Repo layout
 
@@ -110,8 +117,8 @@ and run `node <skill-dir>/scripts/render-team.js .agents/team.json` again.
 | `skills/agent-team-generator/SKILL.md` | The skill entrypoint (survey → intake → roster → team.json → render → verify → hand over) |
 | `skills/agent-team-generator/references/` | Interview, `team-schema.md`, engineering standard (hygiene table), greenfield menu, add-ons, Fable playbook, custom-role skeleton + library |
 | `skills/agent-team-generator/references/templates/` | The rendered files: protocol, AGENTS.md, every core role, docs seeds, the security-review command; `partials/` (Design bar, grounding, user-gated rule) |
-| `skills/agent-team-generator/scripts/render-team.js` | Renders a team from `team.json` and runs the verifier |
-| `skills/agent-team-generator/scripts/verify-team.js` | Mechanical post-generation checks; copied into the target's `.agents/` |
+| `skills/agent-team-generator/scripts/render-team.cjs` | Renders a team from `team.json` and runs the verifier |
+| `skills/agent-team-generator/scripts/verify-team.cjs` | Mechanical post-generation checks; copied into the target's `.agents/` |
 | `skills/agent-team-generator/fixtures/` | `team.json` (a complete worked example, also the smoke test's input) and a canned brief for testing the skill |
 | `bin/cli.js` | The `npx` installer (`--harness` presets, `--to`) |
 | `.claude-plugin/` | Plugin + marketplace manifests for Claude Code's `/plugin` install path |

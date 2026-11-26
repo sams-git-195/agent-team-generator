@@ -1,6 +1,6 @@
 # `team.json` — the one file you write
 
-`node <skill-dir>/scripts/render-team.js .agents/team.json` renders every generated file from
+`node <skill-dir>/scripts/render-team.cjs .agents/team.json` renders every generated file from
 this. Every field is **required** unless marked *opt*; an array of strings is joined with
 newlines (use it for multi-line prose); `null` or `""` on an *opt* object or string omits the
 lines that depend on it. The renderer stops on a missing field and names it. For a stack that
@@ -12,6 +12,7 @@ never its facts. Markdown is fine everywhere; backtick real paths and commands.
 |---|---|
 | `harness` | `both` · `claude` · `opencode` · `other` |
 | `other_harness` | *opt* `{ name, pointer_file? }` — `other` only. Known names get a pointer file (Gemini CLI → `GEMINI.md`, Cursor → `.cursor/rules/agent-protocol.mdc`, Copilot → `.github/copilot-instructions.md`); or give `pointer_file` |
+| `keep` | *opt* array of paths the renderer never overwrites once they exist (`[".claude/agents/architect.md"]`). Kept files drop out of `.agents/.rendered.json`, so the verifier skips their placeholder check |
 | `main_branch` | *opt* default `main` (code-reviewer's default diff range) |
 | `mcp_servers` | *opt* server names the project configures → `mcp__<name>` allow entries in `.claude/settings.json` |
 | `security_review` | `true` fills protocol §5, the qa-tester checklist and (OpenCode) `.opencode/commands/security-review.md` |

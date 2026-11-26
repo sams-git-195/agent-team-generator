@@ -32,8 +32,8 @@ destroy anything only when the user says so, then without re-asking.
 | `references/add-ons.md` | Step 5 — optional skills and the security-review option |
 | `references/agent-skeleton.md` + `references/role-library.md` | Step 3 — custom roles only (mobile, devops, data…) |
 | `references/fable-playbook.md` | Background: the behaviour the templates encode. Not needed during a run |
-| `scripts/render-team.js` | Step 4 — renders everything and runs the verifier |
-| `scripts/verify-team.js` | Copied into the target's `.agents/`; re-run whenever the roster changes |
+| `scripts/render-team.cjs` | Step 4 — renders everything and runs the verifier |
+| `scripts/verify-team.cjs` | Copied into the target's `.agents/`; re-run whenever the roster changes |
 | `fixtures/sample-brief.md` | Testing the skill itself only — never read during a real run |
 
 **Baked in, never asked:** the main agent leads; open edit access with a stated lane per
@@ -50,7 +50,13 @@ CI, `.env.example`) so the interview never asks what the repo answers. If `.agen
 exists, this is a re-run: load it, show what it says, and ask only what changed. If any of
 `AGENTS.md`, `CLAUDE.md`, `.claude/agents/`, `.opencode/agents/` (or v1 `.opencode/agent/`),
 `opencode.json`, `.agents/`, `documentation/` exist, say exactly what would be overwritten and
-get approval first — the renderer overwrites generated files but never existing docs.
+get approval first. What the renderer leaves alone: in `AGENTS.md`, everything outside the
+`<!-- team:start -->` … `<!-- team:end -->` block (an `AGENTS.md` with no block is not touched;
+the render goes to `.agents/AGENTS.generated.md` to merge by hand); existing `documentation/`
+files and the OpenCode security-review command; any path listed in `team.json` `keep`; and the
+project's own keys in `.claude/settings.json` and `opencode.json`, which are merged, not
+replaced. Agent files and the protocol are regenerated: put a project's hand edits to them
+in `team.json`, or list the file under `keep`.
 
 **Step 1 — Intake and summary** (`interview.md`). One message asks for a paragraph; you turn
 it plus the survey into a summary table with a source label per row, and the user corrects it.
@@ -77,14 +83,14 @@ referenced from `roles.<name>.body_file`.
 **Step 4 — Render and verify.** From the target root:
 
 ```bash
-node <skill-dir>/scripts/render-team.js .agents/team.json
+node <skill-dir>/scripts/render-team.cjs .agents/team.json
 ```
 
 It writes every file for the chosen harness(es), seeds `documentation/`, copies the verifier
-to `.agents/verify-team.js` and runs it. Paste the output. A `FAIL` or a render error is fixed
+to `.agents/verify-team.cjs` and runs it. Paste the output. A `FAIL` or a render error is fixed
 in `team.json` and re-rendered — never by editing a generated file by hand. On a greenfield
 repo the gate-script check passes only after Step 5 creates the manifest: re-run
-`node .agents/verify-team.js` then and paste that too. Then the checks the verifier cannot do:
+`node .agents/verify-team.cjs` then and paste that too. Then the checks the verifier cannot do:
 read `AGENTS.md` and one builder file as the agent would — every rule concrete, nothing that
 could be pasted into another repo unchanged; lanes distinct; protocol §6 names every deploy
 channel and never-do item; `⚠️ undecided` markers only where the user actually deferred.
